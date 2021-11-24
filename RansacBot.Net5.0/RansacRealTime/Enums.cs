@@ -9,13 +9,7 @@
 	/// </summary>
 	public enum VertexType : byte
 	{
-		/// <summary>
-		/// Тик является вершиной.
-		/// </summary>
-		Undefined,
-		/// <summary>
-		/// Вершина максимум.
-		/// </summary>
+
 		High,
 		/// <summary>
 		/// Вершина минимум.

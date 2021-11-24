@@ -4,11 +4,14 @@ using System.Globalization;
 
 namespace RansacBot.Net5._0
 {
+    /// <summary>
+    /// Торговый инструмент (бумага). Адаптирован строго под фьючерсы.
+    /// </summary>
     internal class Tool
     {
         #region Свойства
 
-        private static Char separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
+        private static readonly Char separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
 
         /// <summary>
         /// Краткое наименование инструмента (бумаги)
@@ -57,7 +60,12 @@ namespace RansacBot.Net5._0
 
         #endregion
 
-        public Tool(string classCode, string secCode)
+        /// <summary>
+        /// Базовый конструктор. Принимает код класса инструмента (Фьючерсы: "SPBFUT") и тикер(SecCode) инструмента. (RTS например имеет тикер - RIZ1).
+        /// </summary>
+        /// <param name="secCode"></param>
+        /// <param name="classCode"></param>
+        public Tool(string secCode, string classCode = "SPBFUT")
         {
             SecurityCode = secCode;
             ClassCode = classCode;
@@ -66,7 +74,6 @@ namespace RansacBot.Net5._0
             SetBaseParam();
             SetGOInfo();
         }
-
 
         /// <summary>
         /// Устанавливает базовые параметры инструмента.

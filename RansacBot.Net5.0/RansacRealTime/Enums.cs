@@ -9,7 +9,7 @@
 	/// </summary>
 	public enum VertexType : byte
 	{
-		None,
+		Undefined,
 		High,
 		Low,
 		Monkey

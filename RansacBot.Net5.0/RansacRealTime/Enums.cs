@@ -1,8 +1,15 @@
 ﻿namespace RansacRealTime
 {
-    public enum VertexType : byte
+	/// <summary>
+	/// Enum - Тип вершины.<br/>
+	/// Undefined - Тик является вершиной.<br/>
+	/// High - Вершина максимум.<br/>
+	/// Low - Вершина минимум.<br/>
+	/// Monkey - Вершина максимум.<br/>
+	/// </summary>
+	public enum VertexType : byte
 	{
-		None,
+		Undefined,
 		High,
 		Low,
 		Monkey

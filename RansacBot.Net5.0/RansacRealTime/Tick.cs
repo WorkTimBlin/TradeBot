@@ -1,9 +1,12 @@
 ﻿namespace RansacRealTime
 {
+
+	public delegate void NewTickHandler(Tick tick);
+
 	/// <summary>
-	/// Тик из QUIK.
+	/// Тик не из QUIK.
 	/// </summary>
-    public readonly struct Tick
+	public readonly struct Tick
 	{
 		/// <summary>
 		/// ID тика из  QUIK.

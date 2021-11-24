@@ -2,13 +2,13 @@
 using QuikSharp.DataStructures;
 using System.Collections.Generic;
 using System.Text;
+using RansacRealTime;
 
 namespace RansacBot.Net5._0
 {
     static class Connector
 	{
 		public static readonly Quik quik;
-		public delegate void NewTickHandler(Tick tick);
 		public delegate void NewPriceHandler(double price);
 		public static NewPriceHandler NewPrice;
 		private static Dictionary<string, NewTickHandler> recievers = new();

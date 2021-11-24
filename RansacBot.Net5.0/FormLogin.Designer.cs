@@ -77,7 +77,7 @@
             this.btnCansel.TabIndex = 7;
             this.btnCansel.Text = "Отмена";
             this.btnCansel.UseVisualStyleBackColor = true;
-            this.btnCansel.Click += new System.EventHandler(this.btnCansel_Click);
+            this.btnCansel.Click += new System.EventHandler(this.BtnCansel_Click);
             // 
             // lblPort
             // 
@@ -96,7 +96,7 @@
             this.btnStart.TabIndex = 6;
             this.btnStart.Text = "Выбрать";
             this.btnStart.UseVisualStyleBackColor = true;
-            this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
+            this.btnStart.Click += new System.EventHandler(this.BtnStart_Click);
             // 
             // lblTool
             // 
@@ -123,6 +123,7 @@
             this.tbTool.TabIndex = 2;
             this.tbTool.Text = "RIZ1";
             this.tbTool.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.tbTool.TextChanged += new System.EventHandler(this.TbTool_TextChanged);
             // 
             // lblN
             // 
@@ -141,6 +142,7 @@
             this.Controls.Add(this.panel1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "FormLogin";
+            this.Load += new System.EventHandler(this.FormLogin_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nmcN)).EndInit();

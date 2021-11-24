@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using OxyPlot;
-using OxyPlot.Annotations;
+﻿using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using QuikSharp.DataStructures;
+using RansacRealTime;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace RansacBot.Net5._0
 {
@@ -79,15 +74,15 @@ namespace RansacBot.Net5._0
 
         private void MonkeyNFilter_NewVertex(Tick tick, VertexType vertexType)
         {
-            ((LineSeries)OxyChart.Model.Series[0]).Points.Add(new DataPoint(tick.USERINDEX, tick.PRICE));
+            ((LineSeries)OxyChart.Model.Series[0]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
 
             if (vertexType == VertexType.Monkey)
-                ((LineSeries)OxyChart.Model.Series[2]).Points.Add(new DataPoint(tick.USERINDEX, tick.PRICE));
+                ((LineSeries)OxyChart.Model.Series[2]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
             else
-                ((LineSeries)OxyChart.Model.Series[1]).Points.Add(new DataPoint(tick.USERINDEX, tick.PRICE));
+                ((LineSeries)OxyChart.Model.Series[1]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
 
             OxyChart.InvalidatePlot(true);
-            LOGGER.Message("Найдена новая вершина: " + tick.PRICE + " | Индекс: " + tick.USERINDEX);
+            LOGGER.Message("Найдена новая вершина: " + tick.PRICE + " | Индекс: " + tick.VERTEXINDEX);
         }
         private void RansacHystory_NewRansac(Ransac ransac, int level)
         {
@@ -130,7 +125,7 @@ namespace RansacBot.Net5._0
                 //    X = 0,
                 //    Y = price
                 //});
-                //OxyChart.ActualModel.InvalidatePlot(false);
+                //OxyChart.InvalidatePlot(true);
             }
             catch
             {
@@ -316,5 +311,22 @@ namespace RansacBot.Net5._0
         }
 
         #endregion
+
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            InitializationModel();
+
+            await Task.Run(() =>
+            {
+                for (int i = 0; i < 100000; i++)
+                {
+                    int rand = new Random().Next(10000);
+                    ((LineSeries)OxyChart.Model.Series[0]).Points.Add(new DataPoint(i, rand));
+                    //Connector_NewPrice(rand);
+                    OxyChart.InvalidatePlot(true);
+                    Thread.Sleep(100);
+                }
+            });           
+        }
     }
 }

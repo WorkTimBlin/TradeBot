@@ -2,6 +2,7 @@
 using QuikSharp.DataStructures;
 using System.Collections.Generic;
 using System.Text;
+using RansacRealTime;
 
 namespace RansacBot.Net5._0
 {
@@ -11,7 +12,7 @@ namespace RansacBot.Net5._0
 		public delegate void NewTickHandler(Tick tick);
 		public delegate void NewPriceHandler(double price);
 		public static NewPriceHandler NewPrice;
-		private static Dictionary<string, NewTickHandler> recievers = new();
+		private static readonly Dictionary<string, NewTickHandler> recievers = new();
 
 		static Connector()
 		{
@@ -22,16 +23,16 @@ namespace RansacBot.Net5._0
 
 		static public void Subscribe(string classCode, string secCode, NewTickHandler handler)
 		{
-			recievers.Add(classCode + secCode, handler);
+			if (handler != null)
+				recievers.Add(classCode + secCode, handler);
+			else throw new System.Exception("Ошибка в Subsctide()");
 		}
-
-
 		static public void OnNewTrade(AllTrade trade)
 		{
-			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out NewTickHandler handler) && handler != null)
+			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out NewTickHandler handler))
 			{
-				handler(new Tick(trade.TradeNum, 0, (float)trade.Price));
-				NewPrice(trade.Price);
+				handler?.Invoke(new Tick(trade.TradeNum, 0, trade.Price));
+				NewPrice?.Invoke(trade.Price);
 			}
 		}
 	}

@@ -5,43 +5,64 @@ namespace RansacRealTime
 {
 	public class LevelOfRansacs
 	{
-		int level;
-		List<Ransac> ransacs = new();
-		public bool buildingRansac { get; private set; } = false;
-		public int lastIndexPermited { get; private set; } = -1;
+		#region Свойства
+
+		/// <summary>
+		/// Уровень раназаков.
+		/// </summary>
+		private int Level { get; set; }
+		/// <summary>
+		/// Список ранзаков этого уровня.
+		/// </summary>
+		private List<Ransac> Ransacs { get; set; }
+		/// <summary>
+		/// True - Ранзак в данный момент строится. <br/>
+		/// False - Ранзак не строится.
+		/// </summary>
+		public bool IsBuilding { get; private set; } = false;
+		/// <summary>
+		/// Индекс последнего тика, в который выполнилось условие построение ранзака.
+		/// </summary>
+		public int LastIndexPermited { get; private set; } = -1;
+
+		#endregion
+
 
 		public delegate void NewTickHandler(Tick tick);
-
 		public event NewTickHandler NewVertex;
 
 		public delegate void RansacHandler(int level, Ransac ransac);
-
 		public event RansacHandler StopRansac;
 		public event RansacHandler NewRansacNeed;
 		public event RansacHandler RebuildRansacNeed;
 
+
 		public LevelOfRansacs(int level)
 		{
-			this.level = level;
+			Ransacs = new();
+			Level = level;
 		}
-
 		public LevelOfRansacs(int level, string path)
 		{
-			this.level = level;
-			this.LoadStandart(path);
+			Ransacs = new();
+			Level = level;
+			LoadStandart(path);
 		}
+
+
+
 
 		public void SetRansacs(List<Ransac> ransacs, bool building = false)
 		{
-			this.ransacs = ransacs;
-			this.buildingRansac = building;
+			Ransacs = ransacs;
+			IsBuilding = building;
 		}
-
 		public void SaveStandart(string path)
 		{
-			using System.IO.StreamWriter file = new(path + "/ransacLevel-" + this.level.ToString() + ".csv");
-			file.WriteLine("X1;X2;X3;X4;Slope;Intercept;Sigma;errorTreshold;" + buildingRansac.ToString());
-			foreach (Ransac ransac in ransacs)
+			using System.IO.StreamWriter file = new(path + "/ransacLevel-" + Level.ToString() + ".csv");
+			file.WriteLine("X1;X2;X3;X4;Slope;Intercept;Sigma;errorTreshold;" + IsBuilding.ToString());
+
+			foreach (Ransac ransac in Ransacs)
 			{
 				string line = ransac.FirstIndexTick.ToString() + ';'
 					+ ransac.FirstIndexBuild.ToString() + ';'
@@ -54,48 +75,45 @@ namespace RansacRealTime
 				file.WriteLine(line);
 			}
 		}
-
 		private void LoadStandart(string path)
 		{
-			using System.IO.StreamReader reader = new(path + "/ransacLevel-" + this.level + ".csv");
-			this.buildingRansac = Convert.ToBoolean(reader.ReadLine().Split(';')[^1]);
-			ransacs = new();
+			using System.IO.StreamReader reader = new(path + "/ransacLevel-" + this.Level + ".csv");
+			IsBuilding = Convert.ToBoolean(reader.ReadLine().Split(';')[^1]);
+			Ransacs = new();
+
 			while (!reader.EndOfStream)
 			{
 				string[] data = reader.ReadLine().Split(';');
-				ransacs.Add(new Ransac(Convert.ToInt32(data[0]), Convert.ToInt32(data[1]),
+				Ransacs.Add(new Ransac(Convert.ToInt32(data[0]), Convert.ToInt32(data[1]),
 					Convert.ToInt32(data[2]), Convert.ToInt32(data[3]) - Convert.ToInt32(data[0]) + 1,
 					(float)Convert.ToDecimal(data[4]), (float)Convert.ToDecimal(data[5]),
 					(float)Convert.ToDecimal(data[6]), (float)Convert.ToDecimal(data[7])));
 			}
-			if (buildingRansac)
-			{
+
+			if (IsBuilding)
 				ConnectLastRansac();
-			}
-			this.FindLastPermitedIndex();
+			
+			FindLastPermitedIndex();
 		}
 
 		public Ransac[] GetRansacsAsArray()
 		{
-			return this.ransacs.ToArray();
+			return Ransacs.ToArray();
 		}
-
 		public List<Ransac> GetRansacs()
 		{
-			return this.ransacs;
+			return Ransacs;
 		}
-
 		public List<Ransac> GetRansacsFinishedOnly()
 		{
 			List<Ransac> ransacs = new();
-			for (int i = 0; i < this.ransacs.Count - 1; i++)
-			{
-				ransacs.Add(this.ransacs[i]);
-			}
-			if (!buildingRansac)
-			{
-				ransacs.Add(this.ransacs[^1]);
-			}
+
+			for (int i = 0; i < Ransacs.Count - 1; i++)
+				ransacs.Add(Ransacs[i]);
+			
+			if (!IsBuilding)
+				ransacs.Add(Ransacs[^1]);
+
 			return ransacs;
 		}
 
@@ -106,44 +124,46 @@ namespace RansacRealTime
 		/// <returns></returns>
 		public Ransac GetLastRansacContained(Ransac ransac)
 		{
-			int ran = ransacs.Count;
-			if (buildingRansac)
-			{
+			int ran = Ransacs.Count;
+
+			if (IsBuilding)
 				ran--;
-			}
+			
 			do
 			{
 				ran--;
-				if (ransacs[ran].LastIndexTick <= ransac.LastIndexTick)
-				{
-					return ransacs[ran];
-				}
-			} while (ran > 0);
+
+				if (Ransacs[ran].LastIndexTick <= ransac.LastIndexTick)
+					return Ransacs[ran];
+			}
+			while (ran > 0);
+
 			throw new Exception("no ransac stopped inside given ransac");
 		}
-
 		private void FindLastPermitedIndex()
 		{
-			int rans = ransacs.Count;
-			if (buildingRansac)
-			{
+			int rans = Ransacs.Count;
+
+			if (IsBuilding)
 				rans--;
-			}
-			double slopeLastFinished = ransacs[rans - 1].Slope;
+			
+			double slopeLastFinished = Ransacs[rans - 1].Slope;
+
 			do
 			{
 				rans--;
-				if (ransacs[rans].Slope * slopeLastFinished < 0)
+
+				if (Ransacs[rans].Slope * slopeLastFinished < 0)
 				{
-					lastIndexPermited = ransacs[rans].FirstIndexTick;
+					LastIndexPermited = Ransacs[rans].FirstIndexTick;
 					return;
 				}
 			}
 			while (rans > 0);
-			lastIndexPermited = -1;
+
+			LastIndexPermited = -1;
 			return;
 		}
-
 		/// <summary>
 		/// checks, if there is two differently directed ransacs after given index
 		/// </summary>
@@ -151,24 +171,17 @@ namespace RansacRealTime
 		/// <returns></returns>
 		public bool IsTwoDifferentlyDirectedAfter(int lastUsedIndex)
 		{
-			int ransFromEnd = ransacs.Count;
+			int ransFromEnd = Ransacs.Count;
+
 			do
 			{
 				ransFromEnd--;
-				if (ransacs[ransFromEnd].Slope * ransacs[^1].Slope < 0)
-				{
-					if (ransacs.Count < 1 ||
-						ransacs[ransFromEnd].FirstIndexTick > lastUsedIndex)
-					{
-						return true;
-					}
-					else
-					{
-						return false;
-					}
-				}
+
+				if (Ransacs[ransFromEnd].Slope * Ransacs[^1].Slope < 0)
+					return Ransacs.Count < 1 || Ransacs[ransFromEnd].FirstIndexTick > lastUsedIndex;
 			}
 			while (ransFromEnd > 0);
+
 			return false;
 		}
 
@@ -178,59 +191,45 @@ namespace RansacRealTime
 		/// <param name="ticks"></param>
 		private void CreateNewRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile = 0)
 		{
-			if (buildingRansac)
-			{
+			if (IsBuilding)
 				throw new Exception("can't create ransac while previous is not finished");
-			}
-			buildingRansac = true;
-			ransacs.Add(new Ransac(ticks, firstIndex, TypeSigma.Sigma, percentile));
+			
+			IsBuilding = true;
+			Ransacs.Add(new Ransac(ticks, firstIndex, TypeSigma.Sigma, percentile));
 			ConnectLastRansac();
 		}
-
 		private void ConnectLastRansac()
 		{
-			NewVertex += ransacs[^1].OnNewVertex;
-			ransacs[^1].StopRansac += OnRansacStop;
-			ransacs[^1].NeedRebuilding += OnRebuildRansacNeed;
+			NewVertex += Ransacs[^1].OnNewVertex;
+			Ransacs[^1].StopRansac += OnRansacStop;
+			Ransacs[^1].NeedRebuilding += OnRebuildRansacNeed;
 		}
-
 		public void RebuildRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile = 0)
 		{
-			ransacs[^1].Rebuild(new Ransac(ticks, firstIndex, typeSigma, percentile));
+			Ransacs[^1].Rebuild(new Ransac(ticks, firstIndex, typeSigma, percentile));
 		}
-
 		public void OnRebuildRansacNeed(Ransac ransac)
 		{
-			//OnRansacStop(ransac);
-			//ransacs.RemoveAt(ransacs.Count - 1); FIXME
-			RebuildRansacNeed?.Invoke(this.level, ransacs[^1]);
+			RebuildRansacNeed?.Invoke(this.Level, Ransacs[^1]);
 		}
-
 		public void BuildNewRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile = 0)
 		{
-			//Console.WriteLine("building new ransac!");
 			CreateNewRansac(ticks, firstIndex, typeSigma, percentile);
 		}
-
 		public void OnNewVertex(Tick tick)
 		{
-			if (!buildingRansac)
-			{
-				NewRansacNeed?.Invoke(this.level, this.ransacs[^1]);
-			}
+			if (!IsBuilding)
+				NewRansacNeed?.Invoke(Level, Ransacs[^1]);
 			else
-			{
 				NewVertex?.Invoke(tick);
-			}
 		}
-
 		public void OnRansacStop(Ransac ransac)
 		{
-			buildingRansac = false;
+			IsBuilding = false;
 			NewVertex -= ransac.OnNewVertex;
 			ransac.StopRansac -= OnRansacStop;
 			FindLastPermitedIndex();
-			StopRansac?.Invoke(level, ransac);
+			StopRansac?.Invoke(Level, ransac);
 		}
 
 	}

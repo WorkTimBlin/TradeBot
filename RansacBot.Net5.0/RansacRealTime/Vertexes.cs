@@ -31,12 +31,24 @@ namespace RansacRealTime
 			Hystories = new();
 			LastIndexPermited = -1;
 		}
+
+=======
 		public Vertexes(string path) : base()
 		{
 			LoadStandart(path);
 			FindLastIndexPermited();
 		}
 
+
+		public Vertexes(string path, bool loadHystoryesToo)
+		{
+			LoadStandart(path);
+			FindLastIndexPermited();
+			if (loadHystoryesToo)
+			{
+				LoadAllHystories(path);
+			}
+		}
 
 
 		public void FindLastIndexPermited()
@@ -128,6 +140,25 @@ namespace RansacRealTime
 				string[] data = reader.ReadLine().Split(';');
 				VertexList.Add(new Tick(Convert.ToInt32(data[0]), Convert.ToInt32(data[1]), (float)Convert.ToDecimal(data[2])));
 			}
+		}
+
+		/// <summary>
+		/// warning:deletes all current ransac hystories if there was
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns>List of loaded hystories</returns>
+		private List<RansacHystory> LoadAllHystories(string path)
+		{
+			hystories.Clear();
+			DirectoryInfo[] dirs = new DirectoryInfo(path).GetDirectories();
+			foreach(DirectoryInfo hDir in dirs)
+			{
+				if (hDir.Name.Contains("Hystory"))
+				{
+					hystories.Add(new(this, hDir.FullName));
+				}
+			}
+			return hystories;
 		}
 	}
 }

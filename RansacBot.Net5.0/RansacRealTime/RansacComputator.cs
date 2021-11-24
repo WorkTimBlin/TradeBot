@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace RansacRealTime
 {
+	/// <summary>
+	/// Класс предоставляет 1 единственный функционал (Compute) - выдает построенный ранзак с указанными параметрами.
+	/// </summary>
 	public static class RansacComputator
 	{
 		private static (int count, SimpleLinearRegression reg)[] Best;
@@ -16,7 +19,8 @@ namespace RansacRealTime
 		private static double[] y;
 		private static readonly object locker = new();
 
-		public static void ComputeRansac(List<Tick> ticks, TypeSigma typeSigma, double percentile,
+
+		public static void Compute(List<Tick> ticks, TypeSigma typeSigma, double percentile,
 			out SimpleLinearRegression bestReg, out double errorThreshold, out double sigma)
 		{
 			x = ticks.Select(n => (double)n.VERTEXINDEX).ToArray();
@@ -54,6 +58,13 @@ namespace RansacRealTime
 				_ => error,
 			};
 		}
+
+		/// <summary>
+		/// Итерация - генерирует выборку из данных и строит ранзак, если он удовлетворяет условию поиска, то останавливает весь поиск. <br/>
+		/// Иначе сравнивается с текущим лучшим ранзаком и итерация заканчивается.
+		/// </summary>
+		/// <param name="index">Индекс-номер итерации.</param>
+		/// <param name="pls">Состояние потока</param>
 		private static void Iteration(int index, ParallelLoopState pls)
 		{
 			int[] indexSamples = Vector.Sample(MinSamples, x.Length);
@@ -78,6 +89,15 @@ namespace RansacRealTime
 				}
 			}
 		}
+		/// <summary>
+		/// Вычисляет доверительный интервал.
+		/// </summary>
+		/// <param name="ticks"></param>
+		/// <param name="slope"></param>
+		/// <param name="intercept"></param>
+		/// <param name="error"></param>
+		/// <param name="percent"></param>
+		/// <returns></returns>
 		private static double GetPercentileSigma(List<Tick> ticks, double slope, double intercept, double error, double percent)
 		{
 			var a = ticks.FindAll(x => Math.Abs(x.PRICE - (slope * x.VERTEXINDEX + intercept)) > error)
@@ -89,11 +109,22 @@ namespace RansacRealTime
 			EmpiricalDistribution distribution = new(a);
 			return distribution.InverseDistributionFunction(percent);
 		}
+		/// <summary>
+		/// Вычисляет медиану.
+		/// </summary>
+		/// <param name="y"></param>
+		/// <returns></returns>
 		private static double GetMedian(double[] y)
 		{
 			y = y.OrderBy(x => x).ToArray();
 			return y.Length % 2 == 0 ? (y[y.Length / 2] + y[y.Length / 2 - 1]) / 2 : y[y.Length / 2];
 		}
+		/// <summary>
+		/// Вычисляет ошибку по инлайнерам.
+		/// </summary>
+		/// <param name="y"></param>
+		/// <param name="median"></param>
+		/// <returns></returns>
 		private static double GetErrorThreshold(double[] y, double median)
 		{
 			y = y.Select(x => Math.Abs(x - median)).OrderBy(x => x).ToArray();

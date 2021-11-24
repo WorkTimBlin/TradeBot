@@ -15,13 +15,13 @@ namespace RansacBot.Net5._0
             cbPort.SelectedIndex = 0;
             CheckSetting();
         }
-        private void btnStart_Click(object sender, EventArgs e)
+        private void BtnStart_Click(object sender, EventArgs e)
         {
             Trader.SetN((int)nmcN.Value);
             DialogResult = DialogResult.OK;
             Close();
         }
-        private void btnCansel_Click(object sender, EventArgs e)
+        private void BtnCansel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
             Close();

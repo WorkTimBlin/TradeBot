@@ -33,6 +33,7 @@
             this.LoginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.OxyChart = new OxyPlot.WindowsForms.PlotView();
             this.tbCurrentPos = new System.Windows.Forms.TextBox();
             this.lblCurrentPos = new System.Windows.Forms.Label();
@@ -70,6 +71,7 @@
             this.lblClientCode = new System.Windows.Forms.Label();
             this.labelState = new System.Windows.Forms.Label();
             this.menuStrip.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip
@@ -94,7 +96,7 @@
             // LoginToolStripMenuItem
             // 
             this.LoginToolStripMenuItem.Name = "LoginToolStripMenuItem";
-            this.LoginToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.LoginToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.LoginToolStripMenuItem.Text = "Подключиться";
             this.LoginToolStripMenuItem.Click += new System.EventHandler(this.LoginToolStripMenuItem_Click);
             // 
@@ -102,17 +104,24 @@
             // 
             this.OnToolStripMenuItem.Enabled = false;
             this.OnToolStripMenuItem.Name = "OnToolStripMenuItem";
-            this.OnToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.OnToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
             this.OnToolStripMenuItem.Text = "Включить бот";
             this.OnToolStripMenuItem.Click += new System.EventHandler(this.OnToolStripMenuItem_Click);
             // 
             // statusStrip
             // 
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatus});
             this.statusStrip.Location = new System.Drawing.Point(0, 609);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1424, 22);
             this.statusStrip.TabIndex = 1;
             this.statusStrip.Text = "statusStrip1";
+            // 
+            // toolStripStatus
+            // 
+            this.toolStripStatus.Name = "toolStripStatus";
+            this.toolStripStatus.Size = new System.Drawing.Size(0, 17);
             // 
             // OxyChart
             // 
@@ -506,6 +515,8 @@
             this.Text = "RansacBot 5.0";
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -554,5 +565,6 @@
         private System.Windows.Forms.TextBox tbClientCode;
         private System.Windows.Forms.Label lblClientCode;
         private System.Windows.Forms.Label labelState;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatus;
     }
 }

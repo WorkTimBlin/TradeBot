@@ -1,11 +1,14 @@
 ﻿namespace RansacRealTime
 {
 	/// <summary>
-	/// Тип вершины(экстремума) MonkeyN.
+	/// Enum - Тип вершины.<br/>
+	/// Undefined - Тик является вершиной.<br/>
+	/// High - Вершина максимум.<br/>
+	/// Low - Вершина минимум.<br/>
+	/// Monkey - Вершина максимум.<br/>
 	/// </summary>
-    public enum VertexType : byte
+	public enum VertexType : byte
 	{
-		
 		Undefined,
 		High,
 		Low,

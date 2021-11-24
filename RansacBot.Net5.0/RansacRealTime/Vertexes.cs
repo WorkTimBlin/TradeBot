@@ -6,7 +6,7 @@ namespace RansacRealTime
 {
 	public class Vertexes
 	{
-        #region Свойства
+		#region Свойства
 
 		/// <summary>
 		/// Список вершин MonkeyN.
@@ -32,7 +32,6 @@ namespace RansacRealTime
 			LastIndexPermited = -1;
 		}
 
-=======
 		public Vertexes(string path) : base()
 		{
 			LoadStandart(path);
@@ -149,16 +148,18 @@ namespace RansacRealTime
 		/// <returns>List of loaded hystories</returns>
 		private List<RansacHystory> LoadAllHystories(string path)
 		{
-			hystories.Clear();
+			Hystories.Clear();
 			DirectoryInfo[] dirs = new DirectoryInfo(path).GetDirectories();
+
 			foreach(DirectoryInfo hDir in dirs)
 			{
 				if (hDir.Name.Contains("Hystory"))
 				{
-					hystories.Add(new(this, hDir.FullName));
+					Hystories.Add(new(this, hDir.FullName));
 				}
 			}
-			return hystories;
+
+			return Hystories;
 		}
 	}
 }

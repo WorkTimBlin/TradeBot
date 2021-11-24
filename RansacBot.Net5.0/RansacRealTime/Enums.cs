@@ -8,6 +8,9 @@
 		Monkey
 	}
 
+	/// <summary>
+	/// Тип сигмы.
+	/// </summary>
 	public enum TypeSigma : byte
 	{
 		ErrorThreshold,

@@ -1,4 +1,5 @@
 ﻿using OxyPlot;
+using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using QuikSharp.DataStructures;
@@ -12,6 +13,7 @@ namespace RansacBot.Net5._0
 {
     public partial class FormMain : Form
     {
+        private static object locker = new object();
         delegate void TextBoxTextDelegate(TextBox tb, string text);
         private MonkeyNFilter monkeyNFilter;
         private Vertexes vertexes;
@@ -54,8 +56,8 @@ namespace RansacBot.Net5._0
                 Connector.Subscribe(Trader.Tool.ClassCode, Trader.Tool.SecurityCode, monkeyNFilter.OnNewTick);
 
 
-                monkeyNFilter.NewVertex += vertexes.OnNewVertex;
                 monkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
+                monkeyNFilter.NewVertex += vertexes.OnNewVertex;
                 ransacHystory.RebuildRansac += RansacHystory_RebuildRansac;
                 ransacHystory.NewRansac += RansacHystory_NewRansac;
 
@@ -74,14 +76,18 @@ namespace RansacBot.Net5._0
 
         private void MonkeyNFilter_NewVertex(Tick tick, VertexType vertexType)
         {
-            ((LineSeries)OxyChart.Model.Series[0]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
+            lock (locker)
+            {
+                ((LineSeries)OxyChart.Model.Series[0]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
 
-            if (vertexType == VertexType.Monkey)
-                ((LineSeries)OxyChart.Model.Series[2]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
-            else
-                ((LineSeries)OxyChart.Model.Series[1]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
+                if (vertexType == VertexType.Monkey)
+                    ((LineSeries)OxyChart.Model.Series[2]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
+                else
+                    ((LineSeries)OxyChart.Model.Series[1]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
 
-            OxyChart.InvalidatePlot(true);
+                OxyChart.InvalidatePlot(true);
+            }
+
             LOGGER.Message("Найдена новая вершина: " + tick.PRICE + " | Индекс: " + tick.VERTEXINDEX);
         }
         private void RansacHystory_NewRansac(Ransac ransac, int level)
@@ -89,11 +95,15 @@ namespace RansacBot.Net5._0
             if (level != 0)
                 return;
 
-            while ((OxyChart.Model.Series.Count - 3) > 20)
+            lock (locker)
             {
-                OxyChart.Model.Series.RemoveAt(3);
-                OxyChart.Model.Series.RemoveAt(3);
+                while ((OxyChart.Model.Series.Count - 4) > 20)
+                {
+                    OxyChart.Model.Series.RemoveAt(4);
+                    OxyChart.Model.Series.RemoveAt(4);
+                }
             }
+
 
             PrintRansac(ransac);
             LOGGER.Message("Найден новый ранзак: " + ransac.LastIndexTick);
@@ -103,10 +113,13 @@ namespace RansacBot.Net5._0
             if (level != 0)
                 return;
 
-            if (OxyChart.Model.Series.Count > 3)
+            lock (locker)
             {
-                OxyChart.Model.Series.RemoveAt(OxyChart.Model.Series.Count - 1);
-                OxyChart.Model.Series.RemoveAt(OxyChart.Model.Series.Count - 1);
+                if (OxyChart.Model.Series.Count > 4)
+                {
+                    OxyChart.Model.Series.RemoveAt(OxyChart.Model.Series.Count - 1);
+                    OxyChart.Model.Series.RemoveAt(OxyChart.Model.Series.Count - 1);
+                }
             }
 
             PrintRansac(ransac);
@@ -114,22 +127,10 @@ namespace RansacBot.Net5._0
         }
         private void Connector_NewPrice(double price)
         {
-            try
+            lock (locker)
             {
-                //OxyChart.Model.Annotations.Clear();
-                //OxyChart.Model.Annotations.Add(new LineAnnotation()
-                //{
-                //    StrokeThickness = 1,
-                //    Color = OxyColors.Blue,
-                //    Type = LineAnnotationType.Horizontal,
-                //    X = 0,
-                //    Y = price
-                //});
-                //OxyChart.InvalidatePlot(true);
-            }
-            catch
-            {
-                LOGGER.Message("Ошибка отрисовки.");
+                ((LineSeries)OxyChart.ActualModel.Series[3]).Points[0] = new DataPoint(((LineSeries)OxyChart.ActualModel.Series[0]).Points[^1].X + 1, price);
+                OxyChart.InvalidatePlot(true);
             }
         }
         private void Logger_NewMessage(string message)
@@ -257,19 +258,30 @@ namespace RansacBot.Net5._0
                 StrokeThickness = 1,
                 Tag = "Extremum"
             };
+            LineSeries currentPrice = new()
+            {
+                Title = "CurrentPrice",
+                Color = OxyColors.Transparent,
+                MarkerFill = OxyColors.Red,
+                MarkerType = MarkerType.Circle,
+                MarkerSize = 5,
+                Tag = "CurrentPrice"
+            };
+            currentPrice.Points.Add(new DataPoint(0, 0));
 
             plot.Axes.Add(axisX);
             plot.Axes.Add(axisY);
             plot.Series.Add(extremumsLine);
             plot.Series.Add(extremumsN);
             plot.Series.Add(extremumsMonkey);
+            plot.Series.Add(currentPrice);
 
             OxyChart.Model = plot;
             OxyChart.InvalidatePlot(true);
         }
         private void PrintRansac(Ransac ransac)
         {
-            try
+            lock (locker)
             {
                 LineSeries reg = new()
                 {
@@ -294,11 +306,6 @@ namespace RansacBot.Net5._0
                 OxyChart.Model.Series.Add(reg);
                 OxyChart.Model.Series.Add(sigma);
             }
-            catch
-            {
-
-            }
-
         }
         private void TextToTextBox(TextBox tb, string text)
         {
@@ -312,21 +319,46 @@ namespace RansacBot.Net5._0
 
         #endregion
 
-        private async void button1_Click(object sender, EventArgs e)
+        private async void button1_Click_1(object sender, EventArgs e)
         {
             InitializationModel();
 
             await Task.Run(() =>
             {
-                for (int i = 0; i < 100000; i++)
+                //OxyChart.ActualModel.Annotations.Clear();
+                OxyChart.ActualModel.Annotations.Add(new LineAnnotation()
+                {
+                    StrokeThickness = 1,
+                    Color = OxyColors.Blue,
+                    Type = LineAnnotationType.Vertical,
+                    X = 105
+                    //Y = price
+                });
+                //OxyChart.ActualModel.InvalidatePlot(true);
+                OxyChart.ActualModel.Annotations.Clear();
+                OxyChart.ActualModel.Annotations.Add(new LineAnnotation()
+                {
+                    StrokeThickness = 1,
+                    Color = OxyColors.Blue,
+                    Type = LineAnnotationType.Vertical,
+                    X = 150
+                    //Y = price
+                });
+                OxyChart.ActualModel.Annotations.Clear();
+
+
+
+                OxyChart.ActualModel.InvalidatePlot(true);
+
+                for (int i = 0; i < 200; i++)
                 {
                     int rand = new Random().Next(10000);
-                    ((LineSeries)OxyChart.Model.Series[0]).Points.Add(new DataPoint(i, rand));
+                    ((LineSeries)OxyChart.ActualModel.Series[0]).Points.Add(new DataPoint(i, rand));
                     //Connector_NewPrice(rand);
-                    OxyChart.InvalidatePlot(true);
-                    Thread.Sleep(100);
+                    OxyChart.ActualModel.InvalidatePlot(true);
+                    //Thread.Sleep(100);
                 }
-            });           
+            });
         }
     }
 }

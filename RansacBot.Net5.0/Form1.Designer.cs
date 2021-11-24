@@ -70,6 +70,7 @@
             this.tbClientCode = new System.Windows.Forms.TextBox();
             this.lblClientCode = new System.Windows.Forms.Label();
             this.labelState = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.menuStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -466,11 +467,22 @@
             this.labelState.Size = new System.Drawing.Size(0, 15);
             this.labelState.TabIndex = 42;
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(153, 336);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 77;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click_1);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1424, 631);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.tbCurrentPos);
             this.Controls.Add(this.lblCurrentPos);
             this.Controls.Add(this.tbAvailableMax);
@@ -513,6 +525,7 @@
             this.MinimumSize = new System.Drawing.Size(1440, 670);
             this.Name = "FormMain";
             this.Text = "RansacBot 5.0";
+            this.Load += new System.EventHandler(this.FormMain_Load);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
             this.statusStrip.ResumeLayout(false);
@@ -566,5 +579,6 @@
         private System.Windows.Forms.Label lblClientCode;
         private System.Windows.Forms.Label labelState;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatus;
+        private System.Windows.Forms.Button button1;
     }
 }

@@ -6,102 +6,119 @@ namespace RansacRealTime
 {
 	public class Vertexes
 	{
-		public List<Tick> vertexes { get; private set; } = new();
-		public List<RansacHystory> hystories = new();
-		public int Count { get { return vertexes.Count; } }
-		public int lastIndexPermited { get; private set; } = -1;
+        #region Свойства
+
+		/// <summary>
+		/// Список вершин MonkeyN.
+		/// </summary>
+        public List<Tick> VertexList { get; private set; }
+		/// <summary>
+		/// Список подписантов(ранзаков) на вершины.
+		/// </summary>
+		public List<RansacHystory> Hystories { get; set; }
+		/// <summary>
+		/// Индекс последнего тика, в который выполнилось условия разнонаправленных ранзаков.
+		/// </summary>
+		public int LastIndexPermited { get; private set; }
+
+		#endregion
+
+		public event VertexHandler NewVertex;
 
 		public Vertexes()
 		{
-
+			VertexList = new();
+			Hystories = new();
+			LastIndexPermited = -1;
 		}
-		public Vertexes(string path)
+		public Vertexes(string path) : base()
 		{
 			LoadStandart(path);
 			FindLastIndexPermited();
 		}
 
+
+
 		public void FindLastIndexPermited()
 		{
-			int ind = vertexes.Count;
-			if (ind < 2)
-			{
-				lastIndexPermited = -1;
+			if (VertexList.Count < 2)
+            {
+				LastIndexPermited = -1;
 				return;
 			}
-			float lastSlope = vertexes[ind - 1].PRICE - vertexes[ind - 2].PRICE;
+
+			int index = VertexList.Count;
+			double lastSlope = VertexList[index - 1].PRICE - VertexList[index - 2].PRICE;
+
 			do
 			{
-				ind--;
-				if ((vertexes[ind].PRICE - vertexes[ind - 1].PRICE) * lastSlope < 0)
+				index--;
+
+				if ((VertexList[index].PRICE - VertexList[index - 1].PRICE) * lastSlope < 0)
 				{
-					lastIndexPermited = ind - 1;
+					LastIndexPermited = index - 1;
 					return;
 				}
-			} while (ind > 1);
-			lastIndexPermited = -1;
-		}
+			} 
+			while (index > 1);
 
-		public List<Tick> GetRange(int index, int count)
-		{
-			return vertexes.GetRange(index, count);
+			LastIndexPermited = -1;
 		}
-
 		public int GetFirstIndexForNew(Ransac lastRansac)
 		{
 			int startInd = lastRansac.LastIndexTick - 1;
-			if (vertexes[startInd - 1].PRICE > vertexes[startInd].PRICE)
-			{
+
+			if (VertexList[startInd - 1].PRICE > VertexList[startInd].PRICE)
 				startInd -= 1;
-			}
+			
 			return startInd;
 		}
-
 		public int GetIndexOfMinTickInRansac(Ransac ransac)
 		{
 			int minInd = ransac.FirstIndexTick;
+
 			for (int i = ransac.FirstIndexTick; i < ransac.LastIndexTick; i++)
-			{
-				if (vertexes[i].PRICE <= vertexes[minInd].PRICE)
-				{
-					minInd = i;
-				}
-			}
+				if (VertexList[i].PRICE <= VertexList[minInd].PRICE)
+					minInd = i;			
+			
 			return minInd;
 		}
-
 		public int GetIndexOfMaxTickInRansac(Ransac ransac)
 		{
 			int maxInd = ransac.FirstIndexTick;
+
 			for (int i = ransac.FirstIndexTick; i < ransac.LastIndexTick; i++)
-			{
-				if (vertexes[i].PRICE >= vertexes[maxInd].PRICE)
-				{
+				if (VertexList[i].PRICE >= VertexList[maxInd].PRICE)
 					maxInd = i;
-				}
-			}
+			
 			return maxInd;
 		}
 
 
-		public event VertexHandler NewVertex;
-
 		public void OnNewVertex(Tick tick)
 		{
-			vertexes.Add(tick);
+			VertexList.Add(tick);
 			FindLastIndexPermited();
-			foreach (RansacHystory hystory in hystories)
-			{
-				hystory.OnNewVertex(tick);
-			}
-		}
 
+			foreach (RansacHystory hystory in Hystories)
+				hystory.OnNewVertex(tick);
+		}
 		public void OnNewVertex(Tick tick, VertexType vertexType)
 		{
 			OnNewVertex(tick);
 			NewVertex?.Invoke(tick, vertexType);
 		}
 
+
+		public void SaveStandart(string path)
+		{
+			using StreamWriter writer = new(path + "/vertexes.csv");
+			writer.WriteLine("localIndex; globalIndex; price");
+			foreach (Tick vertex in VertexList)
+			{
+				writer.WriteLine(vertex.ID.ToString() + ';' + vertex.VERTEXINDEX.ToString() + ';' + vertex.PRICE.ToString() + ';');
+			}
+		}
 		private void LoadStandart(string path)
 		{
 			using StreamReader reader = new(path + "/vertexes.csv");
@@ -109,16 +126,7 @@ namespace RansacRealTime
 			while (!reader.EndOfStream)
 			{
 				string[] data = reader.ReadLine().Split(';');
-				vertexes.Add(new Tick(Convert.ToInt32(data[0]), Convert.ToInt32(data[1]), (float)Convert.ToDecimal(data[2])));
-			}
-		}
-		public void SaveStandart(string path)
-		{
-			using StreamWriter writer = new(path + "/vertexes.csv");
-			writer.WriteLine("localIndex; globalIndex; price");
-			foreach (Tick vertex in vertexes)
-			{
-				writer.WriteLine(vertex.ID.ToString() + ';' + vertex.VERTEXINDEX.ToString() + ';' + vertex.PRICE.ToString() + ';');
+				VertexList.Add(new Tick(Convert.ToInt32(data[0]), Convert.ToInt32(data[1]), (float)Convert.ToDecimal(data[2])));
 			}
 		}
 	}

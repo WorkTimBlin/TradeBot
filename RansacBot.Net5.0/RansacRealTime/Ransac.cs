@@ -83,7 +83,7 @@ namespace RansacRealTime
 		/// <param name="percentile"></param>
 		public Ransac(in List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile = 90)
 		{
-			RansacComputator.ComputeRansac(ticks, typeSigma, percentile, out SimpleLinearRegression reg, out double errorTreshold, out double sigma);
+			RansacComputator.Compute(ticks, typeSigma, percentile, out SimpleLinearRegression reg, out double errorTreshold, out double sigma);
 			Slope = reg.Slope;
 			Intercept = reg.Intercept;
 			Length = ticks.Count;
@@ -184,14 +184,6 @@ namespace RansacRealTime
 		public double[] Transform(int[] indexes)
 		{
 			return indexes.Select(x => x * Slope + Intercept).ToArray();
-		}
-
-		private enum Action
-		{
-			Add,
-			Rebuild,
-			Stop,
-			Nothing
 		}
 	}
 }

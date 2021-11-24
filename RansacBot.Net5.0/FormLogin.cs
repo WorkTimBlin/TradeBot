@@ -34,7 +34,7 @@ namespace RansacBot.Net5._0
         {
             try
             {
-                Tool tool = new("SPBFUT", tbTool.Text);
+                Tool tool = new(tbTool.Text, "SPBFUT");
                 nmcN.DecimalPlaces = tool.PriceAccuracy;
                 nmcN.Increment = Convert.ToDecimal(tool.Step);
                 nmcN.Minimum = Convert.ToDecimal(tool.Step);

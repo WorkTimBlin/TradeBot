@@ -77,7 +77,7 @@ namespace RansacRealTime
 		}
 		public int GetFirstIndexForNew(Ransac lastRansac)
 		{
-			int startInd = lastRansac.LastIndexTick - 1;
+			int startInd = lastRansac.EndIndexTick - 1;
 
 			if (VertexList[startInd - 1].PRICE > VertexList[startInd].PRICE)
 				startInd -= 1;
@@ -88,7 +88,7 @@ namespace RansacRealTime
 		{
 			int minInd = ransac.FirstIndexTick;
 
-			for (int i = ransac.FirstIndexTick; i < ransac.LastIndexTick; i++)
+			for (int i = ransac.FirstIndexTick; i < ransac.EndIndexTick; i++)
 				if (VertexList[i].PRICE <= VertexList[minInd].PRICE)
 					minInd = i;			
 			
@@ -98,7 +98,7 @@ namespace RansacRealTime
 		{
 			int maxInd = ransac.FirstIndexTick;
 
-			for (int i = ransac.FirstIndexTick; i < ransac.LastIndexTick; i++)
+			for (int i = ransac.FirstIndexTick; i < ransac.EndIndexTick; i++)
 				if (VertexList[i].PRICE >= VertexList[maxInd].PRICE)
 					maxInd = i;
 			

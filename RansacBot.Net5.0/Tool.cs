@@ -61,15 +61,18 @@ namespace RansacBot.Net5._0
         #endregion
 
         /// <summary>
-        /// Базовый конструктор. Принимает код класса инструмента (Фьючерсы: "SPBFUT") и тикер(SecCode) инструмента. (RTS например имеет тикер - RIZ1).
+        /// Базовый конструктор. Принимает код класса инструмента (Фьючерсы: "SPBFUT") и тикер(SecCode) инструмента. (RTS например имеет тикер - RIZ1). <br/>
+        /// А также ClientCode - это номер счета клиента.
         /// </summary>
         /// <param name="secCode"></param>
         /// <param name="classCode"></param>
-        public Tool(string secCode, string classCode = "SPBFUT")
+        public Tool(string secCode, string clientCode, string accountId, string firmId = "SPBFUT", string classCode = "SPBFUT")
         {
             SecurityCode = secCode;
+            ClientCode = clientCode;
             ClassCode = classCode;
-            ClientCode = Connector.quik.Class.GetClientCode().Result;
+            AccountID = accountId;
+            FirmID = firmId;
 
             SetBaseParam();
             SetGOInfo();
@@ -85,23 +88,26 @@ namespace RansacBot.Net5._0
                 try
                 {
                     SecurityInfo infoTool = Connector.quik.Class.GetSecurityInfo(ClassCode, SecurityCode).Result;
+                    
                     if (infoTool != null)
                     {
                         Name = infoTool.Name;
                         Step = infoTool.MinPriceStep;
                         PriceAccuracy = infoTool.Scale;
-                        AccountID = Connector.quik.Class.GetTradeAccount(ClassCode).Result;
-                        FirmID = Connector.quik.Class.GetClassInfo(ClassCode).Result.FirmId;
+                    }
+                    else
+                    {
+                        LOGGER.Message("Tool.SetBaseParam(): Warning - Не удалось загрузить информацию об инструменте " + SecurityCode);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    LOGGER.Message("Tool.SetBaseParam(): Exception - " + ex.Message);
                 }
             }
             else
             {
-
+                LOGGER.Message("Tool.SetBaseParam(): Warning - Код класса '" + ClassCode + "' инструмента не обнаружен.");
             }
         }
         /// <summary>
@@ -115,9 +121,9 @@ namespace RansacBot.Net5._0
                 GOSell = Convert.ToDouble(Connector.quik.Trading.GetParamEx(ClassCode, SecurityCode, ParamNames.SELLDEPO).Result.ParamValue.Replace('.', separator));
                 PriceStep = Convert.ToDouble(Connector.quik.Trading.GetParamEx(ClassCode, SecurityCode, ParamNames.STEPPRICE).Result.ParamValue.Replace('.', separator));
             }
-            catch
+            catch (Exception ex)
             {
-
+                LOGGER.Message("Tool.SetGOInfo(): Exception во время загрузки ГО инструмента: " + ex.Message);
             }
         }
     }

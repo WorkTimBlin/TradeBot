@@ -67,7 +67,7 @@ namespace RansacRealTime
 				string line = ransac.FirstIndexTick.ToString() + ';'
 					+ ransac.FirstIndexBuild.ToString() + ';'
 					+ ransac.LastIndexRebuild.ToString() + ';'
-					+ (ransac.LastIndexTick - 1).ToString() + ';' +
+					+ (ransac.EndIndexTick - 1).ToString() + ';' +
 					((decimal)ransac.Slope).ToString() + ';' +
 					((decimal)ransac.Intercept).ToString() + ';' +
 					((decimal)ransac.Sigma).ToString() + ';' +
@@ -133,7 +133,7 @@ namespace RansacRealTime
 			{
 				ran--;
 
-				if (Ransacs[ran].LastIndexTick <= ransac.LastIndexTick)
+				if (Ransacs[ran].EndIndexTick <= ransac.EndIndexTick)
 					return Ransacs[ran];
 			}
 			while (ran > 0);
@@ -164,26 +164,6 @@ namespace RansacRealTime
 			LastIndexPermited = -1;
 			return;
 		}
-		/// <summary>
-		/// checks, if there is two differently directed ransacs after given index
-		/// </summary>
-		/// <param name="lastUsedIndex"></param>
-		/// <returns></returns>
-		public bool IsTwoDifferentlyDirectedAfter(int lastUsedIndex)
-		{
-			int ransFromEnd = Ransacs.Count;
-
-			do
-			{
-				ransFromEnd--;
-
-				if (Ransacs[ransFromEnd].Slope * Ransacs[^1].Slope < 0)
-					return Ransacs.Count < 1 || Ransacs[ransFromEnd].FirstIndexTick > lastUsedIndex;
-			}
-			while (ransFromEnd > 0);
-
-			return false;
-		}
 
 		/// <summary>
 		/// builds new ransac if no is currently building
@@ -195,7 +175,7 @@ namespace RansacRealTime
 				throw new Exception("can't create ransac while previous is not finished");
 			
 			IsBuilding = true;
-			Ransacs.Add(new Ransac(ticks, firstIndex, TypeSigma.Sigma, percentile));
+			Ransacs.Add(new Ransac(ticks, firstIndex, typeSigma, percentile));
 			ConnectLastRansac();
 		}
 		private void ConnectLastRansac()
@@ -204,15 +184,15 @@ namespace RansacRealTime
 			Ransacs[^1].StopRansac += OnRansacStop;
 			Ransacs[^1].NeedRebuilding += OnRebuildRansacNeed;
 		}
-		public void RebuildRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile = 0)
+		public void RebuildRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile)
 		{
 			Ransacs[^1].Rebuild(new Ransac(ticks, firstIndex, typeSigma, percentile));
 		}
 		public void OnRebuildRansacNeed(Ransac ransac)
 		{
-			RebuildRansacNeed?.Invoke(this.Level, Ransacs[^1]);
+			RebuildRansacNeed?.Invoke(Level, Ransacs[^1]);
 		}
-		public void BuildNewRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile = 0)
+		public void BuildNewRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile)
 		{
 			CreateNewRansac(ticks, firstIndex, typeSigma, percentile);
 		}

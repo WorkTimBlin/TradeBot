@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using RansacBot.Net5._0;
 
 namespace RansacRealTime
 {
@@ -143,7 +144,7 @@ namespace RansacRealTime
 		}
 
 
-		#region События
+		#region Обработчики
 
 		private void SetVertexes(Vertexes vertexes)
 		{
@@ -180,6 +181,7 @@ namespace RansacRealTime
 			Levels[^1].RebuildRansacNeed += OnRebuildAscHandler;
 			Levels[^1].StopRansac += OnStopRansac;
 			NewLevel?.Invoke(Levels[^1]);
+			NewRansac?.Invoke(Levels[^1].GetRansacs()[^1], Levels.Count - 1);
 		}
 		private void OnRebuildAscHandler(int level, Ransac ransac)
 		{
@@ -190,18 +192,19 @@ namespace RansacRealTime
 		{
 			if (level == 0)
 			{
-				if (lastRansac.LastIndexTick > Vertexes.LastIndexPermited)
+				if (lastRansac.EndIndexTick > Vertexes.LastIndexPermited)
 					return;
 				else
 				{
 					int startInd = Vertexes.GetFirstIndexForNew(lastRansac);
 					Levels[level].BuildNewRansac(Vertexes.VertexList.GetRange(startInd, Vertexes.VertexList.Count - startInd), startInd, Type, Percentile);
 					NewRansac?.Invoke(Levels[level].GetRansacs()[^1], level);
+					LOGGER.Message("Построили новый ранзак - level = 0");
 				}
 			}
 			else
 			{
-				if (lastRansac.LastIndexTick > Levels[level - 1].LastIndexPermited)
+				if (lastRansac.EndIndexTick > Levels[level - 1].LastIndexPermited)
 					return;
 				else
 				{
@@ -215,6 +218,7 @@ namespace RansacRealTime
 
 					Levels[level].BuildNewRansac(Vertexes.VertexList.GetRange(startInd, Vertexes.VertexList.Count - startInd), startInd, Type, Percentile);
 					NewRansac?.Invoke(Levels[level].GetRansacs()[^1], level);
+					LOGGER.Message("Построили новый ранзак - level = " + level);
 				}
 			}
 		}

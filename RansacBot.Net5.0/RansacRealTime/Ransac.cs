@@ -43,7 +43,7 @@ namespace RansacRealTime
 		/// <summary>
 		/// Индекс тика по MonkeyN, который преодалел сигму и больше не попадает в ранзак.
 		/// </summary>
-		public int LastIndexTick { get { return FirstIndexTick + Length; } }
+		public int EndIndexTick { get { return FirstIndexTick + Length; } }
 
 		#endregion
 
@@ -90,7 +90,7 @@ namespace RansacRealTime
 			Sigma = sigma;
 			FirstIndexTick = firstIndex;
 			ErrorTreshold = errorTreshold;
-			FirstIndexBuild = LastIndexTick - 1;
+			FirstIndexBuild = EndIndexTick - 1;
 			LastIndexRebuild = FirstIndexBuild;
 		}
 
@@ -154,7 +154,7 @@ namespace RansacRealTime
 			Length = ransac.Length;
 			ErrorTreshold = ransac.ErrorTreshold;
 			Sigma = ransac.Sigma;
-			LastIndexRebuild = LastIndexTick - 1;
+			LastIndexRebuild = EndIndexTick - 1;
 		}
 
 		/// <summary>

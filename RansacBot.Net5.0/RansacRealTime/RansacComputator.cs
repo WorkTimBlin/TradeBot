@@ -34,7 +34,7 @@ namespace RansacRealTime
 			double error = GetErrorThreshold(y, median);
 			errorThreshold = error;
 
-			ParallelLoopResult result = Parallel.For(0, MaxEvaluations, new ParallelOptions { MaxDegreeOfParallelism = 6 }, Iteration);
+			ParallelLoopResult result = Parallel.For(0, MaxEvaluations, new ParallelOptions { MaxDegreeOfParallelism = 4 }, Iteration);
 
 			if (result.LowestBreakIteration == null)
 			{

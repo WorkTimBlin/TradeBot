@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.qUIKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LoginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -71,6 +72,8 @@
             this.lblClientCode = new System.Windows.Forms.Label();
             this.labelState = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
+            this.cbStatus = new System.Windows.Forms.ComboBox();
+            this.timer = new System.Windows.Forms.Timer(this.components);
             this.menuStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
             this.SuspendLayout();
@@ -113,7 +116,7 @@
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatus});
-            this.statusStrip.Location = new System.Drawing.Point(0, 609);
+            this.statusStrip.Location = new System.Drawing.Point(0, 639);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1424, 22);
             this.statusStrip.TabIndex = 1;
@@ -130,10 +133,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.OxyChart.BackColor = System.Drawing.SystemColors.Control;
-            this.OxyChart.Location = new System.Drawing.Point(240, 27);
+            this.OxyChart.Location = new System.Drawing.Point(240, 55);
             this.OxyChart.Name = "OxyChart";
             this.OxyChart.PanCursor = System.Windows.Forms.Cursors.Hand;
-            this.OxyChart.Size = new System.Drawing.Size(1184, 578);
+            this.OxyChart.Size = new System.Drawing.Size(1184, 581);
             this.OxyChart.TabIndex = 4;
             this.OxyChart.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
             this.OxyChart.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
@@ -143,7 +146,7 @@
             // 
             this.tbCurrentPos.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tbCurrentPos.Enabled = false;
-            this.tbCurrentPos.Location = new System.Drawing.Point(134, 437);
+            this.tbCurrentPos.Location = new System.Drawing.Point(134, 467);
             this.tbCurrentPos.Name = "tbCurrentPos";
             this.tbCurrentPos.Size = new System.Drawing.Size(100, 23);
             this.tbCurrentPos.TabIndex = 76;
@@ -153,7 +156,7 @@
             // 
             this.lblCurrentPos.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblCurrentPos.AutoSize = true;
-            this.lblCurrentPos.Location = new System.Drawing.Point(12, 440);
+            this.lblCurrentPos.Location = new System.Drawing.Point(12, 470);
             this.lblCurrentPos.Name = "lblCurrentPos";
             this.lblCurrentPos.Size = new System.Drawing.Size(106, 15);
             this.lblCurrentPos.TabIndex = 75;
@@ -163,7 +166,7 @@
             // 
             this.tbAvailableMax.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tbAvailableMax.Enabled = false;
-            this.tbAvailableMax.Location = new System.Drawing.Point(134, 408);
+            this.tbAvailableMax.Location = new System.Drawing.Point(134, 438);
             this.tbAvailableMax.Name = "tbAvailableMax";
             this.tbAvailableMax.Size = new System.Drawing.Size(100, 23);
             this.tbAvailableMax.TabIndex = 74;
@@ -173,7 +176,7 @@
             // 
             this.lblAvailableMax.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblAvailableMax.AutoSize = true;
-            this.lblAvailableMax.Location = new System.Drawing.Point(12, 411);
+            this.lblAvailableMax.Location = new System.Drawing.Point(12, 441);
             this.lblAvailableMax.Name = "lblAvailableMax";
             this.lblAvailableMax.Size = new System.Drawing.Size(96, 15);
             this.lblAvailableMax.TabIndex = 73;
@@ -183,7 +186,7 @@
             // 
             this.tbAvailableFunds.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tbAvailableFunds.Enabled = false;
-            this.tbAvailableFunds.Location = new System.Drawing.Point(134, 583);
+            this.tbAvailableFunds.Location = new System.Drawing.Point(134, 613);
             this.tbAvailableFunds.Name = "tbAvailableFunds";
             this.tbAvailableFunds.Size = new System.Drawing.Size(100, 23);
             this.tbAvailableFunds.TabIndex = 72;
@@ -193,7 +196,7 @@
             // 
             this.lblAvailableFunds.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblAvailableFunds.AutoSize = true;
-            this.lblAvailableFunds.Location = new System.Drawing.Point(12, 586);
+            this.lblAvailableFunds.Location = new System.Drawing.Point(12, 616);
             this.lblAvailableFunds.Name = "lblAvailableFunds";
             this.lblAvailableFunds.Size = new System.Drawing.Size(108, 15);
             this.lblAvailableFunds.TabIndex = 71;
@@ -203,7 +206,7 @@
             // 
             this.tbBlock.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tbBlock.Enabled = false;
-            this.tbBlock.Location = new System.Drawing.Point(134, 554);
+            this.tbBlock.Location = new System.Drawing.Point(134, 584);
             this.tbBlock.Name = "tbBlock";
             this.tbBlock.Size = new System.Drawing.Size(100, 23);
             this.tbBlock.TabIndex = 70;
@@ -213,7 +216,7 @@
             // 
             this.lblBlock.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblBlock.AutoSize = true;
-            this.lblBlock.Location = new System.Drawing.Point(12, 557);
+            this.lblBlock.Location = new System.Drawing.Point(12, 587);
             this.lblBlock.Name = "lblBlock";
             this.lblBlock.Size = new System.Drawing.Size(97, 15);
             this.lblBlock.TabIndex = 69;
@@ -223,7 +226,7 @@
             // 
             this.tbBalance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tbBalance.Enabled = false;
-            this.tbBalance.Location = new System.Drawing.Point(134, 525);
+            this.tbBalance.Location = new System.Drawing.Point(134, 555);
             this.tbBalance.Name = "tbBalance";
             this.tbBalance.Size = new System.Drawing.Size(100, 23);
             this.tbBalance.TabIndex = 68;
@@ -233,7 +236,7 @@
             // 
             this.lblBalance.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblBalance.AutoSize = true;
-            this.lblBalance.Location = new System.Drawing.Point(12, 528);
+            this.lblBalance.Location = new System.Drawing.Point(12, 558);
             this.lblBalance.Name = "lblBalance";
             this.lblBalance.Size = new System.Drawing.Size(49, 15);
             this.lblBalance.TabIndex = 67;
@@ -243,7 +246,7 @@
             // 
             this.tbBalanceNoMargin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tbBalanceNoMargin.Enabled = false;
-            this.tbBalanceNoMargin.Location = new System.Drawing.Point(134, 496);
+            this.tbBalanceNoMargin.Location = new System.Drawing.Point(134, 526);
             this.tbBalanceNoMargin.Name = "tbBalanceNoMargin";
             this.tbBalanceNoMargin.Size = new System.Drawing.Size(100, 23);
             this.tbBalanceNoMargin.TabIndex = 66;
@@ -253,7 +256,7 @@
             // 
             this.lblBalanceNoMargin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblBalanceNoMargin.AutoSize = true;
-            this.lblBalanceNoMargin.Location = new System.Drawing.Point(12, 499);
+            this.lblBalanceNoMargin.Location = new System.Drawing.Point(12, 529);
             this.lblBalanceNoMargin.Name = "lblBalanceNoMargin";
             this.lblBalanceNoMargin.Size = new System.Drawing.Size(110, 15);
             this.lblBalanceNoMargin.TabIndex = 65;
@@ -263,7 +266,7 @@
             // 
             this.tbVarMargin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tbVarMargin.Enabled = false;
-            this.tbVarMargin.Location = new System.Drawing.Point(134, 467);
+            this.tbVarMargin.Location = new System.Drawing.Point(134, 497);
             this.tbVarMargin.Name = "tbVarMargin";
             this.tbVarMargin.Size = new System.Drawing.Size(100, 23);
             this.tbVarMargin.TabIndex = 64;
@@ -273,7 +276,7 @@
             // 
             this.lblVarMargin.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblVarMargin.AutoSize = true;
-            this.lblVarMargin.Location = new System.Drawing.Point(12, 470);
+            this.lblVarMargin.Location = new System.Drawing.Point(12, 500);
             this.lblVarMargin.Name = "lblVarMargin";
             this.lblVarMargin.Size = new System.Drawing.Size(75, 15);
             this.lblVarMargin.TabIndex = 63;
@@ -282,7 +285,7 @@
             // tbGoSell
             // 
             this.tbGoSell.Enabled = false;
-            this.tbGoSell.Location = new System.Drawing.Point(134, 290);
+            this.tbGoSell.Location = new System.Drawing.Point(134, 316);
             this.tbGoSell.Name = "tbGoSell";
             this.tbGoSell.Size = new System.Drawing.Size(100, 23);
             this.tbGoSell.TabIndex = 62;
@@ -291,7 +294,7 @@
             // lblGoSell
             // 
             this.lblGoSell.AutoSize = true;
-            this.lblGoSell.Location = new System.Drawing.Point(12, 293);
+            this.lblGoSell.Location = new System.Drawing.Point(12, 319);
             this.lblGoSell.Name = "lblGoSell";
             this.lblGoSell.Size = new System.Drawing.Size(80, 15);
             this.lblGoSell.TabIndex = 61;
@@ -300,7 +303,7 @@
             // tbGoBuy
             // 
             this.tbGoBuy.Enabled = false;
-            this.tbGoBuy.Location = new System.Drawing.Point(134, 261);
+            this.tbGoBuy.Location = new System.Drawing.Point(134, 287);
             this.tbGoBuy.Name = "tbGoBuy";
             this.tbGoBuy.Size = new System.Drawing.Size(100, 23);
             this.tbGoBuy.TabIndex = 60;
@@ -309,7 +312,7 @@
             // lblGoBuy
             // 
             this.lblGoBuy.AutoSize = true;
-            this.lblGoBuy.Location = new System.Drawing.Point(12, 264);
+            this.lblGoBuy.Location = new System.Drawing.Point(12, 290);
             this.lblGoBuy.Name = "lblGoBuy";
             this.lblGoBuy.Size = new System.Drawing.Size(91, 15);
             this.lblGoBuy.TabIndex = 59;
@@ -318,7 +321,7 @@
             // tbStepPrice
             // 
             this.tbStepPrice.Enabled = false;
-            this.tbStepPrice.Location = new System.Drawing.Point(134, 232);
+            this.tbStepPrice.Location = new System.Drawing.Point(134, 258);
             this.tbStepPrice.Name = "tbStepPrice";
             this.tbStepPrice.Size = new System.Drawing.Size(100, 23);
             this.tbStepPrice.TabIndex = 58;
@@ -327,7 +330,7 @@
             // lblPriceStep
             // 
             this.lblPriceStep.AutoSize = true;
-            this.lblPriceStep.Location = new System.Drawing.Point(12, 235);
+            this.lblPriceStep.Location = new System.Drawing.Point(12, 261);
             this.lblPriceStep.Name = "lblPriceStep";
             this.lblPriceStep.Size = new System.Drawing.Size(101, 15);
             this.lblPriceStep.TabIndex = 57;
@@ -336,7 +339,7 @@
             // tbStep
             // 
             this.tbStep.Enabled = false;
-            this.tbStep.Location = new System.Drawing.Point(134, 203);
+            this.tbStep.Location = new System.Drawing.Point(134, 229);
             this.tbStep.Name = "tbStep";
             this.tbStep.Size = new System.Drawing.Size(100, 23);
             this.tbStep.TabIndex = 56;
@@ -345,7 +348,7 @@
             // lblStep
             // 
             this.lblStep.AutoSize = true;
-            this.lblStep.Location = new System.Drawing.Point(12, 206);
+            this.lblStep.Location = new System.Drawing.Point(12, 232);
             this.lblStep.Name = "lblStep";
             this.lblStep.Size = new System.Drawing.Size(64, 15);
             this.lblStep.TabIndex = 55;
@@ -354,7 +357,7 @@
             // tbShortName
             // 
             this.tbShortName.Enabled = false;
-            this.tbShortName.Location = new System.Drawing.Point(134, 174);
+            this.tbShortName.Location = new System.Drawing.Point(134, 200);
             this.tbShortName.Name = "tbShortName";
             this.tbShortName.Size = new System.Drawing.Size(100, 23);
             this.tbShortName.TabIndex = 54;
@@ -363,7 +366,7 @@
             // lblShortName
             // 
             this.lblShortName.AutoSize = true;
-            this.lblShortName.Location = new System.Drawing.Point(12, 177);
+            this.lblShortName.Location = new System.Drawing.Point(12, 203);
             this.lblShortName.Name = "lblShortName";
             this.lblShortName.Size = new System.Drawing.Size(115, 15);
             this.lblShortName.TabIndex = 53;
@@ -372,7 +375,7 @@
             // tbSecCode
             // 
             this.tbSecCode.Enabled = false;
-            this.tbSecCode.Location = new System.Drawing.Point(134, 145);
+            this.tbSecCode.Location = new System.Drawing.Point(134, 171);
             this.tbSecCode.Name = "tbSecCode";
             this.tbSecCode.Size = new System.Drawing.Size(100, 23);
             this.tbSecCode.TabIndex = 52;
@@ -381,7 +384,7 @@
             // lblSecCode
             // 
             this.lblSecCode.AutoSize = true;
-            this.lblSecCode.Location = new System.Drawing.Point(12, 148);
+            this.lblSecCode.Location = new System.Drawing.Point(12, 174);
             this.lblSecCode.Name = "lblSecCode";
             this.lblSecCode.Size = new System.Drawing.Size(42, 15);
             this.lblSecCode.TabIndex = 51;
@@ -390,7 +393,7 @@
             // tbFirmID
             // 
             this.tbFirmID.Enabled = false;
-            this.tbFirmID.Location = new System.Drawing.Point(134, 116);
+            this.tbFirmID.Location = new System.Drawing.Point(134, 142);
             this.tbFirmID.Name = "tbFirmID";
             this.tbFirmID.Size = new System.Drawing.Size(100, 23);
             this.tbFirmID.TabIndex = 50;
@@ -399,7 +402,7 @@
             // lblFirmID
             // 
             this.lblFirmID.AutoSize = true;
-            this.lblFirmID.Location = new System.Drawing.Point(12, 119);
+            this.lblFirmID.Location = new System.Drawing.Point(12, 145);
             this.lblFirmID.Name = "lblFirmID";
             this.lblFirmID.Size = new System.Drawing.Size(48, 15);
             this.lblFirmID.TabIndex = 49;
@@ -408,7 +411,7 @@
             // tbClassCode
             // 
             this.tbClassCode.Enabled = false;
-            this.tbClassCode.Location = new System.Drawing.Point(134, 87);
+            this.tbClassCode.Location = new System.Drawing.Point(134, 113);
             this.tbClassCode.Name = "tbClassCode";
             this.tbClassCode.Size = new System.Drawing.Size(100, 23);
             this.tbClassCode.TabIndex = 48;
@@ -417,7 +420,7 @@
             // lblClassCode
             // 
             this.lblClassCode.AutoSize = true;
-            this.lblClassCode.Location = new System.Drawing.Point(12, 90);
+            this.lblClassCode.Location = new System.Drawing.Point(12, 116);
             this.lblClassCode.Name = "lblClassCode";
             this.lblClassCode.Size = new System.Drawing.Size(70, 15);
             this.lblClassCode.TabIndex = 47;
@@ -426,7 +429,7 @@
             // tbAccountID
             // 
             this.tbAccountID.Enabled = false;
-            this.tbAccountID.Location = new System.Drawing.Point(134, 58);
+            this.tbAccountID.Location = new System.Drawing.Point(134, 84);
             this.tbAccountID.Name = "tbAccountID";
             this.tbAccountID.Size = new System.Drawing.Size(100, 23);
             this.tbAccountID.TabIndex = 46;
@@ -435,7 +438,7 @@
             // lblAccountID
             // 
             this.lblAccountID.AutoSize = true;
-            this.lblAccountID.Location = new System.Drawing.Point(12, 61);
+            this.lblAccountID.Location = new System.Drawing.Point(12, 87);
             this.lblAccountID.Name = "lblAccountID";
             this.lblAccountID.Size = new System.Drawing.Size(103, 15);
             this.lblAccountID.TabIndex = 45;
@@ -444,7 +447,7 @@
             // tbClientCode
             // 
             this.tbClientCode.Enabled = false;
-            this.tbClientCode.Location = new System.Drawing.Point(134, 29);
+            this.tbClientCode.Location = new System.Drawing.Point(134, 55);
             this.tbClientCode.Name = "tbClientCode";
             this.tbClientCode.Size = new System.Drawing.Size(100, 23);
             this.tbClientCode.TabIndex = 44;
@@ -453,7 +456,7 @@
             // lblClientCode
             // 
             this.lblClientCode.AutoSize = true;
-            this.lblClientCode.Location = new System.Drawing.Point(12, 32);
+            this.lblClientCode.Location = new System.Drawing.Point(12, 58);
             this.lblClientCode.Name = "lblClientCode";
             this.lblClientCode.Size = new System.Drawing.Size(77, 15);
             this.lblClientCode.TabIndex = 43;
@@ -469,19 +472,36 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(153, 336);
+            this.button1.Location = new System.Drawing.Point(153, 362);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 77;
             this.button1.Text = "button1";
             this.button1.UseVisualStyleBackColor = true;
+            this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click_1);
+            // 
+            // cbStatus
+            // 
+            this.cbStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbStatus.FormattingEnabled = true;
+            this.cbStatus.Location = new System.Drawing.Point(0, 21);
+            this.cbStatus.Name = "cbStatus";
+            this.cbStatus.Size = new System.Drawing.Size(1424, 23);
+            this.cbStatus.TabIndex = 78;
+            // 
+            // timer
+            // 
+            this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1424, 631);
+            this.ClientSize = new System.Drawing.Size(1424, 661);
+            this.Controls.Add(this.cbStatus);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.tbCurrentPos);
             this.Controls.Add(this.lblCurrentPos);
@@ -522,7 +542,7 @@
             this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
-            this.MinimumSize = new System.Drawing.Size(1440, 670);
+            this.MinimumSize = new System.Drawing.Size(1440, 700);
             this.Name = "FormMain";
             this.Text = "RansacBot 5.0";
             this.Load += new System.EventHandler(this.FormMain_Load);
@@ -580,5 +600,7 @@
         private System.Windows.Forms.Label labelState;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatus;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ComboBox cbStatus;
+        private System.Windows.Forms.Timer timer;
     }
 }

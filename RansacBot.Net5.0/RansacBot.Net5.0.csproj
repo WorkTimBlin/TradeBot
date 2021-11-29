@@ -16,12 +16,35 @@
     <PackageReference Include="Accord" Version="3.8.0" />
     <PackageReference Include="Accord.Math" Version="3.8.0" />
     <PackageReference Include="Accord.Statistics" Version="3.8.0" />
+    <PackageReference Include="NLog" Version="4.7.12" />
+    <PackageReference Include="NLog.Config" Version="4.7.12" />
     <PackageReference Include="OxyPlot.Core" Version="2.1.0" />
     <PackageReference Include="OxyPlot.WindowsForms" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\QUIKSharp-master\src\QuikSharp\QuikSharp.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\ir2\.nuget\packages\nlog.config\4.7.12\contentFiles\any\any\NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

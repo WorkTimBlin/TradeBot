@@ -97,17 +97,17 @@ namespace RansacBot.Net5._0
                     }
                     else
                     {
-                        LOGGER.Message("Tool.SetBaseParam(): Warning - Не удалось загрузить информацию об инструменте " + SecurityCode);
+                        LOGGER.Trace("Tool.SetBaseParam(): Warning - Не удалось загрузить информацию об инструменте " + SecurityCode);
                     }
                 }
                 catch (Exception ex)
                 {
-                    LOGGER.Message("Tool.SetBaseParam(): Exception - " + ex.Message);
+                    LOGGER.Trace("Tool.SetBaseParam(): Exception - " + ex.Message);
                 }
             }
             else
             {
-                LOGGER.Message("Tool.SetBaseParam(): Warning - Код класса '" + ClassCode + "' инструмента не обнаружен.");
+                LOGGER.Trace("Tool.SetBaseParam(): Warning - Код класса '" + ClassCode + "' инструмента не обнаружен.");
             }
         }
         /// <summary>
@@ -123,7 +123,7 @@ namespace RansacBot.Net5._0
             }
             catch (Exception ex)
             {
-                LOGGER.Message("Tool.SetGOInfo(): Exception во время загрузки ГО инструмента: " + ex.Message);
+                LOGGER.Trace("Tool.SetGOInfo(): Exception во время загрузки ГО инструмента: " + ex.Message);
             }
         }
     }

@@ -1,5 +1,4 @@
 ﻿using OxyPlot;
-using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using QuikSharp.DataStructures;
@@ -8,16 +7,16 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Collections;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace RansacBot.Net5._0
 {
     public partial class FormMain : Form
     {
         delegate void TextBoxTextDelegate(TextBox tb, string text);
-        private MonkeyNFilter monkeyNFilter;
-        private Vertexes vertexes;
-        private RansacHystory ransacHystory;
+        private int currentLevel;
+        private int currentHystory;
 
         public FormMain()
         {
@@ -33,42 +32,78 @@ namespace RansacBot.Net5._0
         }
         private void LoginToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            FormLogin formLogin = new();
-            formLogin.ShowDialog();
-
-            if (formLogin.DialogResult == DialogResult.OK)
+            try
             {
-                UpdateStaticParams();
-                UpdateCurrentParams();
-                LoginToolStripMenuItem.Enabled = false;
-                OnToolStripMenuItem.Enabled = true;
+                FormLogin formLogin = new();
+                formLogin.ShowDialog();
+
+                if (formLogin.DialogResult == DialogResult.OK)
+                {
+                    UpdateStaticParams();
+                    UpdateCurrentParams();
+                    LoginToolStripMenuItem.Enabled = false;
+                    OnToolStripMenuItem.Enabled = true;
+
+                    LOGGER.Trace("Подключение к Quik выполнено успешно!");
+                }
+                else
+                {
+                    LOGGER.Trace("Подключение отменено!");
+                }
+            }
+            catch (Exception ex)
+            {
+                ClearInterface();
+                LoginToolStripMenuItem.Enabled = true;
+                OnToolStripMenuItem.Enabled = false;
+                LOGGER.Trace("Login_Click(): Exception - " + ex.Message);
             }
         }
         private void OnToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (Trader.Tool != null)
+            InitializationModel();
+
+            Connector.Subscribe(ToolObserver.CurrentTool.ClassCode, ToolObserver.CurrentTool.SecurityCode, ToolObserver.Data.MonkeyNFilter.OnNewTick);
+
+            Connector.NewPrice = Connector_NewPrice;
+            ToolObserver.Data.MonkeyNFilter.NewVertex += ToolObserver.Data.Vertexes.OnNewVertex;
+            ToolObserver.Data.MonkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
+
+            cbRansac.Items.AddRange(ToolObserver.Data.Vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
+            cbRansac.SelectedIndex = 0;
+            nmcLevelRansac.Value = ToolObserver.Data.Vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 2;
+
+            cbRansac.Visible = true;
+            nmcLevelRansac.Visible = true;
+            OnToolStripMenuItem.Enabled = false;
+            LOGGER.Trace("Восстание машин активировано!");
+            timer.Start();
+        }
+        private void CbRansac_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            currentHystory = cbRansac.SelectedIndex;
+            var level = ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels.Count == 0 ? null : ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[^1];
+           
+            for (int i = 0; i < ToolObserver.Data.Vertexes.Hystories.Count; i++)
             {
-                InitializationModel();
-                monkeyNFilter = new(Trader.N);
-                vertexes = new();
-                ransacHystory = new(vertexes, TypeSigma.СonfidenceInterval, 3, 90.0);
-
-                Connector.NewPrice = Connector_NewPrice;
-                Connector.Subscribe(Trader.Tool.ClassCode, Trader.Tool.SecurityCode, monkeyNFilter.OnNewTick);
-
-
-                monkeyNFilter.NewVertex += vertexes.OnNewVertex;
-                monkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
-                ransacHystory.RebuildRansac += RansacHystory_RebuildRansac;
-                ransacHystory.NewRansac += RansacHystory_NewRansac;
-
-                OnToolStripMenuItem.Enabled = false;
-                LOGGER.Message("Подключение прошло успешно!");
-                timer.Start();
+                ToolObserver.Data.Vertexes.Hystories[i].RebuildRansac -= RansacHystory_RebuildRansac;
+                ToolObserver.Data.Vertexes.Hystories[i].NewRansac -= RansacHystory_NewRansac;
             }
-            else
-            {
 
+            ToolObserver.Data.Vertexes.Hystories[currentHystory].RebuildRansac += RansacHystory_RebuildRansac;
+            ToolObserver.Data.Vertexes.Hystories[currentHystory].NewRansac += RansacHystory_NewRansac;
+
+            NmcLevelRansac_ValueChanged(sender, e);
+            nmcLevelRansac.Maximum = ToolObserver.Data.Vertexes.Hystories[currentHystory].MaxLevel + 2;
+        }
+        private void NmcLevelRansac_ValueChanged(object sender, EventArgs e)
+        {
+            currentLevel = (int)nmcLevelRansac.Value - 2;
+            ClearRansacs();
+
+            if (currentLevel < ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels.Count)
+            {
+                PrintRansacs(ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[currentLevel].GetRansacs());
             }
         }
         private void timer_Tick(object sender, EventArgs e)
@@ -76,15 +111,10 @@ namespace RansacBot.Net5._0
             if (OxyChart.InvokeRequired)
             {
                 OxyChart.Invoke(new System.Action(() => { OxyChart.InvalidatePlot(true); }));
-
-                LOGGER.Message("Необычная отрисовка");
+                LOGGER.Trace("Необычная отрисовка");
             }
             else
-            {
                 OxyChart.InvalidatePlot(true);
-                //LOGGER.Message("Просто отрисовка");
-            }
-
         }
 
         #endregion
@@ -100,11 +130,16 @@ namespace RansacBot.Net5._0
             else
                 ((LineSeries)OxyChart.Model.Series[1]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
 
-            LOGGER.Message("Найдена новая вершина: " + tick.PRICE + " | Индекс: " + tick.VERTEXINDEX);
+            if (ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[currentLevel].IsBuilding)
+            {
+                RansacHystory_RebuildRansac(ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[currentLevel].GetRansacs().Last(), currentLevel);
+            }
+
+            LOGGER.Trace("Найдена новая вершина: " + tick.PRICE + " | Индекс: " + tick.VERTEXINDEX);
         }
         private void RansacHystory_NewRansac(Ransac ransac, int level)
         {
-            if (level != 0)
+            if (level != currentLevel)
                 return;
 
             while ((OxyChart.Model.Series.Count - 4) > 20)
@@ -114,11 +149,11 @@ namespace RansacBot.Net5._0
             }
 
             PrintRansac(ransac);
-            LOGGER.Message("Найден новый ранзак: " + (ransac.EndIndexTick - 1));
+            LOGGER.Trace("Найден новый ранзак: " + (ransac.EndIndexTick - 1));
         }
         private void RansacHystory_RebuildRansac(Ransac ransac, int level)
         {
-            if (level != 0)
+            if (level != currentLevel)
                 return;
 
             if (OxyChart.Model.Series.Count > 4)
@@ -128,7 +163,7 @@ namespace RansacBot.Net5._0
             }
 
             PrintRansac(ransac);
-            LOGGER.Message("Текущий ранзак перестроен: " + (ransac.EndIndexTick - 1));
+            LOGGER.Trace("Текущий ранзак перестроен: " + (ransac.EndIndexTick - 1));
         }
         private void Connector_NewPrice(double price)
         {
@@ -136,8 +171,7 @@ namespace RansacBot.Net5._0
         }
         private void Logger_NewMessage(string message)
         {
-            AddTextLog(message);
-            //statusStrip.Items["toolStripStatus"].Text = message;
+            statusStrip.Items["toolStripStatus"].Text = message;
         }
 
         #endregion
@@ -146,33 +180,44 @@ namespace RansacBot.Net5._0
 
         private void UpdateStaticParams()
         {
-            if (Trader.Tool != null)
+            if (ToolObserver.CurrentTool != null)
             {
-                TextToTextBox(tbClientCode, Trader.Tool.ClientCode.ToString());
-                TextToTextBox(tbAccountID, Trader.Tool.AccountID.ToString());
-                TextToTextBox(tbClassCode, Trader.Tool.ClassCode.ToString());
-                TextToTextBox(tbFirmID, Trader.Tool.FirmID.ToString());
-                TextToTextBox(tbSecCode, Trader.Tool.SecurityCode.ToString());
-                TextToTextBox(tbShortName, Trader.Tool.Name.ToString());
-                TextToTextBox(tbStep, Trader.Tool.Step.ToString());
-                TextToTextBox(tbStepPrice, Trader.Tool.PriceStep.ToString());
-                TextToTextBox(tbGoBuy, Trader.Tool.GOBuy.ToString());
-                TextToTextBox(tbGoSell, Trader.Tool.GOSell.ToString());
+                TextToTextBox(tbClientCode, ToolObserver.CurrentTool.ClientCode.ToString());
+                TextToTextBox(tbAccountID, ToolObserver.CurrentTool.AccountID.ToString());
+                TextToTextBox(tbClassCode, ToolObserver.CurrentTool.ClassCode.ToString());
+                TextToTextBox(tbFirmID, ToolObserver.CurrentTool.FirmID.ToString());
+                TextToTextBox(tbSecCode, ToolObserver.CurrentTool.SecurityCode.ToString());
+                TextToTextBox(tbShortName, ToolObserver.CurrentTool.Name.ToString());
+                TextToTextBox(tbStep, ToolObserver.CurrentTool.Step.ToString());
+                TextToTextBox(tbStepPrice, ToolObserver.CurrentTool.PriceStep.ToString());
+                TextToTextBox(tbGoBuy, ToolObserver.CurrentTool.GOBuy.ToString());
+                TextToTextBox(tbGoSell, ToolObserver.CurrentTool.GOSell.ToString());
             }
             else ClearInterface();
         }
         private void UpdateCurrentParams()
         {
-            if (Trader.Tool != null)
+            if (ToolObserver.CurrentTool != null)
             {
-                TextToTextBox(tbAvailableMax, Connector.quik.Trading.CalcBuySell(Trader.Tool.ClassCode, Trader.Tool.SecurityCode, Trader.Tool.ClientCode, Trader.Tool.AccountID, 0, true, true).Result.Qty + " | " +
-                    Connector.quik.Trading.CalcBuySell(Trader.Tool.ClassCode, Trader.Tool.SecurityCode, Trader.Tool.ClientCode, Trader.Tool.AccountID, 0, false, true).Result.Qty);
-                TextToTextBox(tbCurrentPos, "+3 | -2");
-                FuturesClientHolding futuresClient = Connector.quik.Trading.GetFuturesHolding(Trader.Tool.FirmID, Trader.Tool.AccountID, Trader.Tool.SecurityCode, 1).Result;
+                TextToTextBox(tbAvailableMax, Connector.quik.Trading.CalcBuySell(ToolObserver.CurrentTool.ClassCode, ToolObserver.CurrentTool.SecurityCode, ToolObserver.CurrentTool.ClientCode, ToolObserver.CurrentTool.AccountID, 0, true, true).Result.Qty + " | " +
+                    Connector.quik.Trading.CalcBuySell(ToolObserver.CurrentTool.ClassCode, ToolObserver.CurrentTool.SecurityCode, ToolObserver.CurrentTool.ClientCode, ToolObserver.CurrentTool.AccountID, 0, false, true).Result.Qty);
+                TextToTextBox(tbCurrentPos, "0 | 0");
+                
+                FuturesClientHolding futuresClient = Connector.quik.Trading.GetFuturesHolding(ToolObserver.CurrentTool.FirmID, ToolObserver.CurrentTool.AccountID, ToolObserver.CurrentTool.SecurityCode, 1).Result;
+                //FuturesLimits futuresLimits = Connector.quik.Trading.GetFuturesLimit(Trader.Tool.FirmID, Trader.Tool.AccountID, 0, "").Result;
+
 
                 if (futuresClient != null)
                 {
                     TextToTextBox(tbVarMargin, futuresClient.varMargin.ToString());
+                    TextToTextBox(tbBalanceNoMargin, "-");
+                    TextToTextBox(tbBalance, "-");
+                    TextToTextBox(tbBlock, "-");
+                    TextToTextBox(tbAvailableFunds, "-");
+                }
+                else
+                {
+                    TextToTextBox(tbVarMargin, "-");
                     TextToTextBox(tbBalanceNoMargin, "-");
                     TextToTextBox(tbBalance, "-");
                     TextToTextBox(tbBlock, "-");
@@ -206,7 +251,7 @@ namespace RansacBot.Net5._0
         {
             PlotModel plot = new()
             {
-                Title = "MonkeyN - " + Trader.N,
+                Title = "MonkeyN - " + ToolObserver.N,
                 TitleColor = OxyColors.Black
             };
 
@@ -236,7 +281,6 @@ namespace RansacBot.Net5._0
                 LabelFormatter = (x) => x.ToString(),
                 Key = "Y"
             };
-
             LineSeries extremumsN = new()
             {
                 Title = "Extremum-N",
@@ -248,6 +292,7 @@ namespace RansacBot.Net5._0
                 XAxisKey = "X",
                 YAxisKey = "Y"
             };
+
             LineSeries extremumsMonkey = new()
             {
                 Title = "Extremum-Monkey",
@@ -298,7 +343,8 @@ namespace RansacBot.Net5._0
                 Color = ransac.Slope > 0 ? OxyColors.Lime : OxyColors.Red,
                 StrokeThickness = 3,
                 XAxisKey = "X",
-                YAxisKey = "Y"
+                YAxisKey = "Y",
+                Tag = "ransac"
             };
             LineSeries sigma = new()
             {
@@ -306,7 +352,8 @@ namespace RansacBot.Net5._0
                 StrokeThickness = 2,
                 LineStyle = LineStyle.Dot,
                 XAxisKey = "X",
-                YAxisKey = "Y"
+                YAxisKey = "Y",
+                Tag = "ransac"
             };
 
             double y1 = ransac.Transform(ransac.FirstIndexTick);
@@ -320,6 +367,21 @@ namespace RansacBot.Net5._0
             OxyChart.Model.Series.Add(reg);
             OxyChart.Model.Series.Add(sigma);
         }
+        private void PrintRansacs(List<Ransac> ransacs)
+        {
+            ClearRansacs();
+
+            for (int i = 0; i < ransacs.Count; i++)
+                PrintRansac(ransacs[i]);
+        }
+        private void ClearRansacs()
+        {
+            for (int i = OxyChart.Model.Series.Count - 1; i >= 0; i--)
+            {
+                if ((string)OxyChart.Model.Series[i].Tag == "ransac")
+                    OxyChart.Model.Series.RemoveAt(i);
+            }
+        }
         private void TextToTextBox(TextBox tb, string text)
         {
             if (tb.InvokeRequired)
@@ -329,61 +391,36 @@ namespace RansacBot.Net5._0
             }
             else tb.Text = text;
         }
-        private void AddTextLog(string text)
-        {
-            try
-            {
-                if (cbStatus.InvokeRequired)
-                {
-                    cbStatus.Invoke(new System.Action(() =>
-                    {
-                        cbStatus.Items.Add(text);
-                        cbStatus.SelectedIndex = cbStatus.Items.Count - 1;
-                    }));
-                }
-                else
-                {
-                    cbStatus.Items.Add(text);
-                    cbStatus.SelectedIndex = cbStatus.Items.Count - 1;
-                }
-            }
-            catch
-            {
-
-            }
-        }
 
         #endregion
 
-        private async void button1_Click_1(object sender, EventArgs e)
+        private void button1_Click_1(object sender, EventArgs e)
         {
-            InitializationModel();
+        //    InitializationModel();
 
-            await Task.Run(() =>
-            {
-                monkeyNFilter = new(100);
-                vertexes = new();
-                ransacHystory = new(vertexes, TypeSigma.СonfidenceInterval);
-                monkeyNFilter.NewVertex += vertexes.OnNewVertex;
-                monkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
-                ransacHystory.RebuildRansac += RansacHystory_RebuildRansac;
-                ransacHystory.NewRansac += RansacHystory_NewRansac;
+        //    await Task.Run(() =>
+        //    {
+        //        monkeyNFilter = new(100);
+        //        vertexes = new();
+        //        ransacHystory = new(vertexes, TypeSigma.СonfidenceInterval);
+        //        monkeyNFilter.NewVertex += vertexes.OnNewVertex;
+        //        monkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
+        //        ransacHystory.RebuildRansac += RansacHystory_RebuildRansac;
+        //        ransacHystory.NewRansac += RansacHystory_NewRansac;
 
-                int current = 0;
-                for (int i = 0; i < 200; i++)
-                {
-                    int rand = new Random().Next(-1000, i * 1000);
-                    current += rand;
-                    //((LineSeries)OxyChart.ActualModel.Series[0]).Points.Add(new DataPoint(i, rand));
-                    //Connector_NewPrice(rand);
-                    //OxyChart.ActualModel.InvalidatePlot(true);
-                    monkeyNFilter.OnNewTick(new Tick(0, 0, rand));
-                    Thread.Sleep(100);
-                    //Task.Delay(100);
-                }
-            });
+        //        int current = 0;
+        //        for (int i = 0; i < 200; i++)
+        //        {
+        //            int rand = new Random().Next(-1000, i * 1000);
+        //            current += rand;
+        //            //((LineSeries)OxyChart.ActualModel.Series[0]).Points.Add(new DataPoint(i, rand));
+        //            //Connector_NewPrice(rand);
+        //            //OxyChart.ActualModel.InvalidatePlot(true);
+        //            monkeyNFilter.OnNewTick(new Tick(0, 0, rand));
+        //            Thread.Sleep(100);
+        //            //Task.Delay(100);
+        //        }
+        //    });
         }
-
-
     }
 }

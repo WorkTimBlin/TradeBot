@@ -121,7 +121,7 @@ namespace RansacRealTime
 		}
 
 
-		public void SaveStandart(string path)
+		public virtual void SaveStandart(string path)
 		{
 			using StreamWriter writer = new(path + "/vertexes.csv");
 			writer.WriteLine("localIndex; globalIndex; price");

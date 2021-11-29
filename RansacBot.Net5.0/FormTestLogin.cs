@@ -32,6 +32,7 @@ namespace RansacBot.Net5._0
             RansacHystory ransacHystory3 = new(vertexes, ToTypeSigma(cbCloseN1.Text), (int)nmcLevelCloseN1.Value - 1);
             RansacHystory ransacHystory4 = new(vertexes, ToTypeSigma(cbCloseN2.Text), (int)nmcLevelCloseN2.Value - 1);
 
+            monkeyNFilter.NewVertex += vertexes.OnNewVertex;
             RansacObserver ransacObserver = new(vertexes, monkeyNFilter);
             ToolObserver.Initialization(ransacObserver, new Tool(), (double)nmcN.Value, (double)nmcPercentCloseN1.Value);
 

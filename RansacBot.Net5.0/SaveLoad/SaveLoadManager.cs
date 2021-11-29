@@ -52,7 +52,7 @@ namespace RansacBot.Net5._0
 			TimeSpan interval = new(0, 2, 0);
 			//подгружаем из файлов
 			vertexes = new(path, true);
-			monkeyNFilter = new(N, vertexes.VertexList.Count);
+			monkeyNFilter = new(N, vertexes.VertexList[^1]);
 			monkeyNFilter.NewVertex += vertexes.OnNewVertex; // в вершины
 			//ждем две минуты с момента подписки
 			while(DateTime.Now - begin < interval)

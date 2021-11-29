@@ -50,7 +50,7 @@ namespace RansacBot.Net5._0
 
 			//подгружаем из файлов
 			Vertexes vertexes = new(path, loadHystories);
-			MonkeyNFilter monkeyNFilter = new(N, vertexes.VertexList.Count);
+			MonkeyNFilter monkeyNFilter = new(N, vertexes.VertexList[^1]);
 			monkeyNFilter.NewVertex += vertexes.OnNewVertex; // в вершины
 
 			CurrentTool = new Tool();
@@ -93,7 +93,7 @@ namespace RansacBot.Net5._0
 
 			//подгружаем из файлов
 			Data.Vertexes = new(path, loadHystories);
-			Data.MonkeyNFilter = new(N, Data.Vertexes.VertexList.Count);
+			Data.MonkeyNFilter = new(N, Data.Vertexes.VertexList[^1]);
 			Data.MonkeyNFilter.NewVertex += Data.Vertexes.OnNewVertex; // в вершины
 															 //ждем две минуты с момента подписки
 			while (DateTime.Now - begin < interval)

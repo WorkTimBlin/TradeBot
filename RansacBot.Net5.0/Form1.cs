@@ -456,17 +456,7 @@ namespace RansacBot.Net5._0
         private void HystoryTestToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ticksTest = new();
-            using StreamReader reader = new(@"C:\Users\ir2\Desktop\Программы\DATA\TICKS\RTS.F\3.txt");
-            reader.ReadLine();
-
-            while (!reader.EndOfStream)
-            {
-                string[] data = reader.ReadLine().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-                if (Convert.ToInt32(data[0]) > 76183719)
-                    ticksTest.Enqueue(new Tick(Convert.ToInt32(data[0]), 0, Convert.ToInt32(data[2])));
-            }
-
+            LOGGER.Trace("loaded");
             FormTestLogin formTestLogin = new();
             formTestLogin.ShowDialog();
 
@@ -480,13 +470,25 @@ namespace RansacBot.Net5._0
 
                 InitializationModel();
 
-                ToolObserver.Data.MonkeyNFilter.NewVertex += ToolObserver.Data.Vertexes.OnNewVertex;
                 ToolObserver.Data.MonkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
+
+
+                //using StreamReader reader = new(@"C:\Users\ir2\Desktop\Программы\DATA\TICKS\RTS.F\3.txt");
+                using StreamReader reader = new(@"F:\tim\monte-carlo\DATA\TICKS\RTS.F\3.txt");
+                reader.ReadLine();
+                LOGGER.Trace("start loading...");
+
+                while (!reader.EndOfStream)
+                {
+                    string[] data = reader.ReadLine().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    if (Convert.ToInt32(data[0]) > ToolObserver.Data.Vertexes.VertexList.Last().ID)
+                        ticksTest.Enqueue(new Tick(Convert.ToInt32(data[0]), 0, Convert.ToInt32(data[2])));
+                }
 
                 cbRansac.Items.AddRange(ToolObserver.Data.Vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
                 cbRansac.SelectedIndex = 0;
                 nmcLevelRansac.Value = ToolObserver.Data.Vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 1;
-
                 cbRansac.Visible = true;
                 nmcLevelRansac.Visible = true;
                 OnToolStripMenuItem.Enabled = false;

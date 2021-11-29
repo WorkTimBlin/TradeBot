@@ -29,11 +29,15 @@
 			OnNewTickChooser = OnNewTick0;
 		}
 
-		public MonkeyNFilter(double n, int firstIndex)
+		public MonkeyNFilter(double n, Tick last)
 		{
 			this.n = n;
-			this.count = firstIndex;
-			OnNewTickChooser = OnNewTick0;
+			this.count = last.VERTEXINDEX + 1;
+			this.lastReturned = last;
+			this.max = last;
+			this.min = last;
+			this.last = last;
+			OnNewTickChooser = OnNewTick1;
 		}
 
 		public event VertexHandler NewVertex;

@@ -11,15 +11,15 @@ namespace RansacRealTime
 		/// <summary>
 		/// Список вершин MonkeyN.
 		/// </summary>
-        public List<Tick> VertexList { get; private set; }
+		public List<Tick> VertexList { get; private set; } = new();
 		/// <summary>
 		/// Список подписантов(ранзаков) на вершины.
 		/// </summary>
-		public List<RansacHystory> Hystories { get; set; }
+		public List<RansacHystory> Hystories { get; set; } = new();
 		/// <summary>
 		/// Индекс последнего тика, в который выполнилось условия разнонаправленных ранзаков.
 		/// </summary>
-		public int LastIndexPermited { get; private set; }
+		public int LastIndexPermited { get; private set; } = -1;
 
 		#endregion
 
@@ -27,12 +27,10 @@ namespace RansacRealTime
 
 		public Vertexes()
 		{
-			VertexList = new();
-			Hystories = new();
-			LastIndexPermited = -1;
+
 		}
 
-		public Vertexes(string path) : base()
+		public Vertexes(string path)
 		{
 			LoadStandart(path);
 			FindLastIndexPermited();
@@ -43,6 +41,7 @@ namespace RansacRealTime
 		{
 			LoadStandart(path);
 			FindLastIndexPermited();
+
 			if (loadHystoryesToo)
 				LoadAllHystories(path);
 		}
@@ -139,7 +138,7 @@ namespace RansacRealTime
 			while (!reader.EndOfStream)
 			{
 				string[] data = reader.ReadLine().Split(';');
-				VertexList.Add(new Tick(Convert.ToInt32(data[0]), Convert.ToInt32(data[1]), (float)Convert.ToDecimal(data[2])));
+				VertexList.Add(new Tick(Convert.ToInt32(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
 			}
 		}
 
@@ -172,7 +171,7 @@ namespace RansacRealTime
 			{
 				if (hDir.Name.Contains("Hystory"))
 				{
-					Hystories.Add(new(this, hDir.FullName));
+					new RansacHystory(this, hDir.FullName);
 				}
 			}
 

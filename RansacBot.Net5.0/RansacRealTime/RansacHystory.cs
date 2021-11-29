@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace RansacRealTime
 {
@@ -30,9 +31,9 @@ namespace RansacRealTime
 		/// </summary>
 		public double Percentile { get; private set; }
 		/// <summary>
-		/// Максимально допустимый для поиска уровень. (По умолчанию 7). (Максимальный уровень сейчас - это индекс в списке уровней, причем списка без первого уровня. Поправить это потом).
+		/// Максимально допустимый для поиска уровень. (По умолчанию 12). (Максимальный уровень сейчас - это индекс в списке уровней, причем списка без первого уровня. Поправить это потом).
 		/// </summary>
-		public int MaxLevel { get; private set; } = 5;
+		public int MaxLevel { get; private set; } = 10;
 		/// <summary>
 		/// True - достигнут максимальный уровень ранзаков.
 		/// </summary>
@@ -110,9 +111,10 @@ namespace RansacRealTime
 		}
 		private void SaveMetadata(string path)
 		{
-			using StreamWriter writer = new(path + "/metadata.csv");
-			writer.WriteLine("typeSigma;" + Type.ToString());
-			writer.WriteLine("percentile;" + Percentile.ToString());
+			using StreamWriter writer = new(path + "/metadata.csv", false, Encoding.UTF8);
+			writer.WriteLine("typeSigma;" + Type);
+			writer.WriteLine("percentile;" + Percentile);
+			writer.WriteLine("MaxLevel;" + MaxLevel);
 		}
 		private void SaveLevels(string path)
 		{
@@ -123,8 +125,10 @@ namespace RansacRealTime
 		{
 			using StreamReader reader = new(path + "/metadata.csv");
 			string line = reader.ReadLine().Split(';')[1];
+			
 			Type = (TypeSigma)Enum.Parse(typeof(TypeSigma), line);
 			Percentile = Convert.ToDouble(reader.ReadLine().Split(';')[1]);
+			MaxLevel = Convert.ToInt32(reader.ReadLine().Split(';')[1]);
 		}
 		private void LoadLevelsStandart(string path)
 		{

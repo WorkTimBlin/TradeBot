@@ -79,6 +79,24 @@ namespace RansacBot.Net5._0
         }
 
         /// <summary>
+        /// Тестовый конструктор.
+        /// </summary>
+        public Tool()
+        {
+            Name = "РТС";
+            SecurityCode = "RTS";
+            ClassCode = "ClassCode";
+            ClientCode = "ClientCode";
+            AccountID = "AccountID";
+            FirmID = "FirmID";
+            PriceAccuracy = 0;
+            Step = 10;
+            PriceStep = 15;
+            GOBuy = 31000;
+            GOSell = 31000;
+        }
+
+        /// <summary>
         /// Устанавливает базовые параметры инструмента.
         /// </summary>
         private void SetBaseParam()

@@ -10,13 +10,12 @@ namespace RansacRealTime
     {
         public Vertexes Vertexes { get; set; }
         public MonkeyNFilter MonkeyNFilter { get; set; }
-        public int N { get;private set; }
 
-        public RansacObserver(in Vertexes vertexes, in MonkeyNFilter monkeyNFilter, int n)
+
+        public RansacObserver(in Vertexes vertexes, in MonkeyNFilter monkeyNFilter)
         {
             Vertexes = vertexes;
             MonkeyNFilter = monkeyNFilter;
-            N = n;
         }
     }
 }

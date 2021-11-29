@@ -33,6 +33,7 @@
             this.qUIKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LoginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.HystoryTestToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
             this.toolStripSplitButton = new System.Windows.Forms.ToolStripSplitButton();
             this.toolStripStatus = new System.Windows.Forms.ToolStripStatusLabel();
@@ -76,6 +77,8 @@
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.cbRansac = new System.Windows.Forms.ComboBox();
             this.nmcLevelRansac = new System.Windows.Forms.NumericUpDown();
+            this.button2 = new System.Windows.Forms.Button();
+            this.timerTest = new System.Windows.Forms.Timer(this.components);
             this.menuStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nmcLevelRansac)).BeginInit();
@@ -95,7 +98,8 @@
             // 
             this.qUIKToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.LoginToolStripMenuItem,
-            this.OnToolStripMenuItem});
+            this.OnToolStripMenuItem,
+            this.HystoryTestToolStripMenuItem});
             this.qUIKToolStripMenuItem.Name = "qUIKToolStripMenuItem";
             this.qUIKToolStripMenuItem.Size = new System.Drawing.Size(46, 20);
             this.qUIKToolStripMenuItem.Text = "QUIK";
@@ -103,7 +107,7 @@
             // LoginToolStripMenuItem
             // 
             this.LoginToolStripMenuItem.Name = "LoginToolStripMenuItem";
-            this.LoginToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.LoginToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
             this.LoginToolStripMenuItem.Text = "Подключиться";
             this.LoginToolStripMenuItem.Click += new System.EventHandler(this.LoginToolStripMenuItem_Click);
             // 
@@ -111,9 +115,16 @@
             // 
             this.OnToolStripMenuItem.Enabled = false;
             this.OnToolStripMenuItem.Name = "OnToolStripMenuItem";
-            this.OnToolStripMenuItem.Size = new System.Drawing.Size(156, 22);
+            this.OnToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
             this.OnToolStripMenuItem.Text = "Включить бот";
             this.OnToolStripMenuItem.Click += new System.EventHandler(this.OnToolStripMenuItem_Click);
+            // 
+            // HystoryTestToolStripMenuItem
+            // 
+            this.HystoryTestToolStripMenuItem.Name = "HystoryTestToolStripMenuItem";
+            this.HystoryTestToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.HystoryTestToolStripMenuItem.Text = "Тест на истории";
+            this.HystoryTestToolStripMenuItem.Click += new System.EventHandler(this.HystoryTestToolStripMenuItem_Click);
             // 
             // statusStrip
             // 
@@ -542,11 +553,27 @@
             this.nmcLevelRansac.Visible = false;
             this.nmcLevelRansac.ValueChanged += new System.EventHandler(this.NmcLevelRansac_ValueChanged);
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(134, 346);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(100, 23);
+            this.button2.TabIndex = 80;
+            this.button2.Text = "test save";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // timerTest
+            // 
+            this.timerTest.Interval = 1;
+            this.timerTest.Tick += new System.EventHandler(this.timerTest_Tick);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1424, 661);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.cbRansac);
             this.Controls.Add(this.nmcLevelRansac);
             this.Controls.Add(this.button1);
@@ -652,5 +679,8 @@
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton;
         private System.Windows.Forms.ComboBox cbRansac;
         private System.Windows.Forms.NumericUpDown nmcLevelRansac;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.ToolStripMenuItem HystoryTestToolStripMenuItem;
+        private System.Windows.Forms.Timer timerTest;
     }
 }

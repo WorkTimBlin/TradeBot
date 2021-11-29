@@ -9,13 +9,14 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Linq;
 using System.Collections.Generic;
+using System.IO;
 
 namespace RansacBot.Net5._0
 {
     public partial class FormMain : Form
     {
         delegate void TextBoxTextDelegate(TextBox tb, string text);
-        private int currentLevel;
+        private int currentLevel { get; set; }
         private int currentHystory;
 
         public FormMain()
@@ -29,6 +30,7 @@ namespace RansacBot.Net5._0
         {
             LOGGER.NewMessage += Logger_NewMessage;
             timer.Stop();
+            timerTest.Stop();
         }
         private void LoginToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -71,7 +73,7 @@ namespace RansacBot.Net5._0
 
             cbRansac.Items.AddRange(ToolObserver.Data.Vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
             cbRansac.SelectedIndex = 0;
-            nmcLevelRansac.Value = ToolObserver.Data.Vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 2;
+            nmcLevelRansac.Value = ToolObserver.Data.Vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 1;
 
             cbRansac.Visible = true;
             nmcLevelRansac.Visible = true;
@@ -94,7 +96,7 @@ namespace RansacBot.Net5._0
             ToolObserver.Data.Vertexes.Hystories[currentHystory].NewRansac += RansacHystory_NewRansac;
 
             NmcLevelRansac_ValueChanged(sender, e);
-            nmcLevelRansac.Maximum = ToolObserver.Data.Vertexes.Hystories[currentHystory].MaxLevel + 2;
+            nmcLevelRansac.Maximum = ToolObserver.Data.Vertexes.Hystories[currentHystory].MaxLevel + 1;
         }
         private void NmcLevelRansac_ValueChanged(object sender, EventArgs e)
         {
@@ -123,18 +125,7 @@ namespace RansacBot.Net5._0
 
         private void MonkeyNFilter_NewVertex(Tick tick, VertexType vertexType)
         {
-            ((LineSeries)OxyChart.Model.Series[0]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
-
-            if (vertexType == VertexType.Monkey)
-                ((LineSeries)OxyChart.Model.Series[2]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
-            else
-                ((LineSeries)OxyChart.Model.Series[1]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
-
-            if (ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[currentLevel].IsBuilding)
-            {
-                RansacHystory_RebuildRansac(ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[currentLevel].GetRansacs().Last(), currentLevel);
-            }
-
+            PrintVertex(tick, vertexType);
             LOGGER.Trace("Найдена новая вершина: " + tick.PRICE + " | Индекс: " + tick.VERTEXINDEX);
         }
         private void RansacHystory_NewRansac(Ransac ransac, int level)
@@ -382,6 +373,31 @@ namespace RansacBot.Net5._0
                     OxyChart.Model.Series.RemoveAt(i);
             }
         }
+        private void PrintVertex(Tick tick, VertexType vertexType)
+        {
+            ((LineSeries)OxyChart.Model.Series[0]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
+
+            if (vertexType == VertexType.Monkey)
+                ((LineSeries)OxyChart.Model.Series[2]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
+            else
+                ((LineSeries)OxyChart.Model.Series[1]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
+
+            if (currentLevel < ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels.Count && ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[currentLevel].IsBuilding)
+                RansacHystory_RebuildRansac(ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[currentLevel].GetRansacs().Last(), currentLevel);
+        }
+        private void PrintVertexes()
+        {
+            ClearVertexes();
+
+            for (int i = 0; i < ToolObserver.Data.Vertexes.VertexList.Count; i++)
+                PrintVertex(ToolObserver.Data.Vertexes.VertexList[i], VertexType.High);
+        }
+        private void ClearVertexes()
+        {
+            ((LineSeries)OxyChart.Model.Series[0]).Points.Clear();
+            ((LineSeries)OxyChart.Model.Series[1]).Points.Clear();
+            ((LineSeries)OxyChart.Model.Series[2]).Points.Clear();
+        }
         private void TextToTextBox(TextBox tb, string text)
         {
             if (tb.InvokeRequired)
@@ -421,6 +437,86 @@ namespace RansacBot.Net5._0
         //            //Task.Delay(100);
         //        }
         //    });
+        }
+        private void button2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ToolObserver.Save("SAVE", true);
+
+            }
+            catch (Exception ex)
+            {
+                LOGGER.Trace("Ошибка при сохранении: " + ex.Message);
+            }
+        }
+
+
+        Queue<Tick> ticksTest;
+        private void HystoryTestToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ticksTest = new();
+            using StreamReader reader = new(@"C:\Users\ir2\Desktop\Программы\DATA\TICKS\RTS.F\3.txt");
+            reader.ReadLine();
+
+            while (!reader.EndOfStream)
+            {
+                string[] data = reader.ReadLine().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (Convert.ToInt32(data[0]) > 76183719)
+                    ticksTest.Enqueue(new Tick(Convert.ToInt32(data[0]), 0, Convert.ToInt32(data[2])));
+            }
+
+            FormTestLogin formTestLogin = new();
+            formTestLogin.ShowDialog();
+
+            if (formTestLogin.DialogResult == DialogResult.OK)
+            {
+                UpdateStaticParams();
+                UpdateCurrentParams();
+                LoginToolStripMenuItem.Enabled = false;
+                HystoryTestToolStripMenuItem.Enabled = false;
+                OnToolStripMenuItem.Enabled = false;
+
+                InitializationModel();
+
+                ToolObserver.Data.MonkeyNFilter.NewVertex += ToolObserver.Data.Vertexes.OnNewVertex;
+                ToolObserver.Data.MonkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
+
+                cbRansac.Items.AddRange(ToolObserver.Data.Vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
+                cbRansac.SelectedIndex = 0;
+                nmcLevelRansac.Value = ToolObserver.Data.Vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 1;
+
+                cbRansac.Visible = true;
+                nmcLevelRansac.Visible = true;
+                OnToolStripMenuItem.Enabled = false;
+                LOGGER.Trace("Подключение выполнено");
+                timer.Start();
+                PrintVertexes();
+                timerTest.Start();
+            }
+            else
+            {
+                LOGGER.Trace("Подключение отменено!");
+            }
+        }
+        private void timerTest_Tick(object sender, EventArgs e)
+        {
+            if (ticksTest.Count == 0)
+            {
+                timerTest.Stop();
+                LOGGER.Trace("Тики закончились");
+                return;
+            }
+
+            for (int i = 0; i < 20; i++)
+            {
+                Tick tick = ticksTest.Dequeue();
+                ToolObserver.Data.MonkeyNFilter.OnNewTick(tick);
+                Connector_NewPrice(tick.PRICE);
+            }
+
+            LOGGER.Trace("Осталось тиков: " + ticksTest.Count);
         }
     }
 }

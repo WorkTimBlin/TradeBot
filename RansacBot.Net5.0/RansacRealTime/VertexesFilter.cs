@@ -16,20 +16,20 @@
 
 	public class MonkeyNFilter : IVertexFinder
 	{
-		readonly float n;
+		readonly double n;
 		int count = 0;
 		Tick max;
 		Tick min;
 		Tick last;
 		Tick lastReturned;
 
-		public MonkeyNFilter(float n)
+		public MonkeyNFilter(double n)
 		{
 			this.n = n;
 			OnNewTickChooser = OnNewTick0;
 		}
 
-		public MonkeyNFilter(float n, int firstIndex)
+		public MonkeyNFilter(double n, int firstIndex)
 		{
 			this.n = n;
 			this.count = firstIndex;

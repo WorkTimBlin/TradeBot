@@ -34,6 +34,7 @@
             this.LoginToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.toolStripSplitButton = new System.Windows.Forms.ToolStripSplitButton();
             this.toolStripStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.OxyChart = new OxyPlot.WindowsForms.PlotView();
             this.tbCurrentPos = new System.Windows.Forms.TextBox();
@@ -72,10 +73,12 @@
             this.lblClientCode = new System.Windows.Forms.Label();
             this.labelState = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
-            this.cbStatus = new System.Windows.Forms.ComboBox();
             this.timer = new System.Windows.Forms.Timer(this.components);
+            this.cbRansac = new System.Windows.Forms.ComboBox();
+            this.nmcLevelRansac = new System.Windows.Forms.NumericUpDown();
             this.menuStrip.SuspendLayout();
             this.statusStrip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nmcLevelRansac)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip
@@ -115,17 +118,33 @@
             // statusStrip
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripSplitButton,
             this.toolStripStatus});
-            this.statusStrip.Location = new System.Drawing.Point(0, 639);
+            this.statusStrip.Location = new System.Drawing.Point(0, 637);
             this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1424, 22);
+            this.statusStrip.Size = new System.Drawing.Size(1424, 24);
             this.statusStrip.TabIndex = 1;
-            this.statusStrip.Text = "statusStrip1";
+            // 
+            // toolStripSplitButton
+            // 
+            this.toolStripSplitButton.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripSplitButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripSplitButton.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolStripSplitButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripSplitButton.Name = "toolStripSplitButton";
+            this.toolStripSplitButton.RightToLeftAutoMirrorImage = true;
+            this.toolStripSplitButton.Size = new System.Drawing.Size(60, 22);
+            this.toolStripSplitButton.Text = "Logger";
             // 
             // toolStripStatus
             // 
+            this.toolStripStatus.BorderSides = ((System.Windows.Forms.ToolStripStatusLabelBorderSides)((System.Windows.Forms.ToolStripStatusLabelBorderSides.Left | System.Windows.Forms.ToolStripStatusLabelBorderSides.Right)));
+            this.toolStripStatus.BorderStyle = System.Windows.Forms.Border3DStyle.Bump;
+            this.toolStripStatus.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripStatus.Name = "toolStripStatus";
-            this.toolStripStatus.Size = new System.Drawing.Size(0, 17);
+            this.toolStripStatus.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.toolStripStatus.Size = new System.Drawing.Size(66, 19);
+            this.toolStripStatus.Text = "RansacBot";
             // 
             // OxyChart
             // 
@@ -133,10 +152,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.OxyChart.BackColor = System.Drawing.SystemColors.Control;
-            this.OxyChart.Location = new System.Drawing.Point(240, 55);
+            this.OxyChart.Location = new System.Drawing.Point(240, 27);
             this.OxyChart.Name = "OxyChart";
             this.OxyChart.PanCursor = System.Windows.Forms.Cursors.Hand;
-            this.OxyChart.Size = new System.Drawing.Size(1184, 581);
+            this.OxyChart.Size = new System.Drawing.Size(1184, 609);
             this.OxyChart.TabIndex = 4;
             this.OxyChart.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
             this.OxyChart.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
@@ -285,7 +304,7 @@
             // tbGoSell
             // 
             this.tbGoSell.Enabled = false;
-            this.tbGoSell.Location = new System.Drawing.Point(134, 316);
+            this.tbGoSell.Location = new System.Drawing.Point(134, 288);
             this.tbGoSell.Name = "tbGoSell";
             this.tbGoSell.Size = new System.Drawing.Size(100, 23);
             this.tbGoSell.TabIndex = 62;
@@ -294,7 +313,7 @@
             // lblGoSell
             // 
             this.lblGoSell.AutoSize = true;
-            this.lblGoSell.Location = new System.Drawing.Point(12, 319);
+            this.lblGoSell.Location = new System.Drawing.Point(12, 291);
             this.lblGoSell.Name = "lblGoSell";
             this.lblGoSell.Size = new System.Drawing.Size(80, 15);
             this.lblGoSell.TabIndex = 61;
@@ -303,7 +322,7 @@
             // tbGoBuy
             // 
             this.tbGoBuy.Enabled = false;
-            this.tbGoBuy.Location = new System.Drawing.Point(134, 287);
+            this.tbGoBuy.Location = new System.Drawing.Point(134, 259);
             this.tbGoBuy.Name = "tbGoBuy";
             this.tbGoBuy.Size = new System.Drawing.Size(100, 23);
             this.tbGoBuy.TabIndex = 60;
@@ -312,7 +331,7 @@
             // lblGoBuy
             // 
             this.lblGoBuy.AutoSize = true;
-            this.lblGoBuy.Location = new System.Drawing.Point(12, 290);
+            this.lblGoBuy.Location = new System.Drawing.Point(12, 262);
             this.lblGoBuy.Name = "lblGoBuy";
             this.lblGoBuy.Size = new System.Drawing.Size(91, 15);
             this.lblGoBuy.TabIndex = 59;
@@ -321,7 +340,7 @@
             // tbStepPrice
             // 
             this.tbStepPrice.Enabled = false;
-            this.tbStepPrice.Location = new System.Drawing.Point(134, 258);
+            this.tbStepPrice.Location = new System.Drawing.Point(134, 230);
             this.tbStepPrice.Name = "tbStepPrice";
             this.tbStepPrice.Size = new System.Drawing.Size(100, 23);
             this.tbStepPrice.TabIndex = 58;
@@ -330,7 +349,7 @@
             // lblPriceStep
             // 
             this.lblPriceStep.AutoSize = true;
-            this.lblPriceStep.Location = new System.Drawing.Point(12, 261);
+            this.lblPriceStep.Location = new System.Drawing.Point(12, 233);
             this.lblPriceStep.Name = "lblPriceStep";
             this.lblPriceStep.Size = new System.Drawing.Size(101, 15);
             this.lblPriceStep.TabIndex = 57;
@@ -339,7 +358,7 @@
             // tbStep
             // 
             this.tbStep.Enabled = false;
-            this.tbStep.Location = new System.Drawing.Point(134, 229);
+            this.tbStep.Location = new System.Drawing.Point(134, 201);
             this.tbStep.Name = "tbStep";
             this.tbStep.Size = new System.Drawing.Size(100, 23);
             this.tbStep.TabIndex = 56;
@@ -348,7 +367,7 @@
             // lblStep
             // 
             this.lblStep.AutoSize = true;
-            this.lblStep.Location = new System.Drawing.Point(12, 232);
+            this.lblStep.Location = new System.Drawing.Point(12, 204);
             this.lblStep.Name = "lblStep";
             this.lblStep.Size = new System.Drawing.Size(64, 15);
             this.lblStep.TabIndex = 55;
@@ -357,7 +376,7 @@
             // tbShortName
             // 
             this.tbShortName.Enabled = false;
-            this.tbShortName.Location = new System.Drawing.Point(134, 200);
+            this.tbShortName.Location = new System.Drawing.Point(134, 172);
             this.tbShortName.Name = "tbShortName";
             this.tbShortName.Size = new System.Drawing.Size(100, 23);
             this.tbShortName.TabIndex = 54;
@@ -366,7 +385,7 @@
             // lblShortName
             // 
             this.lblShortName.AutoSize = true;
-            this.lblShortName.Location = new System.Drawing.Point(12, 203);
+            this.lblShortName.Location = new System.Drawing.Point(12, 175);
             this.lblShortName.Name = "lblShortName";
             this.lblShortName.Size = new System.Drawing.Size(115, 15);
             this.lblShortName.TabIndex = 53;
@@ -375,7 +394,7 @@
             // tbSecCode
             // 
             this.tbSecCode.Enabled = false;
-            this.tbSecCode.Location = new System.Drawing.Point(134, 171);
+            this.tbSecCode.Location = new System.Drawing.Point(134, 143);
             this.tbSecCode.Name = "tbSecCode";
             this.tbSecCode.Size = new System.Drawing.Size(100, 23);
             this.tbSecCode.TabIndex = 52;
@@ -384,7 +403,7 @@
             // lblSecCode
             // 
             this.lblSecCode.AutoSize = true;
-            this.lblSecCode.Location = new System.Drawing.Point(12, 174);
+            this.lblSecCode.Location = new System.Drawing.Point(12, 146);
             this.lblSecCode.Name = "lblSecCode";
             this.lblSecCode.Size = new System.Drawing.Size(42, 15);
             this.lblSecCode.TabIndex = 51;
@@ -393,7 +412,7 @@
             // tbFirmID
             // 
             this.tbFirmID.Enabled = false;
-            this.tbFirmID.Location = new System.Drawing.Point(134, 142);
+            this.tbFirmID.Location = new System.Drawing.Point(134, 114);
             this.tbFirmID.Name = "tbFirmID";
             this.tbFirmID.Size = new System.Drawing.Size(100, 23);
             this.tbFirmID.TabIndex = 50;
@@ -402,7 +421,7 @@
             // lblFirmID
             // 
             this.lblFirmID.AutoSize = true;
-            this.lblFirmID.Location = new System.Drawing.Point(12, 145);
+            this.lblFirmID.Location = new System.Drawing.Point(12, 117);
             this.lblFirmID.Name = "lblFirmID";
             this.lblFirmID.Size = new System.Drawing.Size(48, 15);
             this.lblFirmID.TabIndex = 49;
@@ -411,7 +430,7 @@
             // tbClassCode
             // 
             this.tbClassCode.Enabled = false;
-            this.tbClassCode.Location = new System.Drawing.Point(134, 113);
+            this.tbClassCode.Location = new System.Drawing.Point(134, 85);
             this.tbClassCode.Name = "tbClassCode";
             this.tbClassCode.Size = new System.Drawing.Size(100, 23);
             this.tbClassCode.TabIndex = 48;
@@ -420,7 +439,7 @@
             // lblClassCode
             // 
             this.lblClassCode.AutoSize = true;
-            this.lblClassCode.Location = new System.Drawing.Point(12, 116);
+            this.lblClassCode.Location = new System.Drawing.Point(12, 88);
             this.lblClassCode.Name = "lblClassCode";
             this.lblClassCode.Size = new System.Drawing.Size(70, 15);
             this.lblClassCode.TabIndex = 47;
@@ -429,7 +448,7 @@
             // tbAccountID
             // 
             this.tbAccountID.Enabled = false;
-            this.tbAccountID.Location = new System.Drawing.Point(134, 84);
+            this.tbAccountID.Location = new System.Drawing.Point(134, 56);
             this.tbAccountID.Name = "tbAccountID";
             this.tbAccountID.Size = new System.Drawing.Size(100, 23);
             this.tbAccountID.TabIndex = 46;
@@ -438,7 +457,7 @@
             // lblAccountID
             // 
             this.lblAccountID.AutoSize = true;
-            this.lblAccountID.Location = new System.Drawing.Point(12, 87);
+            this.lblAccountID.Location = new System.Drawing.Point(12, 59);
             this.lblAccountID.Name = "lblAccountID";
             this.lblAccountID.Size = new System.Drawing.Size(103, 15);
             this.lblAccountID.TabIndex = 45;
@@ -447,7 +466,7 @@
             // tbClientCode
             // 
             this.tbClientCode.Enabled = false;
-            this.tbClientCode.Location = new System.Drawing.Point(134, 55);
+            this.tbClientCode.Location = new System.Drawing.Point(134, 27);
             this.tbClientCode.Name = "tbClientCode";
             this.tbClientCode.Size = new System.Drawing.Size(100, 23);
             this.tbClientCode.TabIndex = 44;
@@ -456,7 +475,7 @@
             // lblClientCode
             // 
             this.lblClientCode.AutoSize = true;
-            this.lblClientCode.Location = new System.Drawing.Point(12, 58);
+            this.lblClientCode.Location = new System.Drawing.Point(12, 30);
             this.lblClientCode.Name = "lblClientCode";
             this.lblClientCode.Size = new System.Drawing.Size(77, 15);
             this.lblClientCode.TabIndex = 43;
@@ -472,36 +491,64 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(153, 362);
+            this.button1.Location = new System.Drawing.Point(134, 317);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.Size = new System.Drawing.Size(100, 23);
             this.button1.TabIndex = 77;
             this.button1.Text = "button1";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Visible = false;
             this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
-            // cbStatus
-            // 
-            this.cbStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cbStatus.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbStatus.FormattingEnabled = true;
-            this.cbStatus.Location = new System.Drawing.Point(0, 21);
-            this.cbStatus.Name = "cbStatus";
-            this.cbStatus.Size = new System.Drawing.Size(1424, 23);
-            this.cbStatus.TabIndex = 78;
-            // 
             // timer
             // 
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
+            // 
+            // cbRansac
+            // 
+            this.cbRansac.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cbRansac.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbRansac.FormattingEnabled = true;
+            this.cbRansac.Location = new System.Drawing.Point(12, 408);
+            this.cbRansac.Name = "cbRansac";
+            this.cbRansac.Size = new System.Drawing.Size(147, 23);
+            this.cbRansac.TabIndex = 79;
+            this.cbRansac.Visible = false;
+            this.cbRansac.SelectedIndexChanged += new System.EventHandler(this.CbRansac_SelectedIndexChanged);
+            // 
+            // nmcLevelRansac
+            // 
+            this.nmcLevelRansac.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.nmcLevelRansac.Location = new System.Drawing.Point(165, 409);
+            this.nmcLevelRansac.Maximum = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
+            this.nmcLevelRansac.Minimum = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            this.nmcLevelRansac.Name = "nmcLevelRansac";
+            this.nmcLevelRansac.Size = new System.Drawing.Size(69, 23);
+            this.nmcLevelRansac.TabIndex = 78;
+            this.nmcLevelRansac.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.nmcLevelRansac.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            this.nmcLevelRansac.Visible = false;
+            this.nmcLevelRansac.ValueChanged += new System.EventHandler(this.NmcLevelRansac_ValueChanged);
             // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1424, 661);
-            this.Controls.Add(this.cbStatus);
+            this.Controls.Add(this.cbRansac);
+            this.Controls.Add(this.nmcLevelRansac);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.tbCurrentPos);
             this.Controls.Add(this.lblCurrentPos);
@@ -550,6 +597,7 @@
             this.menuStrip.PerformLayout();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nmcLevelRansac)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -600,7 +648,9 @@
         private System.Windows.Forms.Label labelState;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatus;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.ComboBox cbStatus;
         private System.Windows.Forms.Timer timer;
+        private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton;
+        private System.Windows.Forms.ComboBox cbRansac;
+        private System.Windows.Forms.NumericUpDown nmcLevelRansac;
     }
 }

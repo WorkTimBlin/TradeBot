@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Windows.Forms;
+using RansacRealTime;
 
 namespace RansacBot.Net5._0
 {
@@ -18,7 +19,20 @@ namespace RansacBot.Net5._0
         }
         private void BtnStart_Click(object sender, EventArgs e)
         {
-            Trader.SetN((int)nmcN.Value);
+            if (!CheckTool(out Tool tool))
+                return;
+
+            MonkeyNFilter monkeyNFilter = new((int)nmcN.Value);
+            Vertexes vertexes = new();
+
+            RansacHystory ransacHystory1 = new(vertexes, ToTypeSigma(cbFilterMMR.Text), (int)nmcLevelMMR.Value - 2);
+            RansacHystory ransacHystory2 = new(vertexes, ToTypeSigma(cbFilterOR.Text), (int)nmcLevelOR.Value - 2);
+            RansacHystory ransacHystory3 = new(vertexes, ToTypeSigma(cbCloseN1.Text), (int)nmcLevelCloseN1.Value - 2);
+            RansacHystory ransacHystory4 = new(vertexes, ToTypeSigma(cbCloseN2.Text), (int)nmcLevelCloseN2.Value - 2);
+  
+            RansacObserver ransacObserver = new(vertexes, monkeyNFilter, (int)nmcN.Value);
+            ToolObserver.Initialization(ransacObserver, tool, (int)nmcN.Value, (double)nmcPercentCloseN1.Value);
+
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -44,60 +58,73 @@ namespace RansacBot.Net5._0
                 if (cbAccountID.Items.Count > 0)
                     cbAccountID.SelectedIndex = 0;
             }
-            catch (Exception ex)
+            catch
             {
-                LOGGER.Message("CbClassCode_SelectedIndexChanged(): Exception - " + ex.Message);
+                lblError.Text = "Нарушение связи с Quik. Попробуйте войти снова.";
+                gbQuikSettings.Enabled = false;
+                gbStrategySettings.Enabled = false;
+                btnStart.Enabled = false;
             }
         }
         private void CbTools_SelectedIndexChanged(object sender, EventArgs e)
         {
-            CheckTool();
+            if (CheckTool(out Tool tool))
+                btnStart.Enabled = true;
+            else btnStart.Enabled = false;
         }
 
-
-
-
-        private void CheckTool()
+        private bool CheckTool(out Tool tool)
         {
+            tool = null;
+
             try
             {
                 if (cbTools.Text != "" && cbClientCode.Text != "" && cbAccountID.Text != "")
                 {
-                    Tool tool = new(cbTools.Text, cbClientCode.Text, cbAccountID.Text);
+                    tool = new(cbTools.Text, cbClientCode.Text, cbAccountID.Text);
                     nmcN.DecimalPlaces = tool.PriceAccuracy;
                     nmcN.Increment = Convert.ToDecimal(tool.Step);
                     nmcN.Minimum = Convert.ToDecimal(tool.Step);
                     nmcN.Maximum = Convert.ToDecimal(tool.Step) * 10000;
                     nmcN.Value = Convert.ToDecimal(tool.Step) * 10;
-                    btnStart.Enabled = true;
-                    Trader.InitTrader(tool);
-                    return;
+                    nmcN.Enabled = true;
+                    return true;
                 }
+                lblError.Text = "Некоторые поля не заполнены или заполнены некорректно!";
             }
             catch
             {
-
+                lblError.Text = "Поймано исключение во время загрузки информации об инструменте.";
             }
-            btnStart.Enabled = false;
+            return false;
         }
         private void InitForms()
         {
-            try
+            var clietnCodes = Connector.quik.Class.GetClientCodes().Result.ToArray();
+            var classes = Connector.quik.Class.GetClassesList().Result.ToArray();
+
+            if (clietnCodes != null && classes != null)
             {
+                cbClientCode.Items.AddRange(clietnCodes);
+                cbClassCode.Items.AddRange(classes);
                 cbPort.Items.Add(34132);
-                cbClassCode.Items.AddRange(Connector.quik.Class.GetClassesList().Result.ToArray());
-                cbClientCode.Items.AddRange(Connector.quik.Class.GetClientCodes().Result.ToArray());
+                cbClassCode.SelectedItem = "SPBFUT";
+                cbTools.SelectedItem = "RiZ1";
 
+                cbPort.SelectedIndex = 0;
+                cbClientCode.SelectedIndex = 0;
+                cbFilterMMR.SelectedIndex = 0;
+                cbFilterOR.SelectedIndex = 1;
+                cbCloseN1.SelectedIndex = 2;
+                cbCloseN2.SelectedIndex = 3;
             }
-            catch (Exception ex)
+            else
             {
+                lblError.Text = "Нарушение связи с Quik. Попробуйте войти снова.";
+                gbQuikSettings.Enabled = false;
+                gbStrategySettings.Enabled = false;
                 btnStart.Enabled = false;
-                LOGGER.Message("FormLogin.InitForms(): Exception - " + ex.Message);
-                return;
             }
-
-            cbPort.SelectedIndex = 0;
-            cbClientCode.SelectedIndex = 0;
         }
         private void ClearForms()
         {
@@ -108,6 +135,16 @@ namespace RansacBot.Net5._0
             cbClientCode.Items.Clear();
             cbFirmID.Items.Clear();
             btnStart.Enabled = false;
+        }
+        private static TypeSigma ToTypeSigma(string text)
+        {
+            return text switch
+            {
+                "ConfidenceInterval-90" => TypeSigma.СonfidenceInterval,
+                "ErrorThreshold" => TypeSigma.ErrorThreshold,
+                "SigmaInliers" => TypeSigma.SigmaInliers,
+                _ => TypeSigma.Sigma,
+            };
         }
     }
 }

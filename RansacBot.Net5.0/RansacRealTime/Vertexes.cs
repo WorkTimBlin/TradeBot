@@ -119,7 +119,7 @@ namespace RansacRealTime
 		}
 
 
-		public void SaveStandart(string path)
+		public virtual void SaveStandart(string path)
 		{
 			if(!new DirectoryInfo(path).Exists)
 			{

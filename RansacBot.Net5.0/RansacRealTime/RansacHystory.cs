@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RansacBot.Net5._0;
 
 namespace RansacRealTime
 {
@@ -16,7 +15,7 @@ namespace RansacRealTime
 		/// <summary>
 		/// Список всех уровней на данный момент.
 		/// </summary>
-		private List<LevelOfRansacs> Levels { get; set; } = new();
+		public List<LevelOfRansacs> Levels { get; private set; } = new();
 		/// <summary>
 		/// Ссылка на вершины MonkeyN.
 		/// </summary>
@@ -31,9 +30,13 @@ namespace RansacRealTime
 		/// </summary>
 		public double Percentile { get; private set; }
 		/// <summary>
-		/// Максимально допустимый для поиска уровень. (По умолчанию 5). (Максимальный уровень сейчас - это индекс в списке уровней, причем списка без первого уровня. Поправить это потом).
+		/// Максимально допустимый для поиска уровень. (По умолчанию 7). (Максимальный уровень сейчас - это индекс в списке уровней, причем списка без первого уровня. Поправить это потом).
 		/// </summary>
 		public int MaxLevel { get; private set; } = 5;
+		/// <summary>
+		/// True - достигнут максимальный уровень ранзаков.
+		/// </summary>
+		public bool IsReachedMaxLevel { get { return Levels.Count == MaxLevel; } }
 
 		#endregion
 
@@ -86,16 +89,10 @@ namespace RansacRealTime
 		private delegate void OnNewVertexHandler(Tick tick);
 		private OnNewVertexHandler OnNewVertexChooser;
 
+
 		public Ransac[][] GetAllLevelsAsArrays()
 		{
 			return Levels.Select(x => x.GetRansacsAsArray()).ToArray();
-		}
-		public LevelOfRansacs GetLevel(int level)
-		{
-			if (level >= Levels.Count)
-				return new(level);
-			else
-				return Levels[level];
 		}
 
 
@@ -199,7 +196,6 @@ namespace RansacRealTime
 					int startInd = Vertexes.GetFirstIndexForNew(lastRansac);
 					Levels[level].BuildNewRansac(Vertexes.VertexList.GetRange(startInd, Vertexes.VertexList.Count - startInd), startInd, Type, Percentile);
 					NewRansac?.Invoke(Levels[level].GetRansacs()[^1], level);
-					LOGGER.Message("Построили новый ранзак - level = 0");
 				}
 			}
 			else
@@ -218,7 +214,6 @@ namespace RansacRealTime
 
 					Levels[level].BuildNewRansac(Vertexes.VertexList.GetRange(startInd, Vertexes.VertexList.Count - startInd), startInd, Type, Percentile);
 					NewRansac?.Invoke(Levels[level].GetRansacs()[^1], level);
-					LOGGER.Message("Построили новый ранзак - level = " + level);
 				}
 			}
 		}

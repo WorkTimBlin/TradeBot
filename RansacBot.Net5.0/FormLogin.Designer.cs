@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lblError = new System.Windows.Forms.Label();
             this.gbStrategySettings = new System.Windows.Forms.GroupBox();
             this.nmcPercentCloseN2 = new System.Windows.Forms.NumericUpDown();
             this.nmcPercentCloseN1 = new System.Windows.Forms.NumericUpDown();
@@ -82,6 +83,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.BackColor = System.Drawing.SystemColors.Control;
+            this.panel1.Controls.Add(this.lblError);
             this.panel1.Controls.Add(this.gbStrategySettings);
             this.panel1.Controls.Add(this.gbQuikSettings);
             this.panel1.Controls.Add(this.btnCansel);
@@ -90,6 +92,13 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(471, 412);
             this.panel1.TabIndex = 9;
+            // 
+            // lblError
+            // 
+            this.lblError.Location = new System.Drawing.Point(12, 345);
+            this.lblError.Name = "lblError";
+            this.lblError.Size = new System.Drawing.Size(279, 51);
+            this.lblError.TabIndex = 14;
             // 
             // gbStrategySettings
             // 
@@ -112,7 +121,7 @@
             this.gbStrategySettings.Controls.Add(this.nmcLevelMMR);
             this.gbStrategySettings.Controls.Add(this.lblFilterMMR);
             this.gbStrategySettings.Controls.Add(this.lblCloseN2);
-            this.gbStrategySettings.Location = new System.Drawing.Point(12, 176);
+            this.gbStrategySettings.Location = new System.Drawing.Point(12, 151);
             this.gbStrategySettings.Name = "gbStrategySettings";
             this.gbStrategySettings.Size = new System.Drawing.Size(441, 191);
             this.gbStrategySettings.TabIndex = 13;
@@ -169,6 +178,7 @@
             // 
             // nmcN
             // 
+            this.nmcN.Enabled = false;
             this.nmcN.Location = new System.Drawing.Point(156, 154);
             this.nmcN.Name = "nmcN";
             this.nmcN.Size = new System.Drawing.Size(70, 23);
@@ -402,7 +412,7 @@
             this.gbQuikSettings.Controls.Add(this.lblPort);
             this.gbQuikSettings.Location = new System.Drawing.Point(12, 12);
             this.gbQuikSettings.Name = "gbQuikSettings";
-            this.gbQuikSettings.Size = new System.Drawing.Size(440, 158);
+            this.gbQuikSettings.Size = new System.Drawing.Size(440, 133);
             this.gbQuikSettings.TabIndex = 12;
             this.gbQuikSettings.TabStop = false;
             this.gbQuikSettings.Text = "Настройки соединения";
@@ -618,5 +628,6 @@
         private System.Windows.Forms.ComboBox cbFirmID;
         private System.Windows.Forms.Label lblFirmID;
         private System.Windows.Forms.ComboBox cbClassCode;
+        private System.Windows.Forms.Label lblError;
     }
 }

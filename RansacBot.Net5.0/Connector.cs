@@ -22,10 +22,24 @@ namespace RansacBot.Net5._0
 
 		static public void Subscribe(string classCode, string secCode, NewTickHandler handler)
 		{
-			if (handler != null)
+			if(recievers.ContainsKey(classCode + secCode))
+			{
+				recievers[classCode + secCode] += handler;
+			}
+			else
+			{
 				recievers.Add(classCode + secCode, handler);
-			else throw new System.Exception("Ошибка в Subsctide()");
+			}
 		}
+
+		static public void Unsubscribe(string classCode, string secCode, NewTickHandler handler)
+		{
+			if (recievers.ContainsKey(classCode + secCode))
+			{
+				recievers[classCode + secCode] -= handler;
+			}
+		}
+
 		static public void OnNewTrade(AllTrade trade)
 		{
 			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out NewTickHandler handler))

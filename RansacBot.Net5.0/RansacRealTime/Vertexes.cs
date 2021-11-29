@@ -44,9 +44,7 @@ namespace RansacRealTime
 			LoadStandart(path);
 			FindLastIndexPermited();
 			if (loadHystoryesToo)
-			{
 				LoadAllHystories(path);
-			}
 		}
 
 
@@ -123,6 +121,10 @@ namespace RansacRealTime
 
 		public void SaveStandart(string path)
 		{
+			if(!new DirectoryInfo(path).Exists)
+			{
+				Directory.CreateDirectory(path);
+			}
 			using StreamWriter writer = new(path + "/vertexes.csv");
 			writer.WriteLine("localIndex; globalIndex; price");
 			foreach (Tick vertex in VertexList)
@@ -138,6 +140,21 @@ namespace RansacRealTime
 			{
 				string[] data = reader.ReadLine().Split(';');
 				VertexList.Add(new Tick(Convert.ToInt32(data[0]), Convert.ToInt32(data[1]), (float)Convert.ToDecimal(data[2])));
+			}
+		}
+
+		public void SaveStandart(string path, bool saveHystoriesToo)
+		{
+			SaveStandart(path);
+			if(saveHystoriesToo)
+				SaveAllHystories(path);
+		}
+
+		public void SaveAllHystories(string path)
+		{
+			foreach(RansacHystory hystory in Hystories)
+			{
+				hystory.SaveStandart(path);
 			}
 		}
 

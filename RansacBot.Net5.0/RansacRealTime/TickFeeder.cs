@@ -7,7 +7,7 @@ namespace RansacRealTime
 
 	public class TickFeeder
 	{
-		private Queue<Tick> ticks;
+		private Queue<Tick> ticks = new();
 		public bool EndOfQueue { get { return !(ticks.Count > 0); } }
 		public event NewTickHandler NewTick;
 		public delegate void VoidHandler();

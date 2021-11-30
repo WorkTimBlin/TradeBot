@@ -31,8 +31,8 @@ namespace RansacBot.Net5._0
             RansacHystory ransacHystory4 = new(vertexes, ToTypeSigma(cbCloseN2.Text), (int)nmcLevelCloseN2.Value - 1);
   
             RansacObserver ransacObserver = new(vertexes, monkeyNFilter);
-            ToolObserver.Initialization(ransacObserver, tool, (int)nmcN.Value, (double)nmcPercentCloseN1.Value);
-            //ToolObserver.Initialization((int)nmcN.Value, (double)nmcPercentCloseN1.Value);
+            //ToolObserver.Initialization(ransacObserver, tool, (int)nmcN.Value, (double)nmcPercentCloseN1.Value);
+            ToolObserver.Initialization((int)nmcN.Value, (double)nmcPercentCloseN1.Value);
 
             DialogResult = DialogResult.OK;
             Close();

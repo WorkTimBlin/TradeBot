@@ -11,6 +11,7 @@ namespace RansacBot.Net5._0
         public static double N { get; private set; }
         public static double PercentCloseN1 { get; private set; }
 
+
         public static void Initialization(RansacObserver ransacObserver, Tool tool, double n, double percent)
         {
             CurrentTool = tool;
@@ -22,8 +23,9 @@ namespace RansacBot.Net5._0
 		{
 			N = n;
 			PercentCloseN1 = percent;
-			OnlyLoad("SAVE", true);
+			Load("SAVE", true);
 		}
+
 
 		public static void Save(string path, bool saveHystories)
 		{
@@ -70,13 +72,22 @@ namespace RansacBot.Net5._0
 				secCode = reader.ReadLine() ?? "";
 			}
 
-			Connector.Unsubscribe(classCode, secCode, Data.MonkeyNFilter.OnNewTick); // на всякий отписываем monkeyN на время загрузки
+			CurrentTool = new Tool(secCode);
+			LOGGER.Trace("Load(): инициализировали инструмент");
+
+			Vertexes vertexes = new(path, loadHystories);
+			MonkeyNFilter monkeyNFilter = new(N, vertexes.VertexList[^1]);
+			monkeyNFilter.NewVertex += vertexes.OnNewVertex;
+
+
+			Connector.Unsubscribe(classCode, secCode, monkeyNFilter.OnNewTick); // на всякий отписываем monkeyN на время загрузки
 			string classCode1 = classCode;
 			string secCode1 = secCode;
 			TickFeeder hub = new(); //хаб для тиков, приходящих до загрузки с финама
 			Connector.Subscribe(classCode, secCode, hub.OnNewTick);
 			//запомнаем первый полученный тик, чтобы потом сравнивать его ID
 			Tick firstGotTick = new(0, 0, 0);
+			LOGGER.Trace("Load(): создали хаб");
 
 			void TickHandler(Tick tick)
 			{
@@ -87,27 +98,31 @@ namespace RansacBot.Net5._0
 			Connector.Subscribe(classCode, secCode, TickHandler);
 			TickFeeder finamTicks = new(); // в этот загружаются тики с финама
 			hub.NewTick += finamTicks.OnNewTick; // потом тики хаба перегрузятся финамские,
-			finamTicks.NewTick += Data.MonkeyNFilter.OnNewTick; // а затем по манки-Н
+			finamTicks.NewTick += monkeyNFilter.OnNewTick; // а затем по манки-Н
 			DateTime begin = DateTime.Now;
 			TimeSpan interval = new(0, 2, 0);
 
 			//подгружаем из файлов
-			Data.Vertexes = new(path, loadHystories);
-			Data.MonkeyNFilter = new(N, Data.Vertexes.VertexList[^1]);
-			Data.MonkeyNFilter.NewVertex += Data.Vertexes.OnNewVertex; // в вершины
-															 //ждем две минуты с момента подписки
+			vertexes = new(path, loadHystories);
+			monkeyNFilter = new(N, vertexes.VertexList[^1]);
+			monkeyNFilter.NewVertex += vertexes.OnNewVertex; // в вершины
+
+			LOGGER.Trace("Load(): Ожидаем 2 минуты");
+			//ждем две минуты с момента подписки
 			while (DateTime.Now - begin < interval)
 			{
 
 			}
 
 			//загружаем тики с финама
-			foreach (Tick tick in ParserDataFinam.BullshitUsage.LoadFrom(Data.Vertexes.VertexList[^1].ID, dateTime))
+			foreach (Tick tick in ParserDataFinam.BullshitUsage.LoadFrom(vertexes.VertexList[^1].ID, dateTime))
 			{
 				if (tick.ID >= firstGotTick.ID) //до тех пор, пока не достигнем текущих ID
 					break;
 				finamTicks.OnNewTick(tick);
 			}
+
+			LOGGER.Trace("Load(): Загрузили тики с финама");
 
 			//отписываем хаб, как только перекачаем тики из хаба в финамские, и подписываем финамские на новые из квика
 			void OnFeededHub()
@@ -116,20 +131,27 @@ namespace RansacBot.Net5._0
 				Connector.Subscribe(classCode1, secCode1, finamTicks.OnNewTick);
 				hub.NewTick -= finamTicks.OnNewTick;
 				finamTicks.RunFeedingToTheEnd(); // как только все подключено, кормим все получившеся тики в monkeyN
+				LOGGER.Trace("Load(): OnFeededHub - сработало");
 			}
 			hub.ReachedEndOfQueue += OnFeededHub;
+
 			
+
 			//отписываем финамские, как только они кончатся, и подписываем напрямую monkeyN
 			void OnFinamTicksEnd()
 			{
 				Connector.Unsubscribe(classCode1, secCode1, finamTicks.OnNewTick);
-				Connector.Subscribe(classCode1, secCode1, Data.MonkeyNFilter.OnNewTick);
-				finamTicks.NewTick -= Data.MonkeyNFilter.OnNewTick;
+				Connector.Subscribe(classCode1, secCode1, monkeyNFilter.OnNewTick);
+				finamTicks.NewTick -= monkeyNFilter.OnNewTick;
+				LOGGER.Trace("Load(): OnFinamTicksEnd - сработало");
 			}
 			
 			finamTicks.ReachedEndOfQueue += OnFinamTicksEnd;
+			LOGGER.Trace("Load(): почти конец");
 			//все подключено, можно перекачивать тики
 			hub.RunFeedingToTheEnd();
+
+			Data = new RansacObserver(vertexes, monkeyNFilter);
 		}
 	}
 }

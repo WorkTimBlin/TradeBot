@@ -138,7 +138,7 @@ namespace RansacRealTime
 			while (!reader.EndOfStream)
 			{
 				string[] data = reader.ReadLine().Split(';');
-				VertexList.Add(new Tick(Convert.ToInt32(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
+				VertexList.Add(new Tick(Convert.ToInt64(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
 			}
 		}
 

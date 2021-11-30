@@ -34,11 +34,11 @@ namespace RansacBot.Net5._0
         }
         private void LoginToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            FormLogin formLogin = new();
+            formLogin.ShowDialog();
+
             try
             {
-                FormLogin formLogin = new();
-                formLogin.ShowDialog();
-
                 if (formLogin.DialogResult == DialogResult.OK)
                 {
                     UpdateStaticParams();
@@ -117,11 +117,13 @@ namespace RansacBot.Net5._0
             }
             else
                 OxyChart.InvalidatePlot(true);
+
+            UpdateCurrentParams();
         }
 
         #endregion
 
-        #region События
+        #region Обработка событий
 
         private void MonkeyNFilter_NewVertex(Tick tick, VertexType vertexType)
         {
@@ -194,17 +196,15 @@ namespace RansacBot.Net5._0
                     Connector.quik.Trading.CalcBuySell(ToolObserver.CurrentTool.ClassCode, ToolObserver.CurrentTool.SecurityCode, ToolObserver.CurrentTool.ClientCode, ToolObserver.CurrentTool.AccountID, 0, false, true).Result.Qty);
                 TextToTextBox(tbCurrentPos, "0 | 0");
                 
-                FuturesClientHolding futuresClient = Connector.quik.Trading.GetFuturesHolding(ToolObserver.CurrentTool.FirmID, ToolObserver.CurrentTool.AccountID, ToolObserver.CurrentTool.SecurityCode, 1).Result;
-                //FuturesLimits futuresLimits = Connector.quik.Trading.GetFuturesLimit(Trader.Tool.FirmID, Trader.Tool.AccountID, 0, "").Result;
+                PortfolioInfo portfolio = Connector.quik.Trading.GetPortfolioInfo(ToolObserver.CurrentTool.FirmID, ToolObserver.CurrentTool.ClientCode).Result;
 
-
-                if (futuresClient != null)
+                if (portfolio != null)
                 {
-                    TextToTextBox(tbVarMargin, futuresClient.varMargin.ToString());
-                    TextToTextBox(tbBalanceNoMargin, "-");
-                    TextToTextBox(tbBalance, "-");
-                    TextToTextBox(tbBlock, "-");
-                    TextToTextBox(tbAvailableFunds, "-");
+                    TextToTextBox(tbVarMargin, Convert.ToDouble(portfolio.VarMargin.Replace('.', ',')).ToString());
+                    TextToTextBox(tbBalanceNoMargin, Convert.ToDouble(portfolio.AllAssets.Replace('.', ',')).ToString());
+                    TextToTextBox(tbBalance, Convert.ToDouble(portfolio.TotalMoneyBal.Replace('.', ',')).ToString());
+                    TextToTextBox(tbBlock, (Convert.ToDouble(portfolio.TotalMoneyBal.Replace('.',',')) - Convert.ToDouble(portfolio.LimNonMargin.Replace('.', ','))).ToString());
+                    TextToTextBox(tbAvailableFunds, Convert.ToDouble(portfolio.LimNonMargin.Replace('.', ',')).ToString());
                 }
                 else
                 {
@@ -473,8 +473,8 @@ namespace RansacBot.Net5._0
                 ToolObserver.Data.MonkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
 
 
-                //using StreamReader reader = new(@"C:\Users\ir2\Desktop\Программы\DATA\TICKS\RTS.F\3.txt");
-                using StreamReader reader = new(@"F:\tim\monte-carlo\DATA\TICKS\RTS.F\3.txt");
+                using StreamReader reader = new(@"C:\Users\ir2\Desktop\Программы\DATA\TICKS\RTS.F\3.txt");
+                //using StreamReader reader = new(@"F:\tim\monte-carlo\DATA\TICKS\RTS.F\3.txt");
                 reader.ReadLine();
                 LOGGER.Trace("start loading...");
 

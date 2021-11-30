@@ -32,6 +32,7 @@ namespace RansacBot.Net5._0
   
             RansacObserver ransacObserver = new(vertexes, monkeyNFilter);
             ToolObserver.Initialization(ransacObserver, tool, (int)nmcN.Value, (double)nmcPercentCloseN1.Value);
+            //ToolObserver.Initialization((int)nmcN.Value, (double)nmcPercentCloseN1.Value);
 
             DialogResult = DialogResult.OK;
             Close();
@@ -81,7 +82,7 @@ namespace RansacBot.Net5._0
             {
                 if (cbTools.Text != "" && cbClientCode.Text != "" && cbAccountID.Text != "")
                 {
-                    tool = new(cbTools.Text, cbClientCode.Text, cbAccountID.Text);
+                    tool = new(cbTools.Text, cbClientCode.Text, cbAccountID.Text, cbFirmID.Text);
                     nmcN.DecimalPlaces = tool.PriceAccuracy;
                     nmcN.Increment = Convert.ToDecimal(tool.Step);
                     nmcN.Minimum = Convert.ToDecimal(tool.Step);

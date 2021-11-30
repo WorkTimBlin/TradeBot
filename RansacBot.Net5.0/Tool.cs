@@ -66,13 +66,31 @@ namespace RansacBot.Net5._0
         /// </summary>
         /// <param name="secCode"></param>
         /// <param name="classCode"></param>
-        public Tool(string secCode, string clientCode, string accountId, string firmId = "SPBFUT", string classCode = "SPBFUT")
+        public Tool(string secCode, string clientCode, string accountId, string firmId, string classCode = "SPBFUT")
         {
             SecurityCode = secCode;
             ClientCode = clientCode;
             ClassCode = classCode;
             AccountID = accountId;
             FirmID = firmId;
+
+            SetBaseParam();
+            SetGOInfo();
+        }
+
+        /// <summary>
+        /// Базовый конструктор. Принимает код класса инструмента (Фьючерсы: "SPBFUT") и тикер(SecCode) инструмента. (RTS например имеет тикер - RIZ1). <br/>
+        /// А также ClientCode - это номер счета клиента.
+        /// </summary>
+        /// <param name="secCode"></param>
+        /// <param name="classCode"></param>
+        public Tool(string secCode)
+        {
+            SecurityCode = secCode;
+            ClientCode = Connector.quik.Class.GetClientCode().Result;
+            ClassCode = "SPBFUT";
+            AccountID = Connector.quik.Class.GetTradeAccount(ClassCode).Result;
+            FirmID = Connector.quik.Class.GetClassInfo(ClassCode).Result.FirmId;
 
             SetBaseParam();
             SetGOInfo();

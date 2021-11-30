@@ -91,8 +91,13 @@ namespace RansacRealTime
 			}
 
 			if (IsBuilding)
+            {
 				ConnectLastRansac();
-			
+
+				if (Ransacs.Count < 2)
+					return;
+            }
+		
 			FindLastPermitedIndex();
 		}
 

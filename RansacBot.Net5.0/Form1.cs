@@ -65,11 +65,11 @@ namespace RansacBot.Net5._0
         {
             InitializationModel();
 
-            Connector.Subscribe(ToolObserver.CurrentTool.ClassCode, ToolObserver.CurrentTool.SecurityCode, ToolObserver.Data.MonkeyNFilter.OnNewTick);
+            //Connector.Subscribe(ToolObserver.CurrentTool.ClassCode, ToolObserver.CurrentTool.SecurityCode, ToolObserver.Data.MonkeyNFilter.OnNewTick);
 
             Connector.NewPrice = Connector_NewPrice;
-            ToolObserver.Data.MonkeyNFilter.NewVertex += ToolObserver.Data.Vertexes.OnNewVertex;
-            ToolObserver.Data.MonkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
+            //ToolObserver.Data.MonkeyNFilter.NewVertex += ToolObserver.Data.Vertexes.OnNewVertex;
+            //ToolObserver.Data.MonkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
 
             cbRansac.Items.AddRange(ToolObserver.Data.Vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
             cbRansac.SelectedIndex = 0;

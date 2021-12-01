@@ -34,7 +34,7 @@ namespace RansacBot.Net5._0
 
             monkeyNFilter.NewVertex += vertexes.OnNewVertex;
             RansacObserver ransacObserver = new(vertexes, monkeyNFilter);
-            ToolObserver.Initialization(ransacObserver, new Tool(), (double)nmcN.Value, (double)nmcPercentCloseN1.Value);
+            InstrumentObserver.Initialization(ransacObserver, new Instrument(), (double)nmcN.Value, (double)nmcPercentCloseN1.Value);
 
 
             DialogResult = DialogResult.OK;
@@ -47,7 +47,7 @@ namespace RansacBot.Net5._0
         }
         private void button1_Click(object sender, EventArgs e)
         {
-            ToolObserver.Initialization((double)nmcN.Value, (double)nmcPercentCloseN1.Value);
+            InstrumentObserver.Initialization((double)nmcN.Value, (double)nmcPercentCloseN1.Value);
 
             DialogResult = DialogResult.OK;
             Close();

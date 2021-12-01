@@ -60,7 +60,7 @@ namespace RansacBot.Net5._0
 
 			}
 			//загружаем тики с финама
-			foreach (Tick tick in ParserDataFinam.BullshitUsage.LoadFrom(vertexes.VertexList[^1].ID, dateTime))
+			foreach (Tick tick in ParserDataFinam.Loader.LoadFrom(vertexes.VertexList[^1].ID, dateTime))
 			{
 				if(tick.ID >= firstGotTick.ID) //до тех пор, пока не достигнем текущих ID
 				{

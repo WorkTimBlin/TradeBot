@@ -4,80 +4,86 @@ using System.IO;
 
 namespace RansacBot.Net5._0
 {
-    internal static class ToolObserver
+    internal class InstrumentObserver
     {
-        public static Tool CurrentTool { get; private set; }
-        public static RansacObserver Data { get; private set; }
-        public static double N { get; private set; }
-        public static double PercentCloseN1 { get; private set; }
+		private Instrument instrument;
+		private RansacObserver ransacsObserver;
+
+		public DateTime dateTimeOfSaving;
 
 
-        public static void Initialization(RansacObserver ransacObserver, Tool tool, double n, double percent)
+        public void Initialization(RansacObserver ransacObserver, Instrument tool)
         {
-            CurrentTool = tool;
-            Data = ransacObserver;
-            N = n;
-            PercentCloseN1 = percent;
-		}
-		public static void Initialization(double n, double percent)
-		{
-			N = n;
-			PercentCloseN1 = percent;
-			Load("SAVE", true);
+            instrument = tool;
+            ransacsObserver = ransacObserver;
 		}
 
-
-		public static void Save(string path, bool saveHystories)
+		public void Save(string path, bool saveHystories)
 		{
-			Data.Vertexes.SaveStandart(path, saveHystories);
-
-            using StreamWriter writer = new(path + @"/Metadata");
-
-            writer.WriteLine(DateTime.Now.ToString());
-            writer.WriteLine(CurrentTool.ClassCode);
-            writer.WriteLine(CurrentTool.SecurityCode);
+			ransacsObserver.vertexes.SaveStandart(path + @"/RansacsObserver", saveHystories);
+			SaveMetadata(path);
         }
-		private static void OnlyLoad(string path, bool loadHystories)
+
+		private void SaveMetadata(string path)
 		{
-			DateTime dateTime;
-			string classCode;
-			string secCode;
-
-			using (StreamReader reader = new(path + @"/Metadata"))
-			{
-				dateTime = DateTime.Parse(reader.ReadLine() ?? "");
-				classCode = reader.ReadLine() ?? "";
-				secCode = reader.ReadLine() ?? "";
-			}
-
-			//подгружаем из файлов
-			Vertexes vertexes = new(path, loadHystories);
-			MonkeyNFilter monkeyNFilter = new(N, vertexes.VertexList[^1]);
-			monkeyNFilter.NewVertex += vertexes.OnNewVertex; // в вершины
-
-			CurrentTool = new Tool();
-			Data = new RansacObserver(vertexes, monkeyNFilter);
+            using StreamWriter writer = new(path + @"/metadata.csv");
+            writer.WriteLine("дата и время сохранения;", DateTime.Now.ToString());
 		}
-		private static void Load(string path, bool loadHystories)
+
+		private void SaveInstrument(string path)
 		{
-			DateTime dateTime;
-			string classCode;
-			string secCode;
+			using StreamWriter writer = new(path + @"/instrument");
+            writer.WriteLine("код класса инструмента;" + instrument.classCode.ToString());
+            writer.WriteLine("код инструмента;" + instrument.securityCode.ToString());
+		}
 
+		/// <summary>
+		/// инициализация ransacObserver из сохраненного в файлах
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="loadHystories">подгружать ли уровни ранзаков, или только вершины</param>
+		private void LoadRansacObserver(string path, bool loadHystories)
+		{
+			ransacsObserver = new RansacObserver(path + @"/RansacsObserver", loadHystories);
+		}
 
-			using (StreamReader reader = new(path + @"/Metadata"))
+		private void LoadMetadata(string path)
+		{
+			using (StreamReader reader = new(path + @"/metadata"))
 			{
-				dateTime = DateTime.Parse(reader.ReadLine() ?? "");
-				classCode = reader.ReadLine() ?? "";
-				secCode = reader.ReadLine() ?? "";
+				dateTimeOfSaving = DateTime.Parse((reader.ReadLine() ?? "").Split(';')[1]);
 			}
+		}
 
-			CurrentTool = new Tool(secCode);
-			LOGGER.Trace("Load(): инициализировали инструмент");
+		/// <summary>
+		/// загружает из файла сохраняемые параметры инструмента
+		/// </summary>
+		/// <param name="path"></param>
+		private void LoadUnfinishedInstrument(string path)
+		{
+			using (StreamReader reader = new(path + @"/instrument"))
+			{
+				instrument.classCode = reader.ReadLine() ?? "";
+				instrument.securityCode = reader.ReadLine() ?? "";
+			}
+		}
 
-			Vertexes vertexes = new(path, loadHystories);
-			MonkeyNFilter monkeyNFilter = new(N, vertexes.VertexList[^1]);
-			monkeyNFilter.NewVertex += vertexes.OnNewVertex;
+		/// <summary>
+		/// загружает параметры инструмента из файла и заполняет его, обращаясь к коннектору
+		/// </summary>
+		/// <param name="path"></param>
+		private void InitInstrument(string path)
+		{
+			Connector.FillInstrument(ref instrument);
+		}
+
+		private void LoadUsingFinamUpToDate(string path, bool loadHystories)
+		{
+			OnlyLoad(path, loadHystories);
+			string classCode = instrument.classCode;
+			string secCode = instrument.securityCode;
+			Vertexes vertexes = ransacsObserver.vertexes;
+			MonkeyNFilter monkeyNFilter = ransacsObserver.monkeyNFilter;
 
 
 			Connector.Unsubscribe(classCode, secCode, monkeyNFilter.OnNewTick); // на всякий отписываем monkeyN на время загрузки
@@ -115,7 +121,7 @@ namespace RansacBot.Net5._0
 			}
 
 			//загружаем тики с финама
-			foreach (Tick tick in ParserDataFinam.BullshitUsage.LoadFrom(vertexes.VertexList[^1].ID, dateTime))
+			foreach (Tick tick in ParserDataFinam.Loader.LoadFrom(vertexes.VertexList[^1].ID, dateTime))
 			{
 				if (tick.ID >= firstGotTick.ID) //до тех пор, пока не достигнем текущих ID
 					break;
@@ -151,7 +157,7 @@ namespace RansacBot.Net5._0
 			//все подключено, можно перекачивать тики
 			hub.RunFeedingToTheEnd();
 
-			Data = new RansacObserver(vertexes, monkeyNFilter);
+			ransacsObserver = new RansacObserver(vertexes, monkeyNFilter);
 		}
 	}
 }

@@ -8,7 +8,7 @@ using System.IO;
 
 namespace ParserDataFinam
 {
-	public class BullshitUsage
+	public class Loader
 	{
 		static public List<Tick> LoadFrom(long lastID, DateTime from)
 		{

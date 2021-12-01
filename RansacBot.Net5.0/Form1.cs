@@ -71,9 +71,9 @@ namespace RansacBot.Net5._0
             //ToolObserver.Data.MonkeyNFilter.NewVertex += ToolObserver.Data.Vertexes.OnNewVertex;
             //ToolObserver.Data.MonkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
 
-            cbRansac.Items.AddRange(ToolObserver.Data.Vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
+            cbRansac.Items.AddRange(InstrumentObserver.ransacsObserver.vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
             cbRansac.SelectedIndex = 0;
-            nmcLevelRansac.Value = ToolObserver.Data.Vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 1;
+            nmcLevelRansac.Value = InstrumentObserver.ransacsObserver.vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 1;
 
             cbRansac.Visible = true;
             nmcLevelRansac.Visible = true;
@@ -84,28 +84,28 @@ namespace RansacBot.Net5._0
         private void CbRansac_SelectedIndexChanged(object sender, EventArgs e)
         {
             currentHystory = cbRansac.SelectedIndex;
-            var level = ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels.Count == 0 ? null : ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[^1];
+            var level = InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels.Count == 0 ? null : InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels[^1];
            
-            for (int i = 0; i < ToolObserver.Data.Vertexes.Hystories.Count; i++)
+            for (int i = 0; i < InstrumentObserver.ransacsObserver.vertexes.Hystories.Count; i++)
             {
-                ToolObserver.Data.Vertexes.Hystories[i].RebuildRansac -= RansacHystory_RebuildRansac;
-                ToolObserver.Data.Vertexes.Hystories[i].NewRansac -= RansacHystory_NewRansac;
+                InstrumentObserver.ransacsObserver.vertexes.Hystories[i].RebuildRansac -= RansacHystory_RebuildRansac;
+                InstrumentObserver.ransacsObserver.vertexes.Hystories[i].NewRansac -= RansacHystory_NewRansac;
             }
 
-            ToolObserver.Data.Vertexes.Hystories[currentHystory].RebuildRansac += RansacHystory_RebuildRansac;
-            ToolObserver.Data.Vertexes.Hystories[currentHystory].NewRansac += RansacHystory_NewRansac;
+            InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].RebuildRansac += RansacHystory_RebuildRansac;
+            InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].NewRansac += RansacHystory_NewRansac;
 
             NmcLevelRansac_ValueChanged(sender, e);
-            nmcLevelRansac.Maximum = ToolObserver.Data.Vertexes.Hystories[currentHystory].MaxLevel + 1;
+            nmcLevelRansac.Maximum = InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].MaxLevel + 1;
         }
         private void NmcLevelRansac_ValueChanged(object sender, EventArgs e)
         {
             currentLevel = (int)nmcLevelRansac.Value - 2;
             ClearRansacs();
 
-            if (currentLevel < ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels.Count)
+            if (currentLevel < InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels.Count)
             {
-                PrintRansacs(ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[currentLevel].GetRansacs());
+                PrintRansacs(InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels[currentLevel].GetRansacs());
             }
         }
         private void timer_Tick(object sender, EventArgs e)
@@ -173,30 +173,30 @@ namespace RansacBot.Net5._0
 
         private void UpdateStaticParams()
         {
-            if (ToolObserver.CurrentTool != null)
+            if (InstrumentObserver.instrument != null)
             {
-                TextToTextBox(tbClientCode, ToolObserver.CurrentTool.ClientCode.ToString());
-                TextToTextBox(tbAccountID, ToolObserver.CurrentTool.AccountID.ToString());
-                TextToTextBox(tbClassCode, ToolObserver.CurrentTool.ClassCode.ToString());
-                TextToTextBox(tbFirmID, ToolObserver.CurrentTool.FirmID.ToString());
-                TextToTextBox(tbSecCode, ToolObserver.CurrentTool.SecurityCode.ToString());
-                TextToTextBox(tbShortName, ToolObserver.CurrentTool.Name.ToString());
-                TextToTextBox(tbStep, ToolObserver.CurrentTool.Step.ToString());
-                TextToTextBox(tbStepPrice, ToolObserver.CurrentTool.PriceStep.ToString());
-                TextToTextBox(tbGoBuy, ToolObserver.CurrentTool.GOBuy.ToString());
-                TextToTextBox(tbGoSell, ToolObserver.CurrentTool.GOSell.ToString());
+                TextToTextBox(tbClientCode, InstrumentObserver.instrument.clientCode.ToString());
+                TextToTextBox(tbAccountID, InstrumentObserver.instrument.accountID.ToString());
+                TextToTextBox(tbClassCode, InstrumentObserver.instrument.classCode.ToString());
+                TextToTextBox(tbFirmID, InstrumentObserver.instrument.firmID.ToString());
+                TextToTextBox(tbSecCode, InstrumentObserver.instrument.securityCode.ToString());
+                TextToTextBox(tbShortName, InstrumentObserver.instrument.name.ToString());
+                TextToTextBox(tbStep, InstrumentObserver.instrument.step.ToString());
+                TextToTextBox(tbStepPrice, InstrumentObserver.instrument.stepPrice.ToString());
+                TextToTextBox(tbGoBuy, InstrumentObserver.instrument.initialMarginBuy.ToString());
+                TextToTextBox(tbGoSell, InstrumentObserver.instrument.initialMarginSell.ToString());
             }
             else ClearInterface();
         }
         private void UpdateCurrentParams()
         {
-            if (ToolObserver.CurrentTool != null)
+            if (InstrumentObserver.instrument != null)
             {
-                TextToTextBox(tbAvailableMax, Connector.quik.Trading.CalcBuySell(ToolObserver.CurrentTool.ClassCode, ToolObserver.CurrentTool.SecurityCode, ToolObserver.CurrentTool.ClientCode, ToolObserver.CurrentTool.AccountID, 0, true, true).Result.Qty + " | " +
-                    Connector.quik.Trading.CalcBuySell(ToolObserver.CurrentTool.ClassCode, ToolObserver.CurrentTool.SecurityCode, ToolObserver.CurrentTool.ClientCode, ToolObserver.CurrentTool.AccountID, 0, false, true).Result.Qty);
+                TextToTextBox(tbAvailableMax, Connector.quik.Trading.CalcBuySell(InstrumentObserver.instrument.classCode, InstrumentObserver.instrument.securityCode, InstrumentObserver.instrument.clientCode, InstrumentObserver.instrument.accountID, 0, true, true).Result.Qty + " | " +
+                    Connector.quik.Trading.CalcBuySell(InstrumentObserver.instrument.classCode, InstrumentObserver.instrument.securityCode, InstrumentObserver.instrument.clientCode, InstrumentObserver.instrument.accountID, 0, false, true).Result.Qty);
                 TextToTextBox(tbCurrentPos, "0 | 0");
                 
-                PortfolioInfo portfolio = Connector.quik.Trading.GetPortfolioInfo(ToolObserver.CurrentTool.FirmID, ToolObserver.CurrentTool.ClientCode).Result;
+                PortfolioInfo portfolio = Connector.quik.Trading.GetPortfolioInfo(InstrumentObserver.instrument.firmID, InstrumentObserver.instrument.clientCode).Result;
 
                 if (portfolio != null)
                 {
@@ -242,7 +242,7 @@ namespace RansacBot.Net5._0
         {
             PlotModel plot = new()
             {
-                Title = "MonkeyN - " + ToolObserver.N,
+                Title = "MonkeyN - " + InstrumentObserver.N,
                 TitleColor = OxyColors.Black
             };
 
@@ -382,15 +382,15 @@ namespace RansacBot.Net5._0
             else
                 ((LineSeries)OxyChart.Model.Series[1]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
 
-            if (currentLevel < ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels.Count && ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[currentLevel].IsBuilding)
-                RansacHystory_RebuildRansac(ToolObserver.Data.Vertexes.Hystories[currentHystory].Levels[currentLevel].GetRansacs().Last(), currentLevel);
+            if (currentLevel < InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels.Count && InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels[currentLevel].IsBuilding)
+                RansacHystory_RebuildRansac(InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels[currentLevel].GetRansacs().Last(), currentLevel);
         }
         private void PrintVertexes()
         {
             ClearVertexes();
 
-            for (int i = 0; i < ToolObserver.Data.Vertexes.VertexList.Count; i++)
-                PrintVertex(ToolObserver.Data.Vertexes.VertexList[i], VertexType.High);
+            for (int i = 0; i < InstrumentObserver.ransacsObserver.vertexes.VertexList.Count; i++)
+                PrintVertex(InstrumentObserver.ransacsObserver.vertexes.VertexList[i], VertexType.High);
         }
         private void ClearVertexes()
         {
@@ -442,7 +442,7 @@ namespace RansacBot.Net5._0
         {
             try
             {
-                ToolObserver.Save("SAVE", true);
+                InstrumentObserver.Save("SAVE", true);
 
             }
             catch (Exception ex)
@@ -470,7 +470,7 @@ namespace RansacBot.Net5._0
 
                 InitializationModel();
 
-                ToolObserver.Data.MonkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
+                InstrumentObserver.ransacsObserver.monkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
 
 
                 using StreamReader reader = new(@"C:\Users\ir2\Desktop\Программы\DATA\TICKS\RTS.F\3.txt");
@@ -482,13 +482,13 @@ namespace RansacBot.Net5._0
                 {
                     string[] data = reader.ReadLine().Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                    if (Convert.ToInt32(data[0]) > ToolObserver.Data.Vertexes.VertexList.Last().ID)
+                    if (Convert.ToInt32(data[0]) > InstrumentObserver.ransacsObserver.vertexes.VertexList.Last().ID)
                         ticksTest.Enqueue(new Tick(Convert.ToInt32(data[0]), 0, Convert.ToInt32(data[2])));
                 }
 
-                cbRansac.Items.AddRange(ToolObserver.Data.Vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
+                cbRansac.Items.AddRange(InstrumentObserver.ransacsObserver.vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
                 cbRansac.SelectedIndex = 0;
-                nmcLevelRansac.Value = ToolObserver.Data.Vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 1;
+                nmcLevelRansac.Value = InstrumentObserver.ransacsObserver.vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 1;
                 cbRansac.Visible = true;
                 nmcLevelRansac.Visible = true;
                 OnToolStripMenuItem.Enabled = false;
@@ -514,7 +514,7 @@ namespace RansacBot.Net5._0
             for (int i = 0; i < 20; i++)
             {
                 Tick tick = ticksTest.Dequeue();
-                ToolObserver.Data.MonkeyNFilter.OnNewTick(tick);
+                InstrumentObserver.ransacsObserver.monkeyNFilter.OnNewTick(tick);
                 Connector_NewPrice(tick.PRICE);
             }
 

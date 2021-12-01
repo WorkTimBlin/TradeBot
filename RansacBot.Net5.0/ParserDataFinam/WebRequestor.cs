@@ -15,8 +15,6 @@ namespace ParserDataFinam
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls;
         }
-
-        // TODO: Use cache control & e-tags
         public async Task<string> GetString(Uri url)
         {
             var response = await client.GetAsync(url).ConfigureAwait(false);

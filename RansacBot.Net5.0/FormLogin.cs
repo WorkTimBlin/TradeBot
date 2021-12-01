@@ -19,7 +19,7 @@ namespace RansacBot.Net5._0
         }
         private void BtnStart_Click(object sender, EventArgs e)
         {
-            if (!CheckTool(out Tool tool))
+            if (!CheckTool(out Instrument tool))
                 return;
 
             MonkeyNFilter monkeyNFilter = new((int)nmcN.Value);
@@ -32,7 +32,7 @@ namespace RansacBot.Net5._0
   
             RansacObserver ransacObserver = new(vertexes, monkeyNFilter);
             //ToolObserver.Initialization(ransacObserver, tool, (int)nmcN.Value, (double)nmcPercentCloseN1.Value);
-            ToolObserver.Initialization((int)nmcN.Value, (double)nmcPercentCloseN1.Value);
+            InstrumentObserver.Initialization((int)nmcN.Value, (double)nmcPercentCloseN1.Value);
 
             DialogResult = DialogResult.OK;
             Close();
@@ -69,12 +69,12 @@ namespace RansacBot.Net5._0
         }
         private void CbTools_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (CheckTool(out Tool tool))
+            if (CheckTool(out Instrument tool))
                 btnStart.Enabled = true;
             else btnStart.Enabled = false;
         }
 
-        private bool CheckTool(out Tool tool)
+        private bool CheckTool(out Instrument tool)
         {
             tool = null;
 
@@ -83,11 +83,11 @@ namespace RansacBot.Net5._0
                 if (cbTools.Text != "" && cbClientCode.Text != "" && cbAccountID.Text != "")
                 {
                     tool = new(cbTools.Text, cbClientCode.Text, cbAccountID.Text, cbFirmID.Text);
-                    nmcN.DecimalPlaces = tool.PriceAccuracy;
-                    nmcN.Increment = Convert.ToDecimal(tool.Step);
-                    nmcN.Minimum = Convert.ToDecimal(tool.Step);
-                    nmcN.Maximum = Convert.ToDecimal(tool.Step) * 10000;
-                    nmcN.Value = Convert.ToDecimal(tool.Step) * 10;
+                    nmcN.DecimalPlaces = tool.priceAccuracy;
+                    nmcN.Increment = Convert.ToDecimal(tool.step);
+                    nmcN.Minimum = Convert.ToDecimal(tool.step);
+                    nmcN.Maximum = Convert.ToDecimal(tool.step) * 10000;
+                    nmcN.Value = Convert.ToDecimal(tool.step) * 10;
                     nmcN.Enabled = true;
                     return true;
                 }

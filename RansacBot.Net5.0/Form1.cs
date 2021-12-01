@@ -71,9 +71,9 @@ namespace RansacBot.Net5._0
             //ToolObserver.Data.MonkeyNFilter.NewVertex += ToolObserver.Data.Vertexes.OnNewVertex;
             //ToolObserver.Data.MonkeyNFilter.NewVertex += MonkeyNFilter_NewVertex;
 
-            cbRansac.Items.AddRange(InstrumentObserver.ransacsObserver.vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
+            cbRansac.Items.AddRange(InstrumentObserver.ransacsObserver.vertexes.hystories.Select(x => x.typeSigma.ToString()).ToArray());
             cbRansac.SelectedIndex = 0;
-            nmcLevelRansac.Value = InstrumentObserver.ransacsObserver.vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 1;
+            nmcLevelRansac.Value = InstrumentObserver.ransacsObserver.vertexes.hystories[cbRansac.SelectedIndex].MaxLevel + 1;
 
             cbRansac.Visible = true;
             nmcLevelRansac.Visible = true;
@@ -84,28 +84,28 @@ namespace RansacBot.Net5._0
         private void CbRansac_SelectedIndexChanged(object sender, EventArgs e)
         {
             currentHystory = cbRansac.SelectedIndex;
-            var level = InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels.Count == 0 ? null : InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels[^1];
+            var level = InstrumentObserver.ransacsObserver.vertexes.hystories[currentHystory].levels.Count == 0 ? null : InstrumentObserver.ransacsObserver.vertexes.hystories[currentHystory].levels[^1];
            
-            for (int i = 0; i < InstrumentObserver.ransacsObserver.vertexes.Hystories.Count; i++)
+            for (int i = 0; i < InstrumentObserver.ransacsObserver.vertexes.hystories.Count; i++)
             {
-                InstrumentObserver.ransacsObserver.vertexes.Hystories[i].RebuildRansac -= RansacHystory_RebuildRansac;
-                InstrumentObserver.ransacsObserver.vertexes.Hystories[i].NewRansac -= RansacHystory_NewRansac;
+                InstrumentObserver.ransacsObserver.vertexes.hystories[i].RebuildRansac -= RansacHystory_RebuildRansac;
+                InstrumentObserver.ransacsObserver.vertexes.hystories[i].NewRansac -= RansacHystory_NewRansac;
             }
 
-            InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].RebuildRansac += RansacHystory_RebuildRansac;
-            InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].NewRansac += RansacHystory_NewRansac;
+            InstrumentObserver.ransacsObserver.vertexes.hystories[currentHystory].RebuildRansac += RansacHystory_RebuildRansac;
+            InstrumentObserver.ransacsObserver.vertexes.hystories[currentHystory].NewRansac += RansacHystory_NewRansac;
 
             NmcLevelRansac_ValueChanged(sender, e);
-            nmcLevelRansac.Maximum = InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].MaxLevel + 1;
+            nmcLevelRansac.Maximum = InstrumentObserver.ransacsObserver.vertexes.hystories[currentHystory].MaxLevel + 1;
         }
         private void NmcLevelRansac_ValueChanged(object sender, EventArgs e)
         {
             currentLevel = (int)nmcLevelRansac.Value - 2;
             ClearRansacs();
 
-            if (currentLevel < InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels.Count)
+            if (currentLevel < InstrumentObserver.ransacsObserver.vertexes.hystories[currentHystory].levels.Count)
             {
-                PrintRansacs(InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels[currentLevel].GetRansacs());
+                PrintRansacs(InstrumentObserver.ransacsObserver.vertexes.hystories[currentHystory].levels[currentLevel].GetRansacs());
             }
         }
         private void timer_Tick(object sender, EventArgs e)
@@ -382,8 +382,8 @@ namespace RansacBot.Net5._0
             else
                 ((LineSeries)OxyChart.Model.Series[1]).Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
 
-            if (currentLevel < InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels.Count && InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels[currentLevel].IsBuilding)
-                RansacHystory_RebuildRansac(InstrumentObserver.ransacsObserver.vertexes.Hystories[currentHystory].Levels[currentLevel].GetRansacs().Last(), currentLevel);
+            if (currentLevel < InstrumentObserver.ransacsObserver.vertexes.hystories[currentHystory].levels.Count && InstrumentObserver.ransacsObserver.vertexes.hystories[currentHystory].levels[currentLevel].IsBuilding)
+                RansacHystory_RebuildRansac(InstrumentObserver.ransacsObserver.vertexes.hystories[currentHystory].levels[currentLevel].GetRansacs().Last(), currentLevel);
         }
         private void PrintVertexes()
         {
@@ -486,9 +486,9 @@ namespace RansacBot.Net5._0
                         ticksTest.Enqueue(new Tick(Convert.ToInt32(data[0]), 0, Convert.ToInt32(data[2])));
                 }
 
-                cbRansac.Items.AddRange(InstrumentObserver.ransacsObserver.vertexes.Hystories.Select(x => x.Type.ToString()).ToArray());
+                cbRansac.Items.AddRange(InstrumentObserver.ransacsObserver.vertexes.hystories.Select(x => x.typeSigma.ToString()).ToArray());
                 cbRansac.SelectedIndex = 0;
-                nmcLevelRansac.Value = InstrumentObserver.ransacsObserver.vertexes.Hystories[cbRansac.SelectedIndex].MaxLevel + 1;
+                nmcLevelRansac.Value = InstrumentObserver.ransacsObserver.vertexes.hystories[cbRansac.SelectedIndex].MaxLevel + 1;
                 cbRansac.Visible = true;
                 nmcLevelRansac.Visible = true;
                 OnToolStripMenuItem.Enabled = false;

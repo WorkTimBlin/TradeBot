@@ -18,7 +18,7 @@ namespace RansacBot.Net5._0.Tests
 			string classCode = "SPBFUT";
 			string secCode = "RiZ1";
 			Vertexes vertexes = new();
-			RansacHystory hystory = new(vertexes, TypeSigma.СonfidenceInterval);
+			RansacsHystory hystory = new(vertexes, TypeSigma.СonfidenceInterval);
 			MonkeyNFilter MNfilter = new(0.05f);
 			Connector.Subscribe(classCode, secCode, MNfilter.OnNewTick);
 			MNfilter.NewVertex += vertexes.OnNewVertex;

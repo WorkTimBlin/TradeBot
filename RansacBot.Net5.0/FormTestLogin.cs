@@ -27,10 +27,10 @@ namespace RansacBot.Net5._0
             MonkeyNFilter monkeyNFilter = new((double)nmcN.Value);
             Vertexes vertexes = new();
 
-            RansacHystory ransacHystory1 = new(vertexes, ToTypeSigma(cbFilterMMR.Text), (int)nmcLevelMMR.Value - 1);
-            RansacHystory ransacHystory2 = new(vertexes, ToTypeSigma(cbFilterOR.Text), (int)nmcLevelOR.Value - 1);
-            RansacHystory ransacHystory3 = new(vertexes, ToTypeSigma(cbCloseN1.Text), (int)nmcLevelCloseN1.Value - 1);
-            RansacHystory ransacHystory4 = new(vertexes, ToTypeSigma(cbCloseN2.Text), (int)nmcLevelCloseN2.Value - 1);
+            RansacsHystory ransacHystory1 = new(vertexes, ToTypeSigma(cbFilterMMR.Text), (int)nmcLevelMMR.Value - 1);
+            RansacsHystory ransacHystory2 = new(vertexes, ToTypeSigma(cbFilterOR.Text), (int)nmcLevelOR.Value - 1);
+            RansacsHystory ransacHystory3 = new(vertexes, ToTypeSigma(cbCloseN1.Text), (int)nmcLevelCloseN1.Value - 1);
+            RansacsHystory ransacHystory4 = new(vertexes, ToTypeSigma(cbCloseN2.Text), (int)nmcLevelCloseN2.Value - 1);
 
             monkeyNFilter.NewVertex += vertexes.OnNewVertex;
             RansacObserver ransacObserver = new(vertexes, monkeyNFilter);

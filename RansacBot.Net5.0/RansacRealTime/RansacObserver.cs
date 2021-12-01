@@ -37,13 +37,13 @@ namespace RansacRealTime
 
 		public RansacObserver(string path, bool loadHystories)
 		{
-			Vertexes vertexes = new(path, loadHystories);
+			vertexes = new(path, loadHystories);
 			double N;
 			using(StreamReader reader = new(path + @"/metadata"))
 			{
 				N = Convert.ToDouble(reader.ReadLine());
 			}
-			MonkeyNFilter monkeyNFilter = new(N, vertexes.VertexList[^1]);
+			monkeyNFilter = new(N, vertexes.VertexList[^1]);
 		}
 
 		public void OnNewTick(Tick tick)

@@ -185,5 +185,13 @@ namespace RansacRealTime
 		{
 			return indexes.Select(x => x * Slope + Intercept).ToArray();
 		}
+
+		public enum Action : byte
+		{
+			Add,
+			Rebuild,
+			Stop,
+			Nothing
+		}
 	}
 }

@@ -6,22 +6,14 @@ namespace RansacRealTime
 {
 	public class Vertexes
 	{
-		#region Свойства
-
-		/// <summary>
-		/// Список вершин MonkeyN.
-		/// </summary>
+		
 		public List<Tick> VertexList { get; private set; } = new();
+		public List<RansacsHystory> hystories = new();
 		/// <summary>
-		/// Список подписантов(ранзаков) на вершины.
+		/// номер вершины, gjckt 
 		/// </summary>
-		public List<RansacHystory> Hystories { get; set; } = new();
-		/// <summary>
-		/// Индекс последнего тика, в который выполнилось условия разнонаправленных ранзаков.
-		/// </summary>
-		public int LastIndexPermited { get; private set; } = -1;
+		public int FirstIndexPermited { get; private set; } = -1;
 
-		#endregion
 
 		public event VertexHandler NewVertex;
 
@@ -47,11 +39,11 @@ namespace RansacRealTime
 		}
 
 
-		public void FindLastIndexPermited()
+		private void FindLastIndexPermited()
 		{
 			if (VertexList.Count < 2)
             {
-				LastIndexPermited = -1;
+				FirstIndexPermited = -1;
 				return;
 			}
 
@@ -64,13 +56,13 @@ namespace RansacRealTime
 
 				if ((VertexList[index].PRICE - VertexList[index - 1].PRICE) * lastSlope < 0)
 				{
-					LastIndexPermited = index - 1;
+					FirstIndexPermited = index - 1;
 					return;
 				}
 			} 
 			while (index > 1);
 
-			LastIndexPermited = -1;
+			FirstIndexPermited = -1;
 		}
 		public int GetFirstIndexForNew(Ransac lastRansac)
 		{
@@ -108,7 +100,7 @@ namespace RansacRealTime
 			VertexList.Add(tick);
 			FindLastIndexPermited();
 
-			foreach (RansacHystory hystory in Hystories)
+			foreach (RansacsHystory hystory in hystories)
 				hystory.OnNewVertex(tick);
 		}
 		public void OnNewVertex(Tick tick, VertexType vertexType)
@@ -117,6 +109,16 @@ namespace RansacRealTime
 			NewVertex?.Invoke(tick, vertexType);
 		}
 
+		private void LoadStandart(string path)
+		{
+			using StreamReader reader = new(path + "/vertexes.csv");
+			reader.ReadLine();
+			while (!reader.EndOfStream)
+			{
+				string[] data = reader.ReadLine().Split(';');
+				VertexList.Add(new Tick(Convert.ToInt64(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
+			}
+		}
 
 		public virtual void SaveStandart(string path)
 		{
@@ -131,17 +133,6 @@ namespace RansacRealTime
 				writer.WriteLine(vertex.ID.ToString() + ';' + vertex.VERTEXINDEX.ToString() + ';' + vertex.PRICE.ToString() + ';');
 			}
 		}
-		private void LoadStandart(string path)
-		{
-			using StreamReader reader = new(path + "/vertexes.csv");
-			reader.ReadLine();
-			while (!reader.EndOfStream)
-			{
-				string[] data = reader.ReadLine().Split(';');
-				VertexList.Add(new Tick(Convert.ToInt64(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
-			}
-		}
-
 		public void SaveStandart(string path, bool saveHystoriesToo)
 		{
 			SaveStandart(path);
@@ -149,9 +140,10 @@ namespace RansacRealTime
 				SaveAllHystories(path);
 		}
 
+
 		public void SaveAllHystories(string path)
 		{
-			foreach(RansacHystory hystory in Hystories)
+			foreach(RansacsHystory hystory in hystories)
 			{
 				hystory.SaveStandart(path);
 			}
@@ -162,20 +154,20 @@ namespace RansacRealTime
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns>List of loaded hystories</returns>
-		private List<RansacHystory> LoadAllHystories(string path)
+		private List<RansacsHystory> LoadAllHystories(string path)
 		{
-			Hystories.Clear();
+			hystories.Clear();
 			DirectoryInfo[] dirs = new DirectoryInfo(path).GetDirectories();
 
 			foreach(DirectoryInfo hDir in dirs)
 			{
 				if (hDir.Name.Contains("Hystory"))
 				{
-					new RansacHystory(this, hDir.FullName);
+					new RansacsHystory(this, hDir.FullName);
 				}
 			}
 
-			return Hystories;
+			return hystories;
 		}
 	}
 }

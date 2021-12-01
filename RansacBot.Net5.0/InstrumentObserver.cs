@@ -1,10 +1,12 @@
 ﻿using RansacRealTime;
 using System;
+using System.Collections;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace RansacBot.Net5._0
 {
-    internal class InstrumentObserver
+	internal class InstrumentObserver
     {
 		private Instrument instrument;
 		private RansacObserver ransacsObserver;
@@ -12,29 +14,28 @@ namespace RansacBot.Net5._0
 		public DateTime dateTimeOfSaving;
 
 
-        public void Initialization(RansacObserver ransacObserver, Instrument tool)
+        public void Initialize(RansacObserver ransacObserver, Instrument instrument)
         {
-            instrument = tool;
+            this.instrument = instrument;
             ransacsObserver = ransacObserver;
 		}
-
+		//TODO: rewrite Save
+		/*
 		public void Save(string path, bool saveHystories)
 		{
 			ransacsObserver.vertexes.SaveStandart(path + @"/RansacsObserver", saveHystories);
 			SaveMetadata(path);
         }
-
-		private void SaveMetadata(string path)
-		{
-            using StreamWriter writer = new(path + @"/metadata.csv");
-            writer.WriteLine("дата и время сохранения;", DateTime.Now.ToString());
-		}
+		*/
 
 		private void SaveInstrument(string path)
 		{
 			using StreamWriter writer = new(path + @"/instrument");
             writer.WriteLine("код класса инструмента;" + instrument.classCode.ToString());
             writer.WriteLine("код инструмента;" + instrument.securityCode.ToString());
+			writer.WriteLine("код клиента(?)" + instrument.clientCode.ToString());
+			writer.WriteLine("ID аккаунта(?)" + instrument.accountID.ToString());
+			writer.WriteLine("ID фирмы (?)" + instrument.firmID.ToString());
 		}
 
 		/// <summary>
@@ -45,6 +46,12 @@ namespace RansacBot.Net5._0
 		private void LoadRansacObserver(string path, bool loadHystories)
 		{
 			ransacsObserver = new RansacObserver(path + @"/RansacsObserver", loadHystories);
+		}
+
+		private void SaveMetadata(string path)
+		{
+            using StreamWriter writer = new(path + @"/metadata.csv");
+            writer.WriteLine("дата и время сохранения;", DateTime.Now.ToString());
 		}
 
 		private void LoadMetadata(string path)
@@ -63,20 +70,44 @@ namespace RansacBot.Net5._0
 		{
 			using (StreamReader reader = new(path + @"/instrument"))
 			{
-				instrument.classCode = reader.ReadLine() ?? "";
-				instrument.securityCode = reader.ReadLine() ?? "";
+				instrument.classCode = reader.ReadLine().Split(';')[1];
+				instrument.securityCode = reader.ReadLine().Split(';')[1];
+				instrument.clientCode = reader.ReadLine().Split(';')[1];
+				instrument.accountID = reader.ReadLine().Split(';')[1];
+				instrument.firmID = reader.ReadLine().Split(';')[1];
 			}
 		}
 
 		/// <summary>
-		/// загружает параметры инструмента из файла и заполняет его, обращаясь к коннектору
+		/// заполняет инструмент, обращаясь к коннектору
 		/// </summary>
 		/// <param name="path"></param>
-		private void InitInstrument(string path)
+		private void FillInstrument()
 		{
 			Connector.FillInstrument(ref instrument);
 		}
 
+		private void FeedLostTicksFromFinam(TimeSpan interval)
+		{
+			TickFeeder hub = new(); //хаб для тиков, приходящих до загрузки с финама
+			Connector.Subscribe(instrument.classCode, instrument.securityCode, hub.OnNewTick);// подписываем хаб на новые тики
+			TickFeeder finamTicks = new(); // в этот загружаются тики с финама
+			hub.NewTick += finamTicks.OnNewTick; // потом тики хаба перегрузятся в финамские
+			DateTime begin = DateTime.Now;
+			//ждем интервал времени с момента подписки
+			//TODO: сейчас ожидание фризит форму. выяснить, как ожидать без фриза
+			//(?)Task.Delay(interval);
+			while (DateTime.Now - begin < interval && hub.EndOfQueue) { }
+			Tick firstGotTick
+			foreach (Tick tick in ParserDataFinam.Loader.LoadFrom(vertexes.VertexList[^1].ID, dateTime))
+			{
+				if (tick.ID >= firstGotTick.ID) //до тех пор, пока не достигнем текущих ID
+					break;
+				finamTicks.OnNewTick(tick);
+			}
+		}
+
+		//TODO: delete and replace
 		private void LoadUsingFinamUpToDate(string path, bool loadHystories)
 		{
 			OnlyLoad(path, loadHystories);
@@ -103,7 +134,7 @@ namespace RansacBot.Net5._0
 
 			Connector.Subscribe(classCode, secCode, TickHandler);
 			TickFeeder finamTicks = new(); // в этот загружаются тики с финама
-			hub.NewTick += finamTicks.OnNewTick; // потом тики хаба перегрузятся финамские,
+			hub.NewTick += finamTicks.OnNewTick; // потом тики хаба перегрузятся в финамские
 			finamTicks.NewTick += monkeyNFilter.OnNewTick; // а затем по манки-Н
 			DateTime begin = DateTime.Now;
 			TimeSpan interval = new(0, 2, 0);

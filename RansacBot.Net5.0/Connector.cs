@@ -53,7 +53,7 @@ namespace RansacBot.Net5._0
 			}
 		}
 
-		static public Instrument GetInstrument(string secCode, string clientCode, string accountId, string firmId, string classCode = "SPBFUT")
+		static public Instrument GetInstrument(string classCode, string secCode, string clientCode, string accountId, string firmId)
 		{
 			var baseParam = GetSecurityInfo(classCode, secCode);
 			var IMInfo = GetInitialMarginInfo(classCode, secCode);
@@ -73,16 +73,10 @@ namespace RansacBot.Net5._0
 			};
 		}
 
+		//TODO: fix Get and FillInstrument
 		static public void FillInstrument(ref Instrument instrument)
 		{
-			if(instrument.classCode == default(string))
-			{
-				instrument = GetInstrument(instrument.securityCode, instrument.clientCode, instrument.accountID, instrument.firmID);
-			}
-			else
-			{
-				instrument = GetInstrument(instrument.securityCode, instrument.clientCode, instrument.accountID, instrument.firmID, instrument.classCode);
-			}
+			instrument = GetInstrument(instrument.classCode, instrument.securityCode, instrument.clientCode, instrument.accountID, instrument.firmID);
 		}
 
 		/// <summary>

@@ -5,27 +5,10 @@ namespace RansacRealTime
 {
 	public class LevelOfRansacs
 	{
-		#region Свойства
-
-		/// <summary>
-		/// Уровень раназаков.
-		/// </summary>
-		private int Level { get; set; }
-		/// <summary>
-		/// Список ранзаков этого уровня.
-		/// </summary>
-		private List<Ransac> Ransacs { get; set; }
-		/// <summary>
-		/// True - Ранзак в данный момент строится. <br/>
-		/// False - Ранзак не строится.
-		/// </summary>
+		private int level;
+		private List<Ransac> Ransacs;
 		public bool IsBuilding { get; private set; } = false;
-		/// <summary>
-		/// Индекс последнего тика, в который выполнилось условие построение ранзака.
-		/// </summary>
 		public int LastIndexPermited { get; private set; } = -1;
-
-		#endregion
 
 
 		public delegate void NewTickHandler(Tick tick);
@@ -40,26 +23,18 @@ namespace RansacRealTime
 		public LevelOfRansacs(int level)
 		{
 			Ransacs = new();
-			Level = level;
+			this.level = level;
 		}
 		public LevelOfRansacs(int level, string path)
 		{
 			Ransacs = new();
-			Level = level;
+			this.level = level;
 			LoadStandart(path);
 		}
 
-
-
-
-		public void SetRansacs(List<Ransac> ransacs, bool building = false)
-		{
-			Ransacs = ransacs;
-			IsBuilding = building;
-		}
 		public void SaveStandart(string path)
 		{
-			using System.IO.StreamWriter file = new(path + "/ransacLevel-" + Level.ToString() + ".csv");
+			using System.IO.StreamWriter file = new(path + "/ransacLevel-" + level.ToString() + ".csv");
 			file.WriteLine("X1;X2;X3;X4;Slope;Intercept;Sigma;errorTreshold;" + IsBuilding.ToString());
 
 			foreach (Ransac ransac in Ransacs)
@@ -77,7 +52,7 @@ namespace RansacRealTime
 		}
 		private void LoadStandart(string path)
 		{
-			using System.IO.StreamReader reader = new(path + "/ransacLevel-" + this.Level + ".csv");
+			using System.IO.StreamReader reader = new(path + "/ransacLevel-" + this.level + ".csv");
 			IsBuilding = Convert.ToBoolean(reader.ReadLine().Split(';')[^1]);
 			Ransacs = new();
 
@@ -123,7 +98,7 @@ namespace RansacRealTime
 		}
 
 		/// <summary>
-		/// returns last ransac that fully contained in given
+		/// returns last ransac that is fully contained in given
 		/// </summary>
 		/// <param name="ind"></param>
 		/// <returns></returns>
@@ -195,7 +170,7 @@ namespace RansacRealTime
 		}
 		public void OnRebuildRansacNeed(Ransac ransac)
 		{
-			RebuildRansacNeed?.Invoke(Level, Ransacs[^1]);
+			RebuildRansacNeed?.Invoke(level, Ransacs[^1]);
 		}
 		public void BuildNewRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile)
 		{
@@ -204,7 +179,7 @@ namespace RansacRealTime
 		public void OnNewVertex(Tick tick)
 		{
 			if (!IsBuilding)
-				NewRansacNeed?.Invoke(Level, Ransacs[^1]);
+				NewRansacNeed?.Invoke(level, Ransacs[^1]);
 			else
 				NewVertex?.Invoke(tick);
 		}
@@ -214,7 +189,7 @@ namespace RansacRealTime
 			NewVertex -= ransac.OnNewVertex;
 			ransac.StopRansac -= OnRansacStop;
 			FindLastPermitedIndex();
-			StopRansac?.Invoke(Level, ransac);
+			StopRansac?.Invoke(level, ransac);
 		}
 
 	}

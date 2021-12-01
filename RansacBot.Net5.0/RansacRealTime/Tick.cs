@@ -3,27 +3,21 @@
 
 	public delegate void NewTickHandler(Tick tick);
 
-	/// <summary>
-	/// Тик не из QUIK.
-	/// </summary>
 	public readonly struct Tick
 	{
 		/// <summary>
-		/// ID тика из  QUIK.
+		/// ID тика из QUIK
 		/// </summary>
-		public readonly long ID { get; }
+		public readonly long ID;
 		/// <summary>
-		/// Порядковый индекс вершины из MonkeyN.
+		/// Порядковый номер вершины
 		/// </summary>
-		public readonly int VERTEXINDEX { get; }
-		/// <summary>
-		/// Цена тика.
-		/// </summary>
-		public readonly double PRICE { get; }
+		public readonly int VERTEXINDEX;
+		public readonly double PRICE;
 
 
 		/// <summary>
-		/// Базовый конструктор
+		/// полный конструктор
 		/// </summary>
 		/// <param name="id">ID тика.</param>
 		/// <param name="index">Пользовательский индекс вершин MonkeyN.</param>

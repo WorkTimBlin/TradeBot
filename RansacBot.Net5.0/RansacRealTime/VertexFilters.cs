@@ -1,6 +1,7 @@
 ﻿namespace RansacRealTime
 {
     public delegate void VertexHandler(Tick tick, VertexType vertexType);
+	public delegate void TickHandler(Tick tick);
 
 	public interface IVertexFinder
 	{

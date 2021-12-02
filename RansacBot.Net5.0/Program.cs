@@ -9,6 +9,7 @@ namespace RansacBot.Net5._0
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
+        /*
         static void Main()
         {
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
@@ -16,5 +17,11 @@ namespace RansacBot.Net5._0
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new FormMain());
         }
+        */
+
+        static void Main()
+		{
+            Console.WriteLine("hello world");
+		}
     }
 }

@@ -1,6 +1,7 @@
 ﻿using RansacRealTime;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -9,12 +10,12 @@ namespace RansacBot.Net5._0
 	internal class InstrumentObserver
     {
 		private Instrument instrument;
-		private RansacObserver ransacsObserver;
+		private RansacsSession ransacsObserver;
 
 		public DateTime dateTimeOfSaving;
 
 
-        public void Initialize(RansacObserver ransacObserver, Instrument instrument)
+        public void Initialize(RansacsSession ransacObserver, Instrument instrument)
         {
             this.instrument = instrument;
             ransacsObserver = ransacObserver;
@@ -45,7 +46,7 @@ namespace RansacBot.Net5._0
 		/// <param name="loadHystories">подгружать ли уровни ранзаков, или только вершины</param>
 		private void LoadRansacObserver(string path, bool loadHystories)
 		{
-			ransacsObserver = new RansacObserver(path + @"/RansacsObserver", loadHystories);
+			ransacsObserver = new RansacsSession(path + @"/RansacsObserver", loadHystories);
 		}
 
 		private void SaveMetadata(string path)
@@ -86,28 +87,29 @@ namespace RansacBot.Net5._0
 		{
 			Connector.FillInstrument(ref instrument);
 		}
-
+		/*
 		private void FeedLostTicksFromFinam(TimeSpan interval)
 		{
-			TickFeeder hub = new(); //хаб для тиков, приходящих до загрузки с финама
+			Queue<Tick> hub = new(); //хаб для тиков, приходящих до загрузки с финама
 			Connector.Subscribe(instrument.classCode, instrument.securityCode, hub.OnNewTick);// подписываем хаб на новые тики
-			TickFeeder finamTicks = new(); // в этот загружаются тики с финама
 			hub.NewTick += finamTicks.OnNewTick; // потом тики хаба перегрузятся в финамские
 			DateTime begin = DateTime.Now;
 			//ждем интервал времени с момента подписки
 			//TODO: сейчас ожидание фризит форму. выяснить, как ожидать без фриза
 			//(?)Task.Delay(interval);
 			while (DateTime.Now - begin < interval && hub.EndOfQueue) { }
-			Tick firstGotTick
-			foreach (Tick tick in ParserDataFinam.Loader.LoadFrom(vertexes.VertexList[^1].ID, dateTime))
+			Tick firstGotTick = hub.Peek();
+			foreach (Tick tick in ParserDataFinam.FinamHystoryLoader.LoadFrom(vertexes.VertexList[^1].ID, dateTime))
 			{
 				if (tick.ID >= firstGotTick.ID) //до тех пор, пока не достигнем текущих ID
 					break;
 				finamTicks.OnNewTick(tick);
 			}
 		}
+		*/
 
 		//TODO: delete and replace
+		/*
 		private void LoadUsingFinamUpToDate(string path, bool loadHystories)
 		{
 			OnlyLoad(path, loadHystories);
@@ -152,7 +154,7 @@ namespace RansacBot.Net5._0
 			}
 
 			//загружаем тики с финама
-			foreach (Tick tick in ParserDataFinam.Loader.LoadFrom(vertexes.VertexList[^1].ID, dateTime))
+			foreach (Tick tick in ParserDataFinam.FinamHystoryLoader.LoadFrom(vertexes.VertexList[^1].ID, dateTime))
 			{
 				if (tick.ID >= firstGotTick.ID) //до тех пор, пока не достигнем текущих ID
 					break;
@@ -190,5 +192,6 @@ namespace RansacBot.Net5._0
 
 			ransacsObserver = new RansacObserver(vertexes, monkeyNFilter);
 		}
+		*/
 	}
 }

@@ -10,7 +10,7 @@ namespace RansacRealTime
 	/// <summary>
 	/// хранит объект Vertexes и манки-фильтр, на который подписан vertexes.
 	/// </summary>
-	class RansacObserver
+	class RansacsSession
 	{
 		public Vertexes vertexes;
 		public MonkeyNFilter monkeyNFilter;
@@ -20,7 +20,7 @@ namespace RansacRealTime
 		/// </summary>
 		/// <param name="vertexes"></param>
 		/// <param name="monkeyNFilter"></param>
-		public RansacObserver(in Vertexes vertexes, in MonkeyNFilter monkeyNFilter)
+		public RansacsSession(in Vertexes vertexes, in MonkeyNFilter monkeyNFilter)
 		{
 			this.vertexes = vertexes;
 			this.monkeyNFilter = monkeyNFilter;
@@ -28,14 +28,14 @@ namespace RansacRealTime
 			this.monkeyNFilter.NewVertex += this.vertexes.OnNewVertex;
 		}
 
-		public RansacObserver(int N)
+		public RansacsSession(int N)
 		{
 			this.vertexes = new();
 			this.monkeyNFilter = new(N);
 			this.monkeyNFilter.NewVertex += this.vertexes.OnNewVertex;
 		}
 
-		public RansacObserver(string path, bool loadHystories)
+		public RansacsSession(string path, bool loadHystories)
 		{
 			vertexes = new(path, loadHystories);
 			double N;

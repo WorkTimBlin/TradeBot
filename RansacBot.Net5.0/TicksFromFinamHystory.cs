@@ -4,7 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace BotTesting
+namespace RansacBot
 {
 	class TicksFromFinamHystory : IEnumerable<Tick>
 	{

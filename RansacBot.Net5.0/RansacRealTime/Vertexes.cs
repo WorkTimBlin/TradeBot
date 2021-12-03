@@ -8,7 +8,7 @@ namespace RansacRealTime
 	{
 		
 		public List<Tick> VertexList { get; private set; } = new();
-		public List<RansacsHystory> hystories = new();
+		public List<RansacsCascade> cascades = new();
 		/// <summary>
 		/// номер вершины, gjckt 
 		/// </summary>
@@ -75,9 +75,9 @@ namespace RansacRealTime
 		}
 		public int GetIndexOfMinTickInRansac(Ransac ransac)
 		{
-			int minInd = ransac.FirstIndexTick;
+			int minInd = ransac.firstTickIndex;
 
-			for (int i = ransac.FirstIndexTick; i < ransac.EndIndexTick; i++)
+			for (int i = ransac.firstTickIndex; i < ransac.EndIndexTick; i++)
 				if (VertexList[i].PRICE <= VertexList[minInd].PRICE)
 					minInd = i;			
 			
@@ -85,9 +85,9 @@ namespace RansacRealTime
 		}
 		public int GetIndexOfMaxTickInRansac(Ransac ransac)
 		{
-			int maxInd = ransac.FirstIndexTick;
+			int maxInd = ransac.firstTickIndex;
 
-			for (int i = ransac.FirstIndexTick; i < ransac.EndIndexTick; i++)
+			for (int i = ransac.firstTickIndex; i < ransac.EndIndexTick; i++)
 				if (VertexList[i].PRICE >= VertexList[maxInd].PRICE)
 					maxInd = i;
 			
@@ -100,7 +100,7 @@ namespace RansacRealTime
 			VertexList.Add(tick);
 			FindLastIndexPermited();
 
-			foreach (RansacsHystory hystory in hystories)
+			foreach (RansacsCascade hystory in cascades)
 				hystory.OnNewVertex(tick);
 		}
 		public void OnNewVertex(Tick tick, VertexType vertexType)
@@ -130,7 +130,7 @@ namespace RansacRealTime
 			writer.WriteLine("localIndex; globalIndex; price");
 			foreach (Tick vertex in VertexList)
 			{
-				writer.WriteLine(vertex.ID.ToString() + ';' + vertex.VERTEXINDEX.ToString() + ';' + vertex.PRICE.ToString() + ';');
+				writer.WriteLine(vertex.ToString());
 			}
 		}
 		public void SaveStandart(string path, bool saveHystoriesToo)
@@ -143,7 +143,7 @@ namespace RansacRealTime
 
 		public void SaveAllHystories(string path)
 		{
-			foreach(RansacsHystory hystory in hystories)
+			foreach(RansacsCascade hystory in cascades)
 			{
 				hystory.SaveStandart(path);
 			}
@@ -154,20 +154,20 @@ namespace RansacRealTime
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns>List of loaded hystories</returns>
-		private List<RansacsHystory> LoadAllHystories(string path)
+		private List<RansacsCascade> LoadAllHystories(string path)
 		{
-			hystories.Clear();
+			cascades.Clear();
 			DirectoryInfo[] dirs = new DirectoryInfo(path).GetDirectories();
 
 			foreach(DirectoryInfo hDir in dirs)
 			{
 				if (hDir.Name.Contains("Hystory"))
 				{
-					new RansacsHystory(this, hDir.FullName);
+					new RansacsCascade(this, hDir.FullName);
 				}
 			}
 
-			return hystories;
+			return cascades;
 		}
 	}
 }

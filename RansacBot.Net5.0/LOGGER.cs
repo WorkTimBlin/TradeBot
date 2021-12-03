@@ -1,11 +1,11 @@
 ﻿using NLog;
 
-namespace RansacBot.Net5._0
+namespace RansacBot
 {
     internal static class LOGGER
     {
-        public delegate void NewMessageHandler(string message);
-        public static event NewMessageHandler NewMessage;
+        public delegate void MessageHandler(string message);
+        public static event MessageHandler NewMessage;
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 

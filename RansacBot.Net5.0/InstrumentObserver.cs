@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace RansacBot.Net5._0
+namespace RansacBot
 {
 	internal class InstrumentObserver
     {
@@ -85,7 +85,7 @@ namespace RansacBot.Net5._0
 		/// <param name="path"></param>
 		private void FillInstrument()
 		{
-			Connector.FillInstrument(ref instrument);
+			Connector.FillInstrument(instrument);
 		}
 		/*
 		private void FeedLostTicksFromFinam(TimeSpan interval)

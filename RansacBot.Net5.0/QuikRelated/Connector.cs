@@ -6,13 +6,12 @@ using RansacRealTime;
 using System;
 using System.Globalization;
 
-namespace RansacBot.Net5._0
+namespace RansacBot
 {
-    static class Connector
+	static class Connector
 	{
 		public static readonly Quik quik;
 		public delegate void NewPriceHandler(double price);
-		public static NewPriceHandler NewPrice;
 		private static readonly Dictionary<string, NewTickHandler> recievers = new();
 
 		private static readonly Char separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
@@ -26,7 +25,7 @@ namespace RansacBot.Net5._0
 
 		static public void Subscribe(string classCode, string secCode, NewTickHandler handler)
 		{
-			if(recievers.ContainsKey(classCode + secCode))
+			if (recievers.ContainsKey(classCode + secCode))
 			{
 				recievers[classCode + secCode] += handler;
 			}
@@ -40,7 +39,7 @@ namespace RansacBot.Net5._0
 		{
 			if (recievers.ContainsKey(classCode + secCode))
 			{
-				recievers[classCode + secCode] -= handler;
+				recievers[classCode + secCode] -= handler ?? throw new Exception("tried to unsubscribe null");
 			}
 		}
 
@@ -49,34 +48,33 @@ namespace RansacBot.Net5._0
 			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out NewTickHandler handler))
 			{
 				handler?.Invoke(new Tick(trade.TradeNum, 0, trade.Price));
-				NewPrice?.Invoke(trade.Price);
 			}
 		}
 
 		static public Instrument GetInstrument(string classCode, string secCode, string clientCode, string accountId, string firmId)
 		{
-			var baseParam = GetSecurityInfo(classCode, secCode);
-			var IMInfo = GetInitialMarginInfo(classCode, secCode);
-			return new()
+			Instrument instrument = new()
 			{
+				classCode = classCode,
 				securityCode = secCode,
 				clientCode = clientCode,
-				classCode = classCode,
 				accountID = accountId,
 				firmID = firmId,
-				name = baseParam.name,
-				step = baseParam.step,
-				priceAccuracy = baseParam.priceAccuracy,
-				initialMarginBuy = IMInfo.initialMarginBuy,
-				initialMarginSell = IMInfo.initialMarginSell,
-				stepPrice = IMInfo.stepPrice
 			};
+			FillInstrument(instrument);
+			return instrument;
 		}
 
-		//TODO: fix Get and FillInstrument
-		static public void FillInstrument(ref Instrument instrument)
+		static public void FillInstrument(Instrument instrument)
 		{
-			instrument = GetInstrument(instrument.classCode, instrument.securityCode, instrument.clientCode, instrument.accountID, instrument.firmID);
+			var baseParam = GetSecurityInfo(instrument.classCode, instrument.securityCode);
+			var IMInfo = GetInitialMarginInfo(instrument.classCode, instrument.securityCode);
+			instrument.name = baseParam.name;
+			instrument.step = baseParam.step;
+			instrument.priceAccuracy = baseParam.priceAccuracy;
+			instrument.initialMarginBuy = IMInfo.initialMarginBuy;
+			instrument.initialMarginSell = IMInfo.initialMarginSell;
+			instrument.stepPrice = IMInfo.stepPrice;
 		}
 
 		/// <summary>
@@ -86,7 +84,7 @@ namespace RansacBot.Net5._0
 		{
 			if (classCode != null && classCode != "")
 			{
-				SecurityInfo infoTool = Connector.quik.Class.GetSecurityInfo(classCode, securityCode).Result;
+				SecurityInfo infoTool = quik.Class.GetSecurityInfo(classCode, securityCode).Result;
 
 				if (infoTool != null)
 				{
@@ -121,9 +119,9 @@ namespace RansacBot.Net5._0
 		{
 			try
 			{
-				double initialMarginBuy = Convert.ToDouble(Connector.quik.Trading.GetParamEx(classCode, securityCode, ParamNames.BUYDEPO).Result.ParamValue.Replace('.', separator));
-				double initialMarginSell = Convert.ToDouble(Connector.quik.Trading.GetParamEx(classCode, securityCode, ParamNames.SELLDEPO).Result.ParamValue.Replace('.', separator));
-				double stepPrice = Convert.ToDouble(Connector.quik.Trading.GetParamEx(classCode, securityCode, ParamNames.STEPPRICE).Result.ParamValue.Replace('.', separator));
+				double initialMarginBuy = Convert.ToDouble(quik.Trading.GetParamEx(classCode, securityCode, ParamNames.BUYDEPO).Result.ParamValue.Replace('.', separator));
+				double initialMarginSell = Convert.ToDouble(quik.Trading.GetParamEx(classCode, securityCode, ParamNames.SELLDEPO).Result.ParamValue.Replace('.', separator));
+				double stepPrice = Convert.ToDouble(quik.Trading.GetParamEx(classCode, securityCode, ParamNames.STEPPRICE).Result.ParamValue.Replace('.', separator));
 				return (initialMarginBuy, initialMarginSell, stepPrice);
 			}
 			catch (Exception ex)

@@ -3,7 +3,7 @@ using System;
 using System.Globalization;
 using System.IO;
 
-namespace RansacBot.Net5._0
+namespace RansacBot
 {
 	/// <summary>
 	/// Торговый инструмент (бумага). Адаптирован строго под фьючерсы.

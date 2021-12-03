@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RansacRealTime;
 
-namespace RansacBot.Net5._0
+namespace RansacBot
 {
 	class FinamHystoryFeeder
 	{

@@ -6,13 +6,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BotTesting
+namespace RansacBot
 {
-	class InstrumentSession
+	class ObservingSession
 	{
-		Instrument instrument;
-		RansacsSession ransacs;
+		public readonly Instrument instrument;
+		public readonly RansacsSession ransacs;
+		private SessionMetadata metadata;
 
+		/// <summary>
+		/// starts a new session on given instrument without any loading
+		/// </summary>
+		/// <param name="instrument"></param>
+		/// <param name="N">N from monkeyN</param>
+		public ObservingSession(Instrument instrument, int N)
+		{
+			this.instrument = instrument;
+			FillInstrument();
+			this.ransacs = new(N);
+			Connector.Subscribe(instrument.classCode, instrument.securityCode, this.ransacs.OnNewTick);
+		}
+
+		public void AddNewRansacsCascade(TypeSigma typeSigma, double percentile = 90)
+		{
+			new RansacsCascade(this.ransacs.vertexes, typeSigma, percentile);
+		}
+
+		public void Save(string path)
+		{
+			ransacs.
+		}
 
 		/// <summary>
 		/// загружает из файла сохраняемые параметры инструмента
@@ -36,16 +59,19 @@ namespace BotTesting
 		/// <param name="path"></param>
 		private void FillInstrument()
 		{
-			Connector.FillInstrument(ref instrument);
+			Connector.FillInstrument(instrument);
 		}
 
-		class SessionMetaData
+		class SessionMetadata
 		{
 			public DateTime dateOfLastSave;
 
-			public void Save()
+			public void Save(string path)
 			{
-
+				using(StreamWriter writer = new(path + @"/metadata"))
+				{
+					writer.WriteLine
+				}
 			}
 		}
 	}

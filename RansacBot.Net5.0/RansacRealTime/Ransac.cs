@@ -8,42 +8,18 @@ namespace RansacRealTime
 	{
 		#region Свойства
 
-		/// <summary>
-		/// Угол наклона прямой. Параметр из уравнения прямой (Y = Slope * X + Intercept).
-		/// </summary>
 		public double Slope { get; private set; }
-		/// <summary>
-		/// Сдвиг прямой. Параметр из уравнения прямой (Y = Slope * X + Intercept).
-		/// </summary>
 		public double Intercept { get; private set; }
-		/// <summary>
-		/// Сигма (может быть вычислена по разному).
-		/// </summary>
 		public double Sigma { get; private set; }
-		/// <summary>
-		/// Один из типов сигм, используя эту величину рассчитываются инлайнеры.
-		/// </summary>
 		public double ErrorTreshold { get; private set; }
-		/// <summary>
-		/// Длина ранзака.
-		/// </summary>
 		public int Length { get; private set; }
+		public readonly int firstTickIndex;
+		public readonly int firstBuildTickIndex;
+		public int LastRebuildTickIndex { get; private set; }
 		/// <summary>
-		/// Индекс, первого входящего в ранзак, тика по MonkeyN.
+		/// Index of tick next to last
 		/// </summary>
-		public int FirstIndexTick { get; private set; }
-		/// <summary>
-		/// Индекс тика по MonkeyN, в который был построен ранзак.
-		/// </summary>
-		public int FirstIndexBuild { get; private set; }
-		/// <summary>
-		/// Индекс тика по MonkeyN, в котором было последнее перестроение ранзака.
-		/// </summary>
-		public int LastIndexRebuild { get; private set; }
-		/// <summary>
-		/// Индекс тика по MonkeyN, который преодалел сигму и больше не попадает в ранзак.
-		/// </summary>
-		public int EndIndexTick { get { return FirstIndexTick + Length; } }
+		public int EndIndexTick { get { return firstTickIndex + Length; } }
 
 		#endregion
 
@@ -68,10 +44,10 @@ namespace RansacRealTime
 			Intercept = intercept;
 			Sigma = sigma;
 			ErrorTreshold = errorTreshold;
-			FirstIndexTick = firstTickIndex;
+			this.firstTickIndex = firstTickIndex;
 			Length = length;
-			FirstIndexBuild = firstBuildTick;
-			LastIndexRebuild = lastRebuildTick;
+			firstBuildTickIndex = firstBuildTick;
+			LastRebuildTickIndex = lastRebuildTick;
 		}
 
 		/// <summary>
@@ -88,10 +64,10 @@ namespace RansacRealTime
 			Intercept = reg.Intercept;
 			Length = ticks.Count;
 			Sigma = sigma;
-			FirstIndexTick = firstIndex;
+			firstTickIndex = firstIndex;
 			ErrorTreshold = errorTreshold;
-			FirstIndexBuild = EndIndexTick - 1;
-			LastIndexRebuild = FirstIndexBuild;
+			firstBuildTickIndex = EndIndexTick - 1;
+			LastRebuildTickIndex = firstBuildTickIndex;
 		}
 
 		/// <summary>
@@ -154,7 +130,7 @@ namespace RansacRealTime
 			Length = ransac.Length;
 			ErrorTreshold = ransac.ErrorTreshold;
 			Sigma = ransac.Sigma;
-			LastIndexRebuild = EndIndexTick - 1;
+			LastRebuildTickIndex = EndIndexTick - 1;
 		}
 
 		/// <summary>

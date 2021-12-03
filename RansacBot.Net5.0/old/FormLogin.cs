@@ -3,9 +3,9 @@ using System.Linq;
 using System.Windows.Forms;
 using RansacRealTime;
 
-namespace RansacBot.Net5._0
+namespace RansacBot.old
 {
-    public partial class FormLogin : Form
+	public partial class FormLogin : Form
     {
         public FormLogin()
         {

@@ -1,4 +1,7 @@
-﻿namespace RansacRealTime
+﻿using System;
+using System.IO;
+
+namespace RansacRealTime
 {
     public delegate void VertexHandler(Tick tick, VertexType vertexType);
 	public delegate void TickHandler(Tick tick);
@@ -17,7 +20,7 @@
 
 	public class MonkeyNFilter : IVertexFinder
 	{
-		readonly double n;
+		public readonly double n;
 		int count = 0;
 		Tick max;
 		Tick min;
@@ -133,6 +136,46 @@
 				max = tick;
 				OnNewTickChooser = OnNewTickSearchHigh;
 				RaiseNewVertexEvent(min, VertexType.Low);
+			}
+		}
+
+		public void SaveStandart(string path, string name = "monkeyNFilter.csv")
+		{
+			using(StreamWriter writer = new(path + @"/" + name))
+			{
+				foreach(string line in SerializeForCSV())
+				{
+					writer.WriteLine(line);
+				}
+			}
+		}
+
+		public string[] SerializeForCSV()
+		{
+			string[] lines = new string[6];
+			lines[0] = "N;" + this.n.ToString();
+			lines[1] = "count;" + this.count.ToString();
+			lines[2] = "max;" + this.max.ToString();
+			lines[3] = "min;" + this.min.ToString();
+			lines[4] = "last;" + this.last.ToString();
+			lines[5] = "lastReturned;" + this.lastReturned.ToString();
+			return lines;
+		}
+
+		public MonkeyNFilter(string path, string name = "monkeyNFilter.csv")
+		{
+			using(StreamReader reader = new(path + @"/" + name))
+			{
+				this.n = Convert.ToDouble(reader.ReadLine().Split(';')[1]);
+				this.count = Convert.ToInt32(reader.ReadLine().Split(';')[1]);
+				string line = reader.ReadLine();
+				this.max = Tick.StandartParse(line.Substring(line.IndexOf(';')));
+				line = reader.ReadLine();
+				this.min = Tick.StandartParse(line.Substring(line.IndexOf(';')));
+				line = reader.ReadLine();
+				this.last = Tick.StandartParse(line.Substring(line.IndexOf(';')));
+				line = reader.ReadLine();
+				this.lastReturned = Tick.StandartParse(line.Substring(line.IndexOf(';')));
 			}
 		}
 	}

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using RansacRealTime;
 
-namespace RansacBot.Net5._0
+namespace RansacBotPrototypes
 {
 	static class SaveLoadManager
 	{

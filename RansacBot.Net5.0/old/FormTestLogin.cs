@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 
-namespace RansacBot.Net5._0
+namespace RansacBot.old
 {
     public partial class FormTestLogin : Form
     {

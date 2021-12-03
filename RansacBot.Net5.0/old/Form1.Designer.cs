@@ -1,4 +1,4 @@
-﻿namespace RansacBot.Net5._0
+﻿namespace RansacBot.old
 {
     partial class FormMain
     {

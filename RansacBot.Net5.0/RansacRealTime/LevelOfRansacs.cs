@@ -39,9 +39,9 @@ namespace RansacRealTime
 
 			foreach (Ransac ransac in Ransacs)
 			{
-				string line = ransac.FirstIndexTick.ToString() + ';'
-					+ ransac.FirstIndexBuild.ToString() + ';'
-					+ ransac.LastIndexRebuild.ToString() + ';'
+				string line = ransac.firstTickIndex.ToString() + ';'
+					+ ransac.firstBuildTickIndex.ToString() + ';'
+					+ ransac.LastRebuildTickIndex.ToString() + ';'
 					+ (ransac.EndIndexTick - 1).ToString() + ';' +
 					((decimal)ransac.Slope).ToString() + ';' +
 					((decimal)ransac.Intercept).ToString() + ';' +
@@ -135,7 +135,7 @@ namespace RansacRealTime
 
 				if (Ransacs[rans].Slope * slopeLastFinished < 0)
 				{
-					LastIndexPermited = Ransacs[rans].FirstIndexTick;
+					LastIndexPermited = Ransacs[rans].firstTickIndex;
 					return;
 				}
 			}
@@ -188,6 +188,7 @@ namespace RansacRealTime
 			IsBuilding = false;
 			NewVertex -= ransac.OnNewVertex;
 			ransac.StopRansac -= OnRansacStop;
+			ransac.NeedRebuilding -= OnRebuildRansacNeed;
 			FindLastPermitedIndex();
 			StopRansac?.Invoke(level, ransac);
 		}

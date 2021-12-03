@@ -12,8 +12,8 @@ namespace RansacRealTime
 	/// </summary>
 	class RansacsSession
 	{
-		public Vertexes vertexes;
-		public MonkeyNFilter monkeyNFilter;
+		public readonly Vertexes vertexes;
+		public readonly MonkeyNFilter monkeyNFilter;
 
 		/// <summary>
 		/// принимает объекты вершин и MonkeyNFilter
@@ -34,7 +34,11 @@ namespace RansacRealTime
 			this.monkeyNFilter = new(N);
 			this.monkeyNFilter.NewVertex += this.vertexes.OnNewVertex;
 		}
-
+		/// <summary>
+		/// loads current session
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="loadHystories"></param>
 		public RansacsSession(string path, bool loadHystories)
 		{
 			vertexes = new(path, loadHystories);
@@ -49,6 +53,17 @@ namespace RansacRealTime
 		public void OnNewTick(Tick tick)
 		{
 			this.monkeyNFilter.OnNewTick(tick);
+		}
+
+		public void SaveStandart(string path, string dirName = "RansacsSession")
+		{
+			path += @"/" + dirName;
+			if (!Directory.Exists(path))
+			{
+				Directory.CreateDirectory(path);
+			}
+			vertexes.SaveStandart(path, true);
+			monkeyNFilter.SaveStandart(path);
 		}
 	}
 }

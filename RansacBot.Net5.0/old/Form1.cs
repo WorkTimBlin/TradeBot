@@ -11,7 +11,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 
-namespace RansacBot.Net5._0
+namespace RansacBot.old
 {
     public partial class FormMain : Form
     {

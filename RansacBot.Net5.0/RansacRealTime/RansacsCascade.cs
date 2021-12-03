@@ -6,7 +6,7 @@ using System.Text;
 
 namespace RansacRealTime
 {
-	public class RansacsHystory
+	public class RansacsCascade
 	{
 		private List<LevelOfRansacs> levels = new();
 		private Vertexes vertexes = new();
@@ -18,14 +18,14 @@ namespace RansacRealTime
 
 		#region Конструкторы
 
-		public RansacsHystory(Vertexes vertexes, TypeSigma typeSigma, double percentile = 90)
+		public RansacsCascade(Vertexes vertexes, TypeSigma typeSigma, double percentile = 90)
 		{
 			SetVertexes(vertexes);
 			this.typeSigma = typeSigma;
 			this.percentile = percentile;
 			OnNewVertexChooser = OnNewVertex0;
 		}
-		public RansacsHystory(Vertexes vertexes, TypeSigma typeSigma, int maxLevels, double percentile = 90)
+		public RansacsCascade(Vertexes vertexes, TypeSigma typeSigma, int maxLevels, double percentile = 90)
 		{
 			SetVertexes(vertexes);
 			this.typeSigma = typeSigma;
@@ -33,7 +33,7 @@ namespace RansacRealTime
 			OnNewVertexChooser = OnNewVertex0;
 			this.percentile = percentile;
 		}
-		public RansacsHystory(Vertexes vertexes, TypeSigma typeSigma, string path)
+		public RansacsCascade(Vertexes vertexes, TypeSigma typeSigma, string path)
 		{
 			SetVertexes(vertexes);
 			OnNewVertexChooser = OnNewVertex1;
@@ -41,7 +41,7 @@ namespace RansacRealTime
 			LoadMetadata(path);
 			LoadLevelsStandart(path);
 		}
-		public RansacsHystory(Vertexes vertexes, string path)
+		public RansacsCascade(Vertexes vertexes, string path)
 		{
 			SetVertexes(vertexes);
 			OnNewVertexChooser = OnNewVertex1;
@@ -129,7 +129,7 @@ namespace RansacRealTime
 		private void SetVertexes(Vertexes vertexes)
 		{
 			this.vertexes = vertexes;
-			vertexes.hystories.Add(this);
+			vertexes.cascades.Add(this);
 		}
 		public void OnNewVertex(Tick tick)
 		{
@@ -165,7 +165,7 @@ namespace RansacRealTime
 		}
 		private void OnRebuildAscHandler(int level, Ransac ransac)
 		{
-			levels[level].RebuildRansac(vertexes.VertexList.GetRange(ransac.FirstIndexTick, vertexes.VertexList.Count - ransac.FirstIndexTick), ransac.FirstIndexTick, typeSigma, percentile);
+			levels[level].RebuildRansac(vertexes.VertexList.GetRange(ransac.firstTickIndex, vertexes.VertexList.Count - ransac.firstTickIndex), ransac.firstTickIndex, typeSigma, percentile);
 			RebuildRansac?.Invoke(levels[level].GetRansacs()[^1], level);
 		}
 		public void OnBuildAscHandler(int level, Ransac lastRansac)

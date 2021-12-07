@@ -14,6 +14,7 @@
   <ItemGroup>
     <Compile Remove="old\Form1.cs" />
     <Compile Remove="old\Form1.Designer.cs" />
+    <Compile Remove="old\FormLogin.cs" />
     <Compile Remove="old\FormLogin.Designer.cs" />
     <Compile Remove="old\FormTestLogin.cs" />
     <Compile Remove="old\FormTestLogin.Designer.cs" />
@@ -31,6 +32,7 @@
     <None Include="old\Form1.cs" />
     <None Include="old\Form1.Designer.cs" />
     <None Include="old\Form1.resx" />
+    <None Include="old\FormLogin.cs" />
     <None Include="old\FormLogin.Designer.cs" />
     <None Include="old\FormLogin.resx" />
     <None Include="old\FormTestLogin.cs" />
@@ -72,10 +74,6 @@
     <None Update="C:\Users\ir2\.nuget\packages\nlog.config\4.7.12\contentFiles\any\any\NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Tests\" />
   </ItemGroup>
 
 </Project>

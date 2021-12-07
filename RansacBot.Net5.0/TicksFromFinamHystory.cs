@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace RansacBot
 {
-	class TicksFromFinamHystory : IEnumerable<Tick>
+	public class TicksFromFinamHystory : IEnumerable<Tick>
 	{
 		private RawFinamHystory rawStrings;
 		public TicksFromFinamHystory(DateTime fromDate, DateTime toDate)

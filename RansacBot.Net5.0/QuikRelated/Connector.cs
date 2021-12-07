@@ -69,12 +69,6 @@ namespace RansacBot
 		{
 			var baseParam = GetSecurityInfo(instrument.classCode, instrument.securityCode);
 			var IMInfo = GetInitialMarginInfo(instrument.classCode, instrument.securityCode);
-			instrument.name = baseParam.name;
-			instrument.step = baseParam.step;
-			instrument.priceAccuracy = baseParam.priceAccuracy;
-			instrument.initialMarginBuy = IMInfo.initialMarginBuy;
-			instrument.initialMarginSell = IMInfo.initialMarginSell;
-			instrument.stepPrice = IMInfo.stepPrice;
 		}
 
 		/// <summary>

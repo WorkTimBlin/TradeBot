@@ -50,6 +50,7 @@ namespace ParserDataFinam
 
 		public RawFinamHystory(DateTime fromDate, DateTime toDate)
 		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 			this.tickLines = FinamTicksHystoryLoader.loadTicksOfTimePeriod(fromDate, toDate).Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
 		}
 	}

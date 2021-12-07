@@ -177,6 +177,28 @@ namespace RansacRealTime
 				line = reader.ReadLine();
 				this.lastReturned = Tick.StandartParse(line.Substring(line.IndexOf(';') + 1));
 			}
+			if(lastReturned.Equals(max))
+			{
+				if(lastReturned.PRICE - last.PRICE == n)
+				{
+					OnNewTickChooser = OnNewTickSearchHigh;
+				}
+				else
+				{
+					OnNewTickChooser = OnNewTickSearchLow;
+				}
+			}
+			else
+			{
+				if(last.PRICE - lastReturned.PRICE == n)
+				{
+					OnNewTickChooser = OnNewTickSearchLow;
+				}
+				else
+				{
+					OnNewTickChooser = OnNewTickSearchHigh;
+				}
+			}
 		}
 	}
 

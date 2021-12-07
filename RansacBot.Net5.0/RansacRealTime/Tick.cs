@@ -47,7 +47,7 @@ namespace RansacRealTime
 		/// <returns>tick parsed from format ID;VERTEXINDEX;PRICE</returns>
 		public static Tick StandartParse(string line)
 		{
-			return StandartParse(line.Split(';'));
+			return StandartParse(line.Split(';', StringSplitOptions.RemoveEmptyEntries));
 		}
 
 		public static Tick StandartParse(string[] fields)

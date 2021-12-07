@@ -11,10 +11,6 @@ namespace RansacBot
 	internal class Instrument
 	{
 		/// <summary>
-		/// Краткое наименование инструмента (бумаги)
-		/// </summary>
-		public string name;
-		/// <summary>
 		/// Код инструмента (бумаги)
 		/// </summary>
 		public string securityCode;
@@ -34,25 +30,8 @@ namespace RansacBot
 		/// Код фирмы
 		/// </summary>
 		public string firmID;
-		/// <summary>
-		/// Точность цены (количество знаков после запятой)
-		/// </summary>
-		public int priceAccuracy;
-		/// <summary>
-		/// Шаг цены
-		/// </summary>
-		public double step;
-		/// <summary>
-		/// Стоимость шага цены
-		/// </summary>
-		public double stepPrice;
-		/// <summary>
-		/// Гарантийное обеспечение покупателя(только для срочного рынка)
-		/// </summary>
-		public double initialMarginBuy;
-		/// Гарантийное обеспечение продавца(только для срочного рынка)
-		/// </summary>
-		public double initialMarginSell;
+
+
 
 		/* конструкторы Дамира
 		/// <summary>

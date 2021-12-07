@@ -34,7 +34,7 @@ namespace RansacBot
 
 		public void Save(string path)
 		{
-			ransacs.
+
 		}
 
 		/// <summary>
@@ -70,7 +70,7 @@ namespace RansacBot
 			{
 				using(StreamWriter writer = new(path + @"/metadata"))
 				{
-					writer.WriteLine
+
 				}
 			}
 		}

@@ -175,7 +175,7 @@ namespace RansacRealTime
 				line = reader.ReadLine();
 				this.last = Tick.StandartParse(line.Substring(line.IndexOf(';')));
 				line = reader.ReadLine();
-				this.lastReturned = Tick.StandartParse(line.Substring(line.IndexOf(';')));
+				this.lastReturned = Tick.StandartParse(line.Substring(line.IndexOf(';') + 1));
 			}
 		}
 	}

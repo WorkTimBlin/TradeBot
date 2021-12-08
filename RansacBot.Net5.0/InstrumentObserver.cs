@@ -46,7 +46,7 @@ namespace RansacBot
 		/// <param name="loadHystories">подгружать ли уровни ранзаков, или только вершины</param>
 		private void LoadRansacObserver(string path, bool loadHystories)
 		{
-			ransacsObserver = new RansacsSession(path + @"/RansacsObserver", loadHystories);
+			ransacsObserver = new RansacsSession(path, loadCascades:loadHystories);
 		}
 
 		private void SaveMetadata(string path)
@@ -63,30 +63,7 @@ namespace RansacBot
 			}
 		}
 
-		/// <summary>
-		/// загружает из файла сохраняемые параметры инструмента
-		/// </summary>
-		/// <param name="path"></param>
-		private void LoadUnfinishedInstrument(string path)
-		{
-			using (StreamReader reader = new(path + @"/instrument"))
-			{
-				instrument.classCode = reader.ReadLine().Split(';')[1];
-				instrument.securityCode = reader.ReadLine().Split(';')[1];
-				instrument.clientCode = reader.ReadLine().Split(';')[1];
-				instrument.accountID = reader.ReadLine().Split(';')[1];
-				instrument.firmID = reader.ReadLine().Split(';')[1];
-			}
-		}
 
-		/// <summary>
-		/// заполняет инструмент, обращаясь к коннектору
-		/// </summary>
-		/// <param name="path"></param>
-		private void FillInstrument()
-		{
-			Connector.FillInstrument(instrument);
-		}
 		/*
 		private void FeedLostTicksFromFinam(TimeSpan interval)
 		{

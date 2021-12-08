@@ -4,23 +4,23 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParserDataFinam
+namespace FinamDataLoader
 {
-    public class WebRequestor
-    {
-        private HttpClient client;
+	class WebRequestor
+	{
+		private HttpClient client;
 
-        public WebRequestor(HttpClient client)
-        {
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls;
-        }
-        public async Task<string> GetString(Uri url)
-        {
-            var response = await client.GetAsync(url).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-            var byteData = await client.GetByteArrayAsync(url).ConfigureAwait(false);
-            return Encoding.GetEncoding(1251).GetString(byteData);
-        }
-    }
+		public WebRequestor(HttpClient client)
+		{
+			this.client = client ?? throw new ArgumentNullException(nameof(client));
+			ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls;
+		}
+		public async Task<string> GetString(Uri url)
+		{
+			var response = await client.GetAsync(url).ConfigureAwait(false);
+			response.EnsureSuccessStatusCode();
+			var byteData = await client.GetByteArrayAsync(url).ConfigureAwait(false);
+			return Encoding.GetEncoding(1251).GetString(byteData);
+		}
+	}
 }

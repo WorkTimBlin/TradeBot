@@ -7,8 +7,8 @@ namespace RansacRealTime
 	public class Vertexes
 	{
 		
-		public List<Tick> VertexList { get; private set; } = new();
-		public List<RansacsCascade> cascades = new();
+		public readonly List<Tick> vertexList = new();
+		public readonly List<RansacsCascade> cascades = new();
 		/// <summary>
 		/// номер вершины, gjckt 
 		/// </summary>
@@ -41,20 +41,20 @@ namespace RansacRealTime
 
 		private void FindLastIndexPermited()
 		{
-			if (VertexList.Count < 2)
+			if (vertexList.Count < 2)
             {
 				FirstIndexPermited = -1;
 				return;
 			}
 
-			int index = VertexList.Count;
-			double lastSlope = VertexList[index - 1].PRICE - VertexList[index - 2].PRICE;
+			int index = vertexList.Count;
+			double lastSlope = vertexList[index - 1].PRICE - vertexList[index - 2].PRICE;
 
 			do
 			{
 				index--;
 
-				if ((VertexList[index].PRICE - VertexList[index - 1].PRICE) * lastSlope < 0)
+				if ((vertexList[index].PRICE - vertexList[index - 1].PRICE) * lastSlope < 0)
 				{
 					FirstIndexPermited = index - 1;
 					return;
@@ -68,7 +68,7 @@ namespace RansacRealTime
 		{
 			int startInd = lastRansac.EndIndexTick - 1;
 
-			if (VertexList[startInd - 1].PRICE > VertexList[startInd].PRICE)
+			if (vertexList[startInd - 1].PRICE > vertexList[startInd].PRICE)
 				startInd -= 1;
 			
 			return startInd;
@@ -78,7 +78,7 @@ namespace RansacRealTime
 			int minInd = ransac.firstTickIndex;
 
 			for (int i = ransac.firstTickIndex; i < ransac.EndIndexTick; i++)
-				if (VertexList[i].PRICE <= VertexList[minInd].PRICE)
+				if (vertexList[i].PRICE <= vertexList[minInd].PRICE)
 					minInd = i;			
 			
 			return minInd;
@@ -88,7 +88,7 @@ namespace RansacRealTime
 			int maxInd = ransac.firstTickIndex;
 
 			for (int i = ransac.firstTickIndex; i < ransac.EndIndexTick; i++)
-				if (VertexList[i].PRICE >= VertexList[maxInd].PRICE)
+				if (vertexList[i].PRICE >= vertexList[maxInd].PRICE)
 					maxInd = i;
 			
 			return maxInd;
@@ -97,7 +97,7 @@ namespace RansacRealTime
 
 		public void OnNewVertex(Tick tick)
 		{
-			VertexList.Add(tick);
+			vertexList.Add(tick);
 			FindLastIndexPermited();
 
 			foreach (RansacsCascade hystory in cascades)
@@ -109,26 +109,28 @@ namespace RansacRealTime
 			NewVertex?.Invoke(tick, vertexType);
 		}
 
-		private void LoadStandart(string path)
+		private const string stdFileName = "vertexes.csv";
+
+		private void LoadStandart(string path, string fileName = stdFileName)
 		{
-			using StreamReader reader = new(path + "/vertexes.csv");
+			using StreamReader reader = new(path + @"\" + fileName);
 			reader.ReadLine();
 			while (!reader.EndOfStream)
 			{
 				string[] data = reader.ReadLine().Split(';');
-				VertexList.Add(new Tick(Convert.ToInt64(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
+				vertexList.Add(new Tick(Convert.ToInt64(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
 			}
 		}
 
-		public virtual void SaveStandart(string path)
+		public virtual void SaveStandart(string path, string fileName = stdFileName)
 		{
 			if(!new DirectoryInfo(path).Exists)
 			{
 				Directory.CreateDirectory(path);
 			}
-			using StreamWriter writer = new(path + "/vertexes.csv");
+			using StreamWriter writer = new(path + @"\" + fileName);
 			writer.WriteLine("localIndex; globalIndex; price");
-			foreach (Tick vertex in VertexList)
+			foreach (Tick vertex in vertexList)
 			{
 				writer.WriteLine(vertex.ToString());
 			}

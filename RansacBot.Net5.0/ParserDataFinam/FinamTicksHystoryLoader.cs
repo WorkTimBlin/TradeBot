@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using RansacRealTime;
 using System.IO;
 
-namespace ParserDataFinam
+namespace FinamDataLoader
 {
 	public class FinamTicksHystoryLoader
 	{
@@ -23,8 +23,6 @@ namespace ParserDataFinam
 
 		static public string loadTicksOfTimePeriod(DateTime from, DateTime to, string address = "https://www.finam.ru/profile/mosbirzha-fyuchersy/rts-12-21-riz1_riz1/export/")
 		{
-			from = DateTime.Now;
-			to = DateTime.Now;
 			ApiConfiguration.UsersFinamLink = address;
 			Symbol symbol = Parser.InitSymbol().Result;
 			LoadCommandOptions options = new(from, to, Period.T1, FileFormat.csv, DateFormat.DDMMYY, TimeFormat.HHMM, FieldSeparator.Semicolon, DecimalSeparator.None, DataFormat.DTLVI, false, false);

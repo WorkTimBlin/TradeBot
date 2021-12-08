@@ -51,20 +51,20 @@ namespace RansacRealTime
 
 		#endregion
 
-		public delegate void NewLevelHandler(LevelOfRansacs level);
-		public event NewLevelHandler NewLevel;
-
+		public delegate void LevelHandler(LevelOfRansacs level);
 		public delegate void RansacHandler(Ransac ransac, int level);
+		public delegate void NewVertexHandler(Tick tick);
+
+		#region events
+		public event LevelHandler NewLevel;
 		public event RansacHandler NewRansac;
 		public event RansacHandler RebuildRansac;
 		public event RansacHandler StopRansac;
 
-		public delegate void NewVertexHandler(Tick tick);
 		public event NewVertexHandler NewVertex;
+		#endregion
 
-		private delegate void OnNewVertexHandler(Tick tick);
-		private OnNewVertexHandler OnNewVertexChooser;
-
+		private NewVertexHandler OnNewVertexChooser; // chooser of function to handle new vertex
 
 		public Ransac[][] GetAllLevelsAsArrays()
 		{
@@ -91,9 +91,11 @@ namespace RansacRealTime
 			SaveLevels(path);
 			SaveMetadata(path);
 		}
-		private void SaveMetadata(string path)
+
+		private const string stdMetadataFileName = "metadata.csv";
+		private void SaveMetadata(string path, string fileName = stdMetadataFileName)
 		{
-			using StreamWriter writer = new(path + "/metadata.csv", false, Encoding.UTF8);
+			using StreamWriter writer = new(path + @"\" + fileName, false, Encoding.UTF8);
 			writer.WriteLine("typeSigma;" + typeSigma);
 			writer.WriteLine("percentile;" + percentile);
 			writer.WriteLine("MaxLevel;" + MaxLevel);
@@ -103,9 +105,9 @@ namespace RansacRealTime
 			foreach (LevelOfRansacs level in levels)
 				level.SaveStandart(path);
 		}
-		private void LoadMetadata(string path)
+		private void LoadMetadata(string path, string fileName = stdMetadataFileName)
 		{
-			using StreamReader reader = new(path + "/metadata.csv");
+			using StreamReader reader = new(path + @"\" + fileName);
 			string line = reader.ReadLine().Split(';')[1];
 			
 			typeSigma = (TypeSigma)Enum.Parse(typeof(TypeSigma), line);
@@ -155,7 +157,7 @@ namespace RansacRealTime
 		private void AddNewLevel()
 		{
 			levels.Add(new LevelOfRansacs(levels.Count));
-			levels[^1].BuildNewRansac(vertexes.VertexList, 0, typeSigma, percentile);
+			levels[^1].BuildNewRansac(vertexes.vertexList, 0, typeSigma, percentile);
 			NewVertex += levels[^1].OnNewVertex;
 			levels[^1].NewRansacNeed += OnBuildAscHandler;
 			levels[^1].RebuildRansacNeed += OnRebuildAscHandler;
@@ -165,7 +167,11 @@ namespace RansacRealTime
 		}
 		private void OnRebuildAscHandler(int level, Ransac ransac)
 		{
-			levels[level].RebuildRansac(vertexes.VertexList.GetRange(ransac.firstTickIndex, vertexes.VertexList.Count - ransac.firstTickIndex), ransac.firstTickIndex, typeSigma, percentile);
+			levels[level].RebuildRansac(
+				vertexes.vertexList.GetRange(ransac.firstTickIndex, vertexes.vertexList.Count - ransac.firstTickIndex), 
+				ransac.firstTickIndex, 
+				typeSigma, 
+				percentile);
 			RebuildRansac?.Invoke(levels[level].GetRansacs()[^1], level);
 		}
 		public void OnBuildAscHandler(int level, Ransac lastRansac)
@@ -177,7 +183,11 @@ namespace RansacRealTime
 				else
 				{
 					int startInd = vertexes.GetFirstIndexForNew(lastRansac);
-					levels[level].BuildNewRansac(vertexes.VertexList.GetRange(startInd, vertexes.VertexList.Count - startInd), startInd, typeSigma, percentile);
+					levels[level].BuildNewRansac(
+						vertexes.vertexList.GetRange(startInd, vertexes.vertexList.Count - startInd), 
+						startInd, 
+						typeSigma, 
+						percentile);
 					NewRansac?.Invoke(levels[level].GetRansacs()[^1], level);
 				}
 			}
@@ -195,7 +205,11 @@ namespace RansacRealTime
 					else
 						startInd = vertexes.GetIndexOfMinTickInRansac(lastContained);
 
-					levels[level].BuildNewRansac(vertexes.VertexList.GetRange(startInd, vertexes.VertexList.Count - startInd), startInd, typeSigma, percentile);
+					levels[level].BuildNewRansac(
+						vertexes.vertexList.GetRange(startInd, vertexes.vertexList.Count - startInd), 
+						startInd, 
+						typeSigma, 
+						percentile);
 					NewRansac?.Invoke(levels[level].GetRansacs()[^1], level);
 				}
 			}

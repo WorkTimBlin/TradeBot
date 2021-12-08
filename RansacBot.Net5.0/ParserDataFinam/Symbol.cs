@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParserDataFinam
+namespace FinamDataLoader
 {
-    public class Symbol
-    {
-        public int Id { get; set; }
-        public string SecCode { get; set; }
-        public string Name { get; set; }
-        public int MarketId { get; set; }
-        public string MarketName { get; set; }
-    }
+	class Symbol
+	{
+		public int Id { get; set; }
+		public string SecCode { get; set; }
+		public string Name { get; set; }
+		public int MarketId { get; set; }
+		public string MarketName { get; set; }
+	}
 }

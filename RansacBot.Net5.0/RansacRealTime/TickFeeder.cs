@@ -9,7 +9,7 @@ namespace RansacRealTime
 	{
 		private Queue<Tick> ticks = new();
 		public bool EndOfQueue { get { return !(ticks.Count > 0); } }
-		public event NewTickHandler NewTick;
+		public event TickHandler NewTick;
 		public delegate void VoidHandler();
 		public event VoidHandler ReachedEndOfQueue;
 

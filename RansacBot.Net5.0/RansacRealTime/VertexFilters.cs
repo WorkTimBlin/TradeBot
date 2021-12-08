@@ -4,7 +4,6 @@ using System.IO;
 namespace RansacRealTime
 {
     public delegate void VertexHandler(Tick tick, VertexType vertexType);
-	public delegate void TickHandler(Tick tick);
 
 	public interface IVertexFinder
 	{
@@ -42,6 +41,57 @@ namespace RansacRealTime
 			this.min = last;
 			this.last = last;
 			OnNewTickChooser = OnNewTick1;
+		}
+
+		private const string stdFileName = "monkeyNFilter.csv";
+		public MonkeyNFilter(string path, string name = stdFileName)
+		{
+			using(StreamReader reader = new(path + @"/" + name))
+			{
+				this.n = Convert.ToDouble(reader.ReadLine().Split(';')[1]);
+				this.count = Convert.ToInt32(reader.ReadLine().Split(';')[1]);
+				string line = reader.ReadLine();
+				this.max = Tick.StandartParse(line.Substring(line.IndexOf(';')));
+				line = reader.ReadLine();
+				this.min = Tick.StandartParse(line.Substring(line.IndexOf(';')));
+				line = reader.ReadLine();
+				this.last = Tick.StandartParse(line.Substring(line.IndexOf(';')));
+				line = reader.ReadLine();
+				this.lastReturned = Tick.StandartParse(line.Substring(line.IndexOf(';') + 1));
+			}
+			if(lastReturned.Equals(max))
+			{
+				if(lastReturned.PRICE - last.PRICE == n) OnNewTickChooser = OnNewTickSearchHigh;
+				else OnNewTickChooser = OnNewTickSearchLow;
+			}
+			else
+			{
+				if(last.PRICE - lastReturned.PRICE == n) OnNewTickChooser = OnNewTickSearchLow;
+				else OnNewTickChooser = OnNewTickSearchHigh;
+			}
+		}
+
+		public void SaveStandart(string path, string name = stdFileName)
+		{
+			using(StreamWriter writer = new(path + @"/" + name))
+			{
+				foreach(string line in SerializeForCSV())
+				{
+					writer.WriteLine(line);
+				}
+			}
+		}
+
+		public string[] SerializeForCSV()
+		{
+			string[] lines = new string[6];
+			lines[0] = "N;" + this.n.ToString();
+			lines[1] = "count;" + this.count.ToString();
+			lines[2] = "max;" + this.max.ToString();
+			lines[3] = "min;" + this.min.ToString();
+			lines[4] = "last;" + this.last.ToString();
+			lines[5] = "lastReturned;" + this.lastReturned.ToString();
+			return lines;
 		}
 
 		public event VertexHandler NewVertex;
@@ -139,67 +189,17 @@ namespace RansacRealTime
 			}
 		}
 
-		public void SaveStandart(string path, string name = "monkeyNFilter.csv")
+		public bool Equals(MonkeyNFilter other)
 		{
-			using(StreamWriter writer = new(path + @"/" + name))
-			{
-				foreach(string line in SerializeForCSV())
-				{
-					writer.WriteLine(line);
-				}
-			}
+			if (this.n == other.n &&
+				this.max.Equals(other.max) &&
+				this.min.Equals(other.min) &&
+				this.last.Equals(other.last) &&
+				this.lastReturned.Equals(other.lastReturned) &&
+				this.OnNewTickChooser.Method.Equals(other.OnNewTickChooser.Method)) return true;
+			return false;
 		}
 
-		public string[] SerializeForCSV()
-		{
-			string[] lines = new string[6];
-			lines[0] = "N;" + this.n.ToString();
-			lines[1] = "count;" + this.count.ToString();
-			lines[2] = "max;" + this.max.ToString();
-			lines[3] = "min;" + this.min.ToString();
-			lines[4] = "last;" + this.last.ToString();
-			lines[5] = "lastReturned;" + this.lastReturned.ToString();
-			return lines;
-		}
-
-		public MonkeyNFilter(string path, string name = "monkeyNFilter.csv")
-		{
-			using(StreamReader reader = new(path + @"/" + name))
-			{
-				this.n = Convert.ToDouble(reader.ReadLine().Split(';')[1]);
-				this.count = Convert.ToInt32(reader.ReadLine().Split(';')[1]);
-				string line = reader.ReadLine();
-				this.max = Tick.StandartParse(line.Substring(line.IndexOf(';')));
-				line = reader.ReadLine();
-				this.min = Tick.StandartParse(line.Substring(line.IndexOf(';')));
-				line = reader.ReadLine();
-				this.last = Tick.StandartParse(line.Substring(line.IndexOf(';')));
-				line = reader.ReadLine();
-				this.lastReturned = Tick.StandartParse(line.Substring(line.IndexOf(';') + 1));
-			}
-			if(lastReturned.Equals(max))
-			{
-				if(lastReturned.PRICE - last.PRICE == n)
-				{
-					OnNewTickChooser = OnNewTickSearchHigh;
-				}
-				else
-				{
-					OnNewTickChooser = OnNewTickSearchLow;
-				}
-			}
-			else
-			{
-				if(last.PRICE - lastReturned.PRICE == n)
-				{
-					OnNewTickChooser = OnNewTickSearchLow;
-				}
-				else
-				{
-					OnNewTickChooser = OnNewTickSearchHigh;
-				}
-			}
-		}
 	}
 
 }

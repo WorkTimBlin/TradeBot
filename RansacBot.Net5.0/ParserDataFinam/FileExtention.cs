@@ -1,15 +1,15 @@
-﻿namespace ParserDataFinam
+﻿namespace FinamDataLoader
 {
-    public class FileExtension
-    {
-        public static readonly FileExtension Csv = new FileExtension(".csv");
-        public static readonly FileExtension Txt = new FileExtension(".txt");
+	class FileExtension
+	{
+		public static readonly FileExtension Csv = new FileExtension(".csv");
+		public static readonly FileExtension Txt = new FileExtension(".txt");
 
-        public string Value { get; }
+		public string Value { get; }
 
-        private FileExtension(string value)
-        {
-            this.Value = value;
-        }
-    }
+		private FileExtension(string value)
+		{
+			this.Value = value;
+		}
+	}
 }

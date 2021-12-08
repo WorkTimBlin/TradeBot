@@ -3,7 +3,7 @@
 namespace RansacRealTime
 {
 
-	public delegate void NewTickHandler(Tick tick);
+	public delegate void TickHandler(Tick tick);
 
 	public readonly struct Tick
 	{

@@ -12,19 +12,30 @@ namespace RansacBot
 	{
 		public readonly Instrument instrument;
 		public readonly RansacsSession ransacs;
-		private SessionMetadata metadata;
+		public readonly List<RansacsCascade> ransacsCascades;
 
 		/// <summary>
-		/// starts a new session on given instrument without any loading
+		/// starts a new session on given instrument without any loading and immediatly subscribes ransacs to new ticks
 		/// </summary>
 		/// <param name="instrument"></param>
 		/// <param name="N">N from monkeyN</param>
 		public ObservingSession(Instrument instrument, int N)
 		{
 			this.instrument = instrument;
-			FillInstrument();
 			this.ransacs = new(N);
+			ransacsCascades = this.ransacs.vertexes.cascades;
 			Connector.Subscribe(instrument.classCode, instrument.securityCode, this.ransacs.OnNewTick);
+		}
+
+		/// <summary>
+		/// Initialises Instrument and ransacs session from file
+		/// </summary>
+		/// <param name="path"></param>
+		public ObservingSession(string path)
+		{
+			instrument = new(path);
+			ransacs = new(path);
+			ransacsCascades = ransacs.vertexes.cascades;
 		}
 
 		public void AddNewRansacsCascade(TypeSigma typeSigma, double percentile = 90)
@@ -32,46 +43,51 @@ namespace RansacBot
 			new RansacsCascade(this.ransacs.vertexes, typeSigma, percentile);
 		}
 
-		public void Save(string path)
+		//TODO:complete
+		public void UpdateUpToNow()
 		{
-
+			Queue<Tick> hub = new();
+			Connector.Subscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			DateTime targetDateTime = DateTime.Now + new TimeSpan(0, 2, 0);
+			WaitWhile(() => { return DateTime.Now >= targetDateTime; });
 		}
 
 		/// <summary>
-		/// загружает из файла сохраняемые параметры инструмента
+		/// Feeds ticks from finam hystory into ransacs session, stops when ID of tick from hystory equals to given
+		/// Throws exception if there is no tick with such ID
 		/// </summary>
-		/// <param name="path"></param>
-		private void LoadUnfinishedInstrument(string path)
+		/// <param name="startDate"></param>
+		public void FeedTheGapWithTicksUpToID(IEnumerable<Tick> ticksHystory, long stopID)
 		{
-			using (StreamReader reader = new(path + @"/instrument"))
+			foreach(Tick tick in ticksHystory)
 			{
-				instrument.classCode = reader.ReadLine().Split(';')[1];
-				instrument.securityCode = reader.ReadLine().Split(';')[1];
-				instrument.clientCode = reader.ReadLine().Split(';')[1];
-				instrument.accountID = reader.ReadLine().Split(';')[1];
-				instrument.firmID = reader.ReadLine().Split(';')[1];
+				if (tick.ID == stopID) return;
+				this.ransacs.OnNewTick(tick);
+			}
+			throw new ArgumentException("hystoryDoesn't reach stopID");
+		}
+
+		public void SaveStandart(string path)
+		{
+			SaveMetadata(path);
+			instrument.SaveStandart(path);
+			ransacs.SaveStandart(path);
+		}
+
+		private const string metadataName = "metadata";
+		private void SaveMetadata(string path, string fileName = metadataName)
+		{
+			using(StreamWriter writer = new(path + @"/" + fileName))
+			{
+				writer.WriteLine("dateTimeOfLastSave;" + DateTime.Now.ToString());
 			}
 		}
 
-		/// <summary>
-		/// заполняет инструмент, обращаясь к коннектору
-		/// </summary>
-		/// <param name="path"></param>
-		private void FillInstrument()
+		private (DateTime dateTimeOfLastSave, object? someFool) LoadMetadata(string path, string fileName = metadataName)
 		{
-			Connector.FillInstrument(instrument);
-		}
-
-		class SessionMetadata
-		{
-			public DateTime dateOfLastSave;
-
-			public void Save(string path)
+			using (StreamReader reader = new(path + @"/" + fileName))
 			{
-				using(StreamWriter writer = new(path + @"/metadata"))
-				{
-
-				}
+				return (DateTime.Parse(reader.ReadLine().Split(';', StringSplitOptions.RemoveEmptyEntries)[1]), null);
 			}
 		}
 	}

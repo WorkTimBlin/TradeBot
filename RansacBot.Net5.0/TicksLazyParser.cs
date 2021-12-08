@@ -1,4 +1,4 @@
-﻿using ParserDataFinam;
+﻿using FinamDataLoader;
 using RansacRealTime;
 using System;
 using System.Collections;
@@ -6,12 +6,12 @@ using System.Collections.Generic;
 
 namespace RansacBot
 {
-	public class TicksFromFinamHystory : IEnumerable<Tick>
+	public class TicksLazyParser : IEnumerable<Tick>
 	{
-		private RawFinamHystory rawStrings;
-		public TicksFromFinamHystory(DateTime fromDate, DateTime toDate)
+		private ICollection<string> rawStrings;
+		public TicksLazyParser(ICollection<string> rawStrings)
 		{
-			rawStrings = new(fromDate, toDate);
+			this.rawStrings = rawStrings;
 		}
 
 		public IEnumerator<Tick> GetEnumerator()

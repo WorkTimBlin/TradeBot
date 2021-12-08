@@ -5,17 +5,28 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ParserDataFinam;
+using FinamDataLoader;
 
-namespace ParserDataFinam
+namespace FinamDataLoader
 {
-	class RawFinamHystory:IEnumerable<string>
+	public class RawFinamHystory:IEnumerable<string>
 	{
 		readonly string[] tickLines;
 
 		private int currentLineIndex;
 
 		public string Current { get { return tickLines[currentLineIndex]; } }
+		public RawFinamHystory(DateTime fromDate, DateTime toDate)
+		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			this.tickLines = FinamTicksHystoryLoader.loadTicksOfTimePeriod(fromDate, toDate).Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+		}
+
+		public static string[] GetTickLines(DateTime fromDate, DateTime toDate)
+		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			return FinamTicksHystoryLoader.loadTicksOfTimePeriod(fromDate, toDate).Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
+		}
 
 		public IEnumerator<string> GetEnumerator()
 		{
@@ -48,10 +59,5 @@ namespace ParserDataFinam
 			currentLineIndex = 0;
 		}
 
-		public RawFinamHystory(DateTime fromDate, DateTime toDate)
-		{
-			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-			this.tickLines = FinamTicksHystoryLoader.loadTicksOfTimePeriod(fromDate, toDate).Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
-		}
 	}
 }

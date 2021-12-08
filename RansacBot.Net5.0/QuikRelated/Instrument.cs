@@ -8,30 +8,67 @@ namespace RansacBot
 	/// <summary>
 	/// Торговый инструмент (бумага). Адаптирован строго под фьючерсы.
 	/// </summary>
-	internal class Instrument
+	class Instrument
 	{
 		/// <summary>
 		/// Код инструмента (бумаги)
 		/// </summary>
-		public string securityCode;
+		public readonly string securityCode;
 		/// <summary>
 		/// Код класса инструмента (бумаги)
 		/// </summary>
-		public string classCode;
+		public readonly string classCode;
 		/// <summary>
 		/// Код клиента (номер счета)
 		/// </summary>
-		public string clientCode;
+		public readonly string clientCode;
 		/// <summary>
 		/// Счет клиента
 		/// </summary>
-		public string accountID;
+		public readonly string accountID;
 		/// <summary>
 		/// Код фирмы
 		/// </summary>
-		public string firmID;
+		public readonly string firmID;
 
+		private const string stdFileName = "instrument.csv";
 
+		public Instrument(string securityCode, string classCode, string clientCode, string accountID, string firmID)
+		{
+			this.securityCode = securityCode;
+			this.classCode = classCode;
+			this.clientCode = clientCode;
+			this.accountID = accountID;
+			this.firmID = firmID;
+		}
+
+		/// <summary>
+		/// загружает из файла сохраняемые параметры инструмента
+		/// </summary>
+		/// <param name="path"></param>
+		public Instrument(string path, string filename = stdFileName)
+		{
+			using (StreamReader reader = new(path + @"\" + filename))
+			{
+				classCode = reader.ReadLine().Split(';')[1];
+				securityCode = reader.ReadLine().Split(';')[1];
+				clientCode = reader.ReadLine().Split(';')[1];
+				accountID = reader.ReadLine().Split(';')[1];
+				firmID = reader.ReadLine().Split(';')[1];
+			}
+		}
+
+		public void SaveStandart(string path, string fileName = stdFileName)
+		{
+			using(StreamWriter writer = new(path + @"\" + fileName))
+			{
+				writer.WriteLine("securityCode;" + securityCode);
+				writer.WriteLine("classCode;" + classCode);
+				writer.WriteLine("clientCode;" + clientCode);
+				writer.WriteLine("accountID;" + accountID);
+				writer.WriteLine("firmID;" + firmID);
+			}
+		}
 
 		/* конструкторы Дамира
 		/// <summary>

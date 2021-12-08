@@ -10,7 +10,7 @@ namespace RansacRealTime
 	/// <summary>
 	/// хранит объект Vertexes и манки-фильтр, на который подписан vertexes.
 	/// </summary>
-	class RansacsSession
+	public class RansacsSession
 	{
 		public readonly Vertexes vertexes;
 		public readonly MonkeyNFilter monkeyNFilter;
@@ -20,7 +20,7 @@ namespace RansacRealTime
 		/// </summary>
 		/// <param name="vertexes"></param>
 		/// <param name="monkeyNFilter"></param>
-		public RansacsSession(in Vertexes vertexes, in MonkeyNFilter monkeyNFilter)
+		public RansacsSession(Vertexes vertexes, MonkeyNFilter monkeyNFilter)
 		{
 			this.vertexes = vertexes;
 			this.monkeyNFilter = monkeyNFilter;
@@ -34,20 +34,18 @@ namespace RansacRealTime
 			this.monkeyNFilter = new(N);
 			this.monkeyNFilter.NewVertex += this.vertexes.OnNewVertex;
 		}
+
+		private const string stdDirName = "RansacsSession";
 		/// <summary>
 		/// loads current session
 		/// </summary>
 		/// <param name="path"></param>
-		/// <param name="loadHystories"></param>
-		public RansacsSession(string path, bool loadHystories)
+		/// <param name="loadCascades"></param>
+		public RansacsSession(string path, string dirName = stdDirName, bool loadCascades = true)
 		{
-			vertexes = new(path, loadHystories);
-			double N;
-			using(StreamReader reader = new(path + @"/metadata"))
-			{
-				N = Convert.ToDouble(reader.ReadLine());
-			}
-			monkeyNFilter = new(N, vertexes.VertexList[^1]);
+			path += @"\" + dirName;
+			vertexes = new(path, loadCascades);
+			monkeyNFilter = new(path);
 		}
 
 		public void OnNewTick(Tick tick)
@@ -55,7 +53,7 @@ namespace RansacRealTime
 			this.monkeyNFilter.OnNewTick(tick);
 		}
 
-		public void SaveStandart(string path, string dirName = "RansacsSession")
+		public void SaveStandart(string path, string dirName = stdDirName)
 		{
 			path += @"/" + dirName;
 			if (!Directory.Exists(path))

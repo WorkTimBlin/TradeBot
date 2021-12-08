@@ -12,7 +12,7 @@ namespace RansacBot
 	{
 		public static readonly Quik quik;
 		public delegate void NewPriceHandler(double price);
-		private static readonly Dictionary<string, NewTickHandler> recievers = new();
+		private static readonly Dictionary<string, TickHandler> recievers = new();
 
 		private static readonly Char separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
 
@@ -23,7 +23,7 @@ namespace RansacBot
 			quik.Events.OnAllTrade += OnNewTrade;
 		}
 
-		static public void Subscribe(string classCode, string secCode, NewTickHandler handler)
+		static public void Subscribe(string classCode, string secCode, TickHandler handler)
 		{
 			if (recievers.ContainsKey(classCode + secCode))
 			{
@@ -35,7 +35,7 @@ namespace RansacBot
 			}
 		}
 
-		static public void Unsubscribe(string classCode, string secCode, NewTickHandler handler)
+		static public void Unsubscribe(string classCode, string secCode, TickHandler handler)
 		{
 			if (recievers.ContainsKey(classCode + secCode))
 			{
@@ -45,30 +45,10 @@ namespace RansacBot
 
 		static public void OnNewTrade(AllTrade trade)
 		{
-			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out NewTickHandler handler))
+			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out TickHandler handler))
 			{
 				handler?.Invoke(new Tick(trade.TradeNum, 0, trade.Price));
 			}
-		}
-
-		static public Instrument GetInstrument(string classCode, string secCode, string clientCode, string accountId, string firmId)
-		{
-			Instrument instrument = new()
-			{
-				classCode = classCode,
-				securityCode = secCode,
-				clientCode = clientCode,
-				accountID = accountId,
-				firmID = firmId,
-			};
-			FillInstrument(instrument);
-			return instrument;
-		}
-
-		static public void FillInstrument(Instrument instrument)
-		{
-			var baseParam = GetSecurityInfo(instrument.classCode, instrument.securityCode);
-			var IMInfo = GetInitialMarginInfo(instrument.classCode, instrument.securityCode);
 		}
 
 		/// <summary>

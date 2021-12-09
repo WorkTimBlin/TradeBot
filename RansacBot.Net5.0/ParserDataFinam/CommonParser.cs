@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace FinamDataLoader
 {
-	static class CommonParser
+	internal static class CommonParser
 	{
 		private const string CONST_NamesPattern = @"\'(\\.|[^\'])*\'";
 

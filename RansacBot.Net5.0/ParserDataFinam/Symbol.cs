@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FinamDataLoader
 {
-	class Symbol
+	internal class Symbol
 	{
 		public int Id { get; set; }
 		public string SecCode { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace FinamDataLoader
 {
-	class FindCommandOptions
+	internal class FindCommandOptions
 	{
 		public string Ticker { get; set; }
 		public string Name { get; set; }

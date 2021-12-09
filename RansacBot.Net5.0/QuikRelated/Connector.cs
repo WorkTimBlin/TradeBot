@@ -23,6 +23,14 @@ namespace RansacBot
 			quik.Events.OnAllTrade += OnNewTrade;
 		}
 
+		static public void OnNewTrade(AllTrade trade)
+		{
+			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out TickHandler handler))
+			{
+				handler?.Invoke(new Tick(trade.TradeNum, 0, trade.Price));
+			}
+		}
+
 		static public void Subscribe(string classCode, string secCode, TickHandler handler)
 		{
 			if (recievers.ContainsKey(classCode + secCode))
@@ -34,7 +42,10 @@ namespace RansacBot
 				recievers.Add(classCode + secCode, handler);
 			}
 		}
-
+		static public void Subscribe(Instrument instrument, TickHandler handler)
+		{
+			Subscribe(instrument.classCode, instrument.securityCode, handler);
+		}
 		static public void Unsubscribe(string classCode, string secCode, TickHandler handler)
 		{
 			if (recievers.ContainsKey(classCode + secCode))
@@ -42,19 +53,16 @@ namespace RansacBot
 				recievers[classCode + secCode] -= handler ?? throw new Exception("tried to unsubscribe null");
 			}
 		}
-
-		static public void OnNewTrade(AllTrade trade)
+		static public void Unsubscribe(Instrument instrument, TickHandler handler)
 		{
-			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out TickHandler handler))
-			{
-				handler?.Invoke(new Tick(trade.TradeNum, 0, trade.Price));
-			}
+			Unsubscribe(instrument.classCode, instrument.securityCode, handler);
 		}
 
 		/// <summary>
 		/// имя, шаг цены и ее точность
 		/// </summary>
-		private static (string name, double step, int priceAccuracy) GetSecurityInfo(string classCode, string securityCode)
+		private static (string name, double step, int priceAccuracy) 
+			GetSecurityInfo(string classCode, string securityCode)
 		{
 			if (classCode != null && classCode != "")
 			{
@@ -82,14 +90,14 @@ namespace RansacBot
 					"' инструмента не обнаружен.");
 			}
 		}
-
 		/// <summary>
 		/// параметры ГО и стоимости шага цены. 
 		/// </summary>
 		/// <param name="classCode"></param>
 		/// <param name="securityCode"></param>
 		/// <returns>кортеж с маржой на покупку и продажу и шаг цены</returns>
-		private static (double initialMarginBuy, double initialMarginSell, double stepPrice) GetInitialMarginInfo(string classCode, string securityCode)
+		private static (double initialMarginBuy, double initialMarginSell, double stepPrice) 
+			GetInitialMarginInfo(string classCode, string securityCode)
 		{
 			try
 			{

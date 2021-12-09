@@ -2,7 +2,7 @@
 
 namespace FinamDataLoader
 {
-	class Query
+	internal class Query
 	{
 		private readonly NameValueCodec codec;
 		private string fileName;

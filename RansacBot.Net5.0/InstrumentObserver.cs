@@ -10,7 +10,7 @@ namespace RansacBot
 	internal class InstrumentObserver
     {
 		private Instrument instrument;
-		private RansacsSession ransacsObserver;
+		private RansacsSession ransacsSession;
 
 		public DateTime dateTimeOfSaving;
 
@@ -18,7 +18,7 @@ namespace RansacBot
         public void Initialize(RansacsSession ransacObserver, Instrument instrument)
         {
             this.instrument = instrument;
-            ransacsObserver = ransacObserver;
+            ransacsSession = ransacObserver;
 		}
 		//TODO: rewrite Save
 		/*
@@ -43,10 +43,10 @@ namespace RansacBot
 		/// инициализация ransacObserver из сохраненного в файлах
 		/// </summary>
 		/// <param name="path"></param>
-		/// <param name="loadHystories">подгружать ли уровни ранзаков, или только вершины</param>
-		private void LoadRansacObserver(string path, bool loadHystories)
+		/// <param name="loadCascades">подгружать ли уровни ранзаков, или только вершины</param>
+		private void LoadRansacObserver(string path, bool loadCascades)
 		{
-			ransacsObserver = new RansacsSession(path, loadCascades:loadHystories);
+			ransacsSession = new RansacsSession(path, loadCascades:loadCascades);
 		}
 
 		private void SaveMetadata(string path)

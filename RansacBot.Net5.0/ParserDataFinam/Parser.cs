@@ -5,7 +5,7 @@ using System.Net.Http;
 
 namespace FinamDataLoader
 {
-	static class Parser
+	internal static class Parser
 	{
 		private const string CONST_Issue = "Finam.IssuerProfile.Main.issue";
 

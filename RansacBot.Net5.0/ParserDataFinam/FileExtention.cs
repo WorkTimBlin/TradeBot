@@ -1,6 +1,6 @@
 ﻿namespace FinamDataLoader
 {
-	class FileExtension
+	internal class FileExtension
 	{
 		public static readonly FileExtension Csv = new FileExtension(".csv");
 		public static readonly FileExtension Txt = new FileExtension(".txt");

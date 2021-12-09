@@ -1,6 +1,6 @@
 ﻿namespace FinamDataLoader
 {
-	static class ObjectExtensions
+	internal static class ObjectExtensions
 	{
 		public static Period ToPeriod(string timeframe)
 		{

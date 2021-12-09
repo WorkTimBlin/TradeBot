@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FinamDataLoader
 {
-	class WebRequestor
+	internal class WebRequestor
 	{
 		private HttpClient client;
 

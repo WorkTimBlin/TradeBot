@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FinamDataLoader
 {
-	static class ApiConfiguration
+	internal static class ApiConfiguration
 	{
 		/// <summary>
 		/// Ссылка на соответсвующий инструмент и рынок, задается пользователем.

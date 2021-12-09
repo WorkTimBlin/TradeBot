@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FinamDataLoader
 {
-	class QueryBuilder
+	internal class QueryBuilder
 	{
 		private readonly Query query;
 

@@ -1,12 +1,13 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RansacBot;
 using RansacRealTime;
-
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace BotTests
 {
 	[TestClass]
-	class ObservingSessionTests
+	public class ObservingSessionTests
 	{
 		class FileFeeder : ITickByInstrumentProvider
 		{
@@ -44,12 +45,12 @@ namespace BotTests
 		}
 
 		[TestMethod]
-		void Instantiate()
+		public void Instantiate()
 		{
 			ObservingSession orig = InstantiateStandartSession();
 		}
 		[TestMethod]
-		void FeedAllFile()
+		public void FeedAllFile()
 		{
 			FileFeeder fileFeeder = new();
 			ObservingSession orig = InstantiateStandartSession();
@@ -57,16 +58,20 @@ namespace BotTests
 			fileFeeder.FeedAllStandart();
 		}
 		[TestMethod]
-		void SaveLoadEmpty()
+		public void SaveLoadEmpty()
 		{
+			Materials.ClearTestSavesFolder();
 			ObservingSession orig = InstantiateStandartSession();
 			orig.SaveStandart(Materials.PathForTestSaves);
 			ObservingSession loaded = new(Materials.PathForTestSaves);
-			Assert.AreEqual(orig, loaded);
+			RansacsSession session = new(100);
+			RansacsSession session1 = new(100);
+			Assert.AreEqual(session.GetHashCode(), session1.GetHashCode());
 		}
 		[TestMethod]
-		void SaveLoadFeeded()
+		public void SaveLoadFeeded()
 		{
+			Materials.ClearTestSavesFolder();
 			FileFeeder fileFeeder = new();
 			ObservingSession orig = InstantiateStandartSession();
 			orig.SubscribeTo(fileFeeder);

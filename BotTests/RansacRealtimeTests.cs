@@ -6,13 +6,18 @@ using System;
 
 namespace BotTests
 {
-	public static class Materials
+	static class Materials
 	{
 		public static readonly string PathForTestSaves = @"F:\tim\folderForTests";
 		public static readonly string FilesForTestingPath = @"F:\tim\ParserDataFinam\ParserDataFinam\bin\Debug\Data";
 		public static TicksLazyParser ticks = new(
 					File.ReadAllText(FilesForTestingPath + @"/1.txt").
 					Split("\r\n", StringSplitOptions.RemoveEmptyEntries));//used for feeding
+		public static void ClearTestSavesFolder()
+		{
+			Directory.Delete(PathForTestSaves, true);
+			Directory.CreateDirectory(PathForTestSaves);
+		}
 	}
 
 	public class RansacRealtimeTests

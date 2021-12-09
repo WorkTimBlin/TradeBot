@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace RansacBot
 {
+	[Serializable()]
 	class ObservingSession
 	{
 		public readonly Instrument instrument;
@@ -27,6 +28,7 @@ namespace RansacBot
 			this.instrument = instrument;
 			this.ransacs = new(N);
 			ransacsCascades = this.ransacs.vertexes.cascades;
+			isUpdated = true;
 		}
 
 		/// <summary>

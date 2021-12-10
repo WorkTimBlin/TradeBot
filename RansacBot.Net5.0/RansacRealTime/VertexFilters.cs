@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Collections;
+
 
 namespace RansacRealTime
 {
@@ -58,16 +60,8 @@ namespace RansacRealTime
 				this.last = Tick.StandartParse(line.Substring(line.IndexOf(';')));
 				line = reader.ReadLine();
 				this.lastReturned = Tick.StandartParse(line.Substring(line.IndexOf(';') + 1));
-			}
-			if(lastReturned.Equals(max))
-			{
-				if(lastReturned.PRICE - last.PRICE == n) OnNewTickChooser = OnNewTickSearchHigh;
-				else OnNewTickChooser = OnNewTickSearchLow;
-			}
-			else
-			{
-				if(last.PRICE - lastReturned.PRICE == n) OnNewTickChooser = OnNewTickSearchLow;
-				else OnNewTickChooser = OnNewTickSearchHigh;
+				line = reader.ReadLine();
+				SetOnNewTickChooserFromString(line.Substring(line.IndexOf(';') + 1));
 			}
 		}
 
@@ -84,14 +78,31 @@ namespace RansacRealTime
 
 		public string[] SerializeForCSV()
 		{
-			string[] lines = new string[6];
+			string[] lines = new string[7];
 			lines[0] = "N;" + this.n.ToString();
 			lines[1] = "count;" + this.count.ToString();
 			lines[2] = "max;" + this.max.ToString();
 			lines[3] = "min;" + this.min.ToString();
 			lines[4] = "last;" + this.last.ToString();
 			lines[5] = "lastReturned;" + this.lastReturned.ToString();
+			lines[6] = "SearchingFor;" + GetWhatNowSearchingFor();
 			return lines;
+		}
+		private string GetWhatNowSearchingFor()
+		{
+			if (OnNewTickChooser == OnNewTick0) return "tick";
+			else if (OnNewTickChooser == OnNewTick1) return "vertex";
+			else if (OnNewTickChooser == OnNewTickSearchHigh) return "high";
+			else if (OnNewTickChooser == OnNewTickSearchLow) return "low";
+			else throw new Exception("on new tick chooser not set to correct function");
+		}
+		private void SetOnNewTickChooserFromString(string whatSearchingFor)
+		{
+			if (whatSearchingFor == "tick") OnNewTickChooser = OnNewTick0;
+			else if (whatSearchingFor == "vertex") OnNewTickChooser = OnNewTick1;
+			else if (whatSearchingFor == "high") OnNewTickChooser = OnNewTickSearchHigh;
+			else if (whatSearchingFor == "low") OnNewTickChooser = OnNewTickSearchLow;
+			else throw new ArgumentException("Input string was not in correct format");
 		}
 
 		public event VertexHandler NewVertex;
@@ -199,7 +210,5 @@ namespace RansacRealTime
 				this.OnNewTickChooser.Method.Equals(other.OnNewTickChooser.Method)) return true;
 			return false;
 		}
-
 	}
-
 }

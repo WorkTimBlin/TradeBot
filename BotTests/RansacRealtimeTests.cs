@@ -51,7 +51,7 @@ namespace BotTests
 				//Arrange
 				MonkeyNFilter first = new(100);
 				//feeding with ticks of 01.12.2012 from finam
-				foreach(Tick tick in ticks)
+				foreach (Tick tick in ticks)
 				{
 					first.OnNewTick(tick);
 				}
@@ -74,13 +74,13 @@ namespace BotTests
 			{
 				RansacsSession session = new(100);
 				RansacsCascade cascade = new(session.vertexes, TypeSigma.ErrorThreshold);
-				foreach(Tick tick in ticks)
+				foreach (Tick tick in ticks)
 				{
 					session.OnNewTick(tick);
 				}
 				session.SaveStandart(PathForTestSaves);
-				RansacsSession loaded = new(PathForTestSaves, loadCascades:true);
-				for(int i = 0; i < session.vertexes.vertexList.Count; i++)
+				RansacsSession loaded = new(PathForTestSaves, loadCascades: true);
+				for (int i = 0; i < session.vertexes.vertexList.Count; i++)
 				{
 					Assert.AreEqual(session.vertexes.vertexList[i], loaded.vertexes.vertexList[i], i.ToString() + "th ticks aren't equal!");
 				}

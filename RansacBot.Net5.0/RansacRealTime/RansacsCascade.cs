@@ -198,7 +198,7 @@ namespace RansacRealTime
 				else
 				{
 					int startInd;
-					Ransac lastContained = levels[level - 1].GetLastRansacContained(lastRansac);
+					Ransac lastContained = levels[level - 1].GetLastRansacContainedIn(lastRansac);
 
 					if (lastRansac.Slope > 0)
 						startInd = vertexes.GetIndexOfMaxTickInRansac(lastContained);

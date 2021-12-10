@@ -102,7 +102,7 @@ namespace RansacRealTime
 		/// </summary>
 		/// <param name="ind"></param>
 		/// <returns></returns>
-		public Ransac GetLastRansacContained(Ransac ransac)
+		public Ransac GetLastRansacContainedIn(Ransac ransac)
 		{
 			int ran = Ransacs.Count;
 

@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace RansacBot
 {
-	[Serializable()]
 	class ObservingSession
 	{
 		public readonly Instrument instrument;
@@ -72,6 +71,32 @@ namespace RansacBot
 			isUpdated = false;
 		}
 
+		public void UpdateFromTicksUpToEndKeepingUpWithProviderWaitingForTime(
+			IList<Tick> ticks,
+			ITickByInstrumentProvider provider,
+			TimeSpan time)
+		{
+			if (isUpdated) return;
+			Queue<Tick> hub = new();
+			provider.Subscribe(instrument, hub.Enqueue);
+			DateTime targetDateTime = DateTime.Now + time;
+			while (DateTime.Now < targetDateTime || hub.Count == 0) ;
+			FeedRansacsWithTicksUpToID(
+				ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID),
+				hub.Peek().ID);
+			FeedRansacsWholeQueue(hub);
+			Connector.Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			isUpdated = true;
+		}
+		public void UpdateFromTicksUpToEnd(IList<Tick> ticks)
+		{
+			if (isUpdated) return;
+			IList<Tick> shit = ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID).ToList();
+			FeedRansacsWithTicksUpToID(
+				ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID).Append(new Tick(ticks.Last().ID + 1, 0, 0)),
+				ticks[^1].ID + 1);
+			isUpdated = true;
+		}
 		public void UpdateFromFinamAndLaunchUsingQuik()
 		{
 			UnsubscribeOfQuik();
@@ -93,7 +118,7 @@ namespace RansacBot
 			Queue<Tick> hub = new();
 			Connector.Subscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
 			DateTime targetDateTime = DateTime.Now + new TimeSpan(0, 2, 0);
-			while (DateTime.Now < targetDateTime) ;
+			while (DateTime.Now < targetDateTime || hub.Count == 0) ;
 			FeedRansacsWithTicksUpToID(
 				new TicksLazyParser(
 					FinamDataLoader.RawFinamHystory.GetTickLines(
@@ -102,6 +127,14 @@ namespace RansacBot
 				hub.Peek().ID);
 			FeedRansacsWholeQueue(hub);
 			Connector.Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			isUpdated = true;
+		}
+		//TODO:delete
+		/// <summary>
+		/// TO DELETE!! METHOD FOR TESTS ONLY!!
+		/// </summary>
+		public void UpdateEmpty()
+		{
 			isUpdated = true;
 		}
 
@@ -114,7 +147,8 @@ namespace RansacBot
 		{
 			foreach(Tick tick in ticksHystory)
 			{
-				if (tick.ID == stopID) return;
+				if (tick.ID == stopID) 
+					return;
 				this.ransacs.OnNewTick(tick);
 			}
 			throw new ArgumentException("hystoryDoesn't reach stopID");

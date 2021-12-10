@@ -11,13 +11,13 @@ namespace RansacBot
 	class Instrument
 	{
 		/// <summary>
-		/// Код инструмента (бумаги)
-		/// </summary>
-		public readonly string securityCode;
-		/// <summary>
 		/// Код класса инструмента (бумаги)
 		/// </summary>
 		public readonly string classCode;
+		/// <summary>
+		/// Код инструмента (бумаги)
+		/// </summary>
+		public readonly string securityCode;
 		/// <summary>
 		/// Код клиента (номер счета)
 		/// </summary>
@@ -33,10 +33,10 @@ namespace RansacBot
 
 		private const string stdFileName = "instrument.csv";
 
-		public Instrument(string securityCode, string classCode, string clientCode, string accountID, string firmID)
+		public Instrument(string classCode, string securityCode, string clientCode, string accountID, string firmID)
 		{
-			this.securityCode = securityCode;
 			this.classCode = classCode;
+			this.securityCode = securityCode;
 			this.clientCode = clientCode;
 			this.accountID = accountID;
 			this.firmID = firmID;
@@ -62,8 +62,8 @@ namespace RansacBot
 		{
 			using(StreamWriter writer = new(path + @"\" + fileName))
 			{
-				writer.WriteLine("securityCode;" + securityCode);
 				writer.WriteLine("classCode;" + classCode);
+				writer.WriteLine("securityCode;" + securityCode);
 				writer.WriteLine("clientCode;" + clientCode);
 				writer.WriteLine("accountID;" + accountID);
 				writer.WriteLine("firmID;" + firmID);

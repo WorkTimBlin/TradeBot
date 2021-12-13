@@ -140,12 +140,12 @@ namespace RansacRealTime
 		private void OnNewVertex0(Tick tick)
 		{
 			NewVertex?.Invoke(tick);
-
-			if (vertexes.FirstIndexPermited > -1)
-			{
-				AddNewLevel();
-				OnNewVertexChooser = OnNewVertex1;
-			}
+			if (levels.Count < MaxLevel)
+				if (vertexes.FirstIndexPermited > -1)
+				{
+					AddNewLevel();
+					OnNewVertexChooser = OnNewVertex1;
+				}
 		}
 		private void OnNewVertex1(Tick tick)
 		{

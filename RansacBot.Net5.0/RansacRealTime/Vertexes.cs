@@ -9,11 +9,7 @@ namespace RansacRealTime
 		
 		public readonly List<Tick> vertexList = new();
 		public readonly List<RansacsCascade> cascades = new();
-		/// <summary>
-		/// номер вершины, gjckt 
-		/// </summary>
 		public int FirstIndexPermited { get; private set; } = -1;
-
 
 		public event VertexHandler NewVertex;
 
@@ -21,21 +17,16 @@ namespace RansacRealTime
 		{
 
 		}
-
 		public Vertexes(string path)
 		{
 			LoadStandart(path);
 			FindLastIndexPermited();
 		}
-
-
 		public Vertexes(string path, bool loadHystoryesToo)
 		{
 			LoadStandart(path);
 			FindLastIndexPermited();
-
-			if (loadHystoryesToo)
-				LoadAllHystories(path);
+			if (loadHystoryesToo) LoadAllHystories(path);
 		}
 
 
@@ -94,7 +85,6 @@ namespace RansacRealTime
 			return maxInd;
 		}
 
-
 		public void OnNewVertex(Tick tick)
 		{
 			vertexList.Add(tick);
@@ -110,7 +100,6 @@ namespace RansacRealTime
 		}
 
 		private const string stdFileName = "vertexes.csv";
-
 		private void LoadStandart(string path, string fileName = stdFileName)
 		{
 			using StreamReader reader = new(path + @"\" + fileName);
@@ -121,7 +110,6 @@ namespace RansacRealTime
 				vertexList.Add(new Tick(Convert.ToInt64(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
 			}
 		}
-
 		public virtual void SaveStandart(string path, string fileName = stdFileName)
 		{
 			if(!new DirectoryInfo(path).Exists)
@@ -141,8 +129,6 @@ namespace RansacRealTime
 			if(saveHystoriesToo)
 				SaveAllHystories(path);
 		}
-
-
 		public void SaveAllHystories(string path)
 		{
 			foreach(RansacsCascade hystory in cascades)
@@ -150,7 +136,6 @@ namespace RansacRealTime
 				hystory.SaveStandart(path);
 			}
 		}
-
 		/// <summary>
 		/// warning:deletes all current ransac hystories if there was
 		/// </summary>

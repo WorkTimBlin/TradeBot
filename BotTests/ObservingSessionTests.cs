@@ -153,24 +153,9 @@ namespace BotTests
 			Assert.AreEqual(JsonConvert.SerializeObject(orig), JsonConvert.SerializeObject(loaded));
 		}
 		[TestMethod]
-		public void SaveFeededLoadContinueFeedingErrorTreshold()
-		{
-			Materials.ClearTestSavesFolder();
-			FileFeeder fileFeeder = new();
-			ObservingSession orig = InstantiateStandartSession();
-			orig.AddNewRansacsCascade(TypeSigma.ErrorThreshold);
-			orig.SubscribeTo(fileFeeder);
-			fileFeeder.FeedRangeOfStandart(0, 200000);
-			orig.SaveStandart(Materials.PathForTestSaves);
-			ObservingSession loaded = new(Materials.PathForTestSaves);
-			loaded.UpdateEmpty();
-			loaded.SubscribeTo(fileFeeder);
-			fileFeeder.FeedRangeOfStandart(200000, 200000);
-			Assert.AreEqual(orig.ransacs.vertexes.cascades[0].LevelsCount, loaded.ransacs.vertexes.cascades[0].LevelsCount);
-		}
-		[TestMethod]
 		public void FeedPartThenFeedNextAsIfItWasGap()
 		{
+			Materials.ClearTestSavesFolder();
 			FileFeeder fileFeeder = new();
 			ObservingSession orig = InstantiateStandartSession();
 			ObservingSession gapFilled = InstantiateStandartSession();
@@ -178,6 +163,8 @@ namespace BotTests
 			gapFilled.SubscribeTo(fileFeeder);
 			fileFeeder.FeedRangeOfStandart(0, 200000);
 			gapFilled.UnsubscribeOf(fileFeeder);
+			gapFilled.SaveStandart(Materials.PathForTestSaves);
+			gapFilled = new(Materials.PathForTestSaves);
 			fileFeeder.FeedRangeOfStandart(200000, Materials.ticks.Count - 200000);
 			gapFilled.UpdateFromTicksUpToEnd(Materials.ticks);
 			//Task task = Task.Run(() => gapFilled.UpdateFromTicksUpToEndKeepingUpWithProviderWaitingForTime(Materials.ticks, fileFeeder, new System.TimeSpan(0, 0, 5)));
@@ -185,5 +172,26 @@ namespace BotTests
 			//task.Wait();
 			Assert.AreEqual(JsonConvert.SerializeObject(orig.ransacs), JsonConvert.SerializeObject(gapFilled.ransacs));
 		}
+		[TestMethod]
+		public void FeedPartSaveLoadFeedGapKeepingUpWithProvider()
+		{
+			Materials.ClearTestSavesFolder();
+			FileFeeder fileFeeder = new();
+			ObservingSession orig = InstantiateStandartSession();
+			ObservingSession gapFilled = InstantiateStandartSession();
+			orig.SubscribeTo(fileFeeder);
+			gapFilled.SubscribeTo(fileFeeder);
+			fileFeeder.FeedRangeOfStandart(0, 200000);
+			gapFilled.UnsubscribeOf(fileFeeder);
+			gapFilled.SaveStandart(Materials.PathForTestSaves);
+			fileFeeder.FeedRangeOfStandart(200000, 100000);
+			gapFilled = new(Materials.PathForTestSaves);
+			Task task = Task.Run(() => gapFilled.UpdateFromTicksUpToEndKeepingUpWithProviderWaitingForTime(Materials.ticks, fileFeeder, new System.TimeSpan(0, 0, 5)));
+			Task.Run(() => fileFeeder.FeedRangeOfStandart(300000, 100000));
+			task.Wait();
+			Assert.AreEqual(JsonConvert.SerializeObject(orig.ransacs), JsonConvert.SerializeObject(gapFilled.ransacs));
+		}
+
+
 	}
 }

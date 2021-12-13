@@ -72,9 +72,7 @@ namespace RansacBot
 		}
 
 		public void UpdateFromTicksUpToEndKeepingUpWithProviderWaitingForTime(
-			IList<Tick> ticks,
-			ITickByInstrumentProvider provider,
-			TimeSpan time)
+			IList<Tick> ticks, ITickByInstrumentProvider provider, TimeSpan time)
 		{
 			if (isUpdated) return;
 			Queue<Tick> hub = new();
@@ -85,16 +83,14 @@ namespace RansacBot
 				ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID),
 				hub.Peek().ID);
 			FeedRansacsWholeQueue(hub);
-			Connector.Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			provider.Unsubscribe(instrument, hub.Enqueue);
 			isUpdated = true;
 		}
 		public void UpdateFromTicksUpToEnd(IList<Tick> ticks)
 		{
 			if (isUpdated) return;
-			IList<Tick> shit = ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID).ToList();
-			FeedRansacsWithTicksUpToID(
-				ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID).Append(new Tick(ticks.Last().ID + 1, 0, 0)),
-				ticks[^1].ID + 1);
+			FeedRansacsWithTicks(
+				ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID));
 			isUpdated = true;
 		}
 		public void UpdateFromFinamAndLaunchUsingQuik()
@@ -102,10 +98,6 @@ namespace RansacBot
 			UnsubscribeOfQuik();
 			UpdateUpToNowUsingFinam();
 			SubscribeToQuik();
-		}
-		public void AddNewRansacsCascade(TypeSigma typeSigma, double percentile = 90)
-		{
-			new RansacsCascade(this.ransacs.vertexes, typeSigma, percentile);
 		}
 		/// <summary>
 		/// feeds ransacs with ticks from finam from given date
@@ -129,6 +121,12 @@ namespace RansacBot
 			Connector.Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
 			isUpdated = true;
 		}
+		public void AddNewRansacsCascade(TypeSigma typeSigma, double percentile = 90)
+		{
+			new RansacsCascade(this.ransacs.vertexes, typeSigma, percentile);
+		}
+
+
 		//TODO:delete
 		/// <summary>
 		/// TO DELETE!! METHOD FOR TESTS ONLY!!
@@ -138,6 +136,7 @@ namespace RansacBot
 			isUpdated = true;
 		}
 
+
 		/// <summary>
 		/// Feeds ticks from finam hystory into ransacs session, stops when ID of tick from hystory equals to given
 		/// Throws exception if there is no tick with such ID
@@ -145,13 +144,22 @@ namespace RansacBot
 		/// <param name="startDate"></param>
 		public void FeedRansacsWithTicksUpToID(IEnumerable<Tick> ticksHystory, long stopID)
 		{
-			foreach(Tick tick in ticksHystory)
+			ransacs.monkeyNFilter.ReturnToLastReturned();
+			foreach (Tick tick in ticksHystory)
 			{
-				if (tick.ID == stopID) 
+				if (tick.ID >= stopID) 
 					return;
 				this.ransacs.OnNewTick(tick);
 			}
 			throw new ArgumentException("hystoryDoesn't reach stopID");
+		}
+		public void FeedRansacsWithTicks(IEnumerable<Tick> ticksHystory)
+		{
+			ransacs.monkeyNFilter.ReturnToLastReturned();
+			foreach (Tick tick in ticksHystory)
+			{
+				this.ransacs.OnNewTick(tick);
+			}
 		}
 		public void FeedRansacsWholeQueue(Queue<Tick> ticks)
 		{

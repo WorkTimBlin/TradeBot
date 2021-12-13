@@ -46,6 +46,7 @@ namespace RansacRealTime
 			path += @"\" + dirName;
 			vertexes = new(path, loadCascades);
 			monkeyNFilter = new(path);
+			monkeyNFilter.NewVertex += this.vertexes.OnNewVertex;
 		}
 
 		public void OnNewTick(Tick tick)

@@ -33,38 +33,44 @@ namespace RansacRealTime
 			this.n = n;
 			OnNewTickChooser = OnNewTick0;
 		}
-
-		public MonkeyNFilter(double n, Tick last)
-		{
-			this.n = n;
-			this.count = last.VERTEXINDEX + 1;
-			this.lastReturned = last;
-			this.max = last;
-			this.min = last;
-			this.last = last;
-			OnNewTickChooser = OnNewTick1;
-		}
-
 		private const string stdFileName = "monkeyNFilter.csv";
 		public MonkeyNFilter(string path, string name = stdFileName)
 		{
-			using(StreamReader reader = new(path + @"/" + name))
-			{
-				this.n = Convert.ToDouble(reader.ReadLine().Split(';')[1]);
-				this.count = Convert.ToInt32(reader.ReadLine().Split(';')[1]);
-				string line = reader.ReadLine();
-				this.max = Tick.StandartParse(line.Substring(line.IndexOf(';')));
-				line = reader.ReadLine();
-				this.min = Tick.StandartParse(line.Substring(line.IndexOf(';')));
-				line = reader.ReadLine();
-				this.last = Tick.StandartParse(line.Substring(line.IndexOf(';')));
-				line = reader.ReadLine();
-				this.lastReturned = Tick.StandartParse(line.Substring(line.IndexOf(';') + 1));
-				line = reader.ReadLine();
-				SetOnNewTickChooserFromString(line.Substring(line.IndexOf(';') + 1));
-			}
+			var data = LoadStandart(path, name);
+			this.n = data.n;
+			this.count = data.count;
+			this.max = data.max;
+			this.min = data.min;
+			this.last = data.last;
+			this.lastReturned = data.lastReturned;
+			OnNewTickChooser = data.onNewTickChooser;
 		}
 
+		public 
+		(double n,
+		int count,
+		Tick max,
+		Tick min,
+		Tick last,
+		Tick lastReturned,
+		TickHandler onNewTickChooser)
+		LoadStandart(string path, string name = stdFileName)
+		{
+			using StreamReader reader = new(path + @"/" + name);
+			double n = Convert.ToDouble(reader.ReadLine().Split(';')[1]);
+			int count = Convert.ToInt32(reader.ReadLine().Split(';')[1]);
+			string line = reader.ReadLine();
+			Tick max = Tick.StandartParse(line.Substring(line.IndexOf(';')));
+			line = reader.ReadLine();
+			Tick min = Tick.StandartParse(line.Substring(line.IndexOf(';')));
+			line = reader.ReadLine();
+			Tick last = Tick.StandartParse(line.Substring(line.IndexOf(';')));
+			line = reader.ReadLine();
+			Tick lastReturned = Tick.StandartParse(line.Substring(line.IndexOf(';') + 1));
+			line = reader.ReadLine();
+			TickHandler onNewTickChooser = GetOnNewTickChooserFromString(line.Substring(line.IndexOf(';') + 1));
+			return (n, count, max, min, last, lastReturned, onNewTickChooser);
+		}
 		public void SaveStandart(string path, string name = stdFileName)
 		{
 			using(StreamWriter writer = new(path + @"/" + name))
@@ -75,7 +81,6 @@ namespace RansacRealTime
 				}
 			}
 		}
-
 		public string[] SerializeForCSV()
 		{
 			string[] lines = new string[7];
@@ -96,20 +101,21 @@ namespace RansacRealTime
 			else if (OnNewTickChooser == OnNewTickSearchLow) return "low";
 			else throw new Exception("on new tick chooser not set to correct function");
 		}
-		private void SetOnNewTickChooserFromString(string whatSearchingFor)
+		private TickHandler GetOnNewTickChooserFromString(string whatSearchingFor)
 		{
-			if (whatSearchingFor == "tick") OnNewTickChooser = OnNewTick0;
-			else if (whatSearchingFor == "vertex") OnNewTickChooser = OnNewTick1;
-			else if (whatSearchingFor == "high") OnNewTickChooser = OnNewTickSearchHigh;
-			else if (whatSearchingFor == "low") OnNewTickChooser = OnNewTickSearchLow;
+			if (whatSearchingFor == "tick") return OnNewTick0;
+			else if (whatSearchingFor == "vertex") return OnNewTick1;
+			else if (whatSearchingFor == "high") return OnNewTickSearchHigh;
+			else if (whatSearchingFor == "low") return OnNewTickSearchLow;
 			else throw new ArgumentException("Input string was not in correct format");
+		}
+		public void ReturnToLastReturned()
+		{
+			this.max = this.lastReturned;
+			this.min = this.lastReturned;
 		}
 
 		public event VertexHandler NewVertex;
-
-		public delegate void DelOnNewTick(Tick tick);
-
-		private DelOnNewTick OnNewTickChooser;
 
 		private void RaiseNewVertexEvent(Tick tick, VertexType vertexType)
 		{
@@ -123,11 +129,11 @@ namespace RansacRealTime
 			NewVertex?.Invoke(tick, vertexType);
 		}
 
+		private TickHandler OnNewTickChooser;
 		public void OnNewTick(Tick tick)
 		{
 			OnNewTickChooser(tick);
 		}
-
 		private void OnNewTick0(Tick tick)
 		{
 			//Console.WriteLine("first tick!");
@@ -135,7 +141,6 @@ namespace RansacRealTime
 			min = tick;
 			this.OnNewTickChooser = OnNewTick1;
 		}
-
 		private void OnNewTick1(Tick tick)
 		{
 			if (tick.PRICE > max.PRICE)
@@ -159,7 +164,6 @@ namespace RansacRealTime
 				RaiseNewVertexEvent(max, VertexType.High);
 			}
 		}
-
 		private void OnNewTickSearchHigh(Tick tick)
 		{
 			if (tick.PRICE > max.PRICE)
@@ -179,7 +183,6 @@ namespace RansacRealTime
 				RaiseNewVertexEvent(max, VertexType.High);
 			}
 		}
-
 		private void OnNewTickSearchLow(Tick tick)
 		{
 			if (tick.PRICE < min.PRICE)
@@ -199,7 +202,6 @@ namespace RansacRealTime
 				RaiseNewVertexEvent(min, VertexType.Low);
 			}
 		}
-
 		public bool Equals(MonkeyNFilter other)
 		{
 			if (this.n == other.n &&

@@ -1,4 +1,4 @@
-﻿namespace RansacRealTime
+﻿namespace RansacsRealTime
 {
 	public enum VertexType : byte
 	{
@@ -7,7 +7,7 @@
 		Monkey
 	}
 
-	public enum TypeSigma : byte
+	public enum SigmaType : byte
 	{
 		ErrorThreshold,
 		Sigma,

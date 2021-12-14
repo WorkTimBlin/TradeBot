@@ -1,5 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using RansacRealTime;
+using RansacsRealTime;
 using RansacBot;
 using System.IO;
 using System;
@@ -73,7 +73,7 @@ namespace BotTests
 			public void Saveload()
 			{
 				RansacsSession session = new(100);
-				RansacsCascade cascade = new(session.vertexes, TypeSigma.ErrorThreshold);
+				RansacsCascade cascade = new(session.vertexes, SigmaType.ErrorThreshold);
 				foreach (Tick tick in ticks)
 				{
 					session.OnNewTick(tick);

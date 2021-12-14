@@ -1,4 +1,4 @@
-﻿using RansacRealTime;
+﻿using RansacsRealTime;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -121,7 +121,7 @@ namespace RansacBot
 			Connector.Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
 			isUpdated = true;
 		}
-		public void AddNewRansacsCascade(TypeSigma typeSigma, double percentile = 90)
+		public void AddNewRansacsCascade(SigmaType typeSigma, double percentile = 90)
 		{
 			new RansacsCascade(this.ransacs.vertexes, typeSigma, percentile);
 		}

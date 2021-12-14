@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections;
 
 
-namespace RansacRealTime
+namespace RansacsRealTime
 {
     public delegate void VertexHandler(Tick tick, VertexType vertexType);
 

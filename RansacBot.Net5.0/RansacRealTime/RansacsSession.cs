@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RansacRealTime
+namespace RansacsRealTime
 {
 	/// <summary>
 	/// хранит объект Vertexes и манки-фильтр, на который подписан vertexes.

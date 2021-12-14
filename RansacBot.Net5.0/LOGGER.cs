@@ -24,6 +24,7 @@ namespace RansacBot
         /// <param name="message"></param>
         public static void Debug(string message)
         {
+            NewMessage?.Invoke(message);
             logger.Debug(message);
         }
         /// <summary>
@@ -32,6 +33,7 @@ namespace RansacBot
         /// <param name="message"></param>
         public static void Info(string message)
         {
+            NewMessage?.Invoke(message);
             logger.Info(message);
         }
         /// <summary>
@@ -40,6 +42,7 @@ namespace RansacBot
         /// <param name="message"></param>
         public static void Warn(string message)
         {
+            NewMessage?.Invoke(message);
             logger.Warn(message);
         }
         /// <summary>
@@ -48,6 +51,7 @@ namespace RansacBot
         /// <param name="message"></param>
         public static void Error(string message)
         {
+            NewMessage?.Invoke(message);
             logger.Error(message);
         }
         /// <summary>
@@ -56,6 +60,7 @@ namespace RansacBot
         /// <param name="message"></param>
         public static void Fatal(string message)
         {
+            NewMessage?.Invoke(message);
             logger.Fatal(message);
         }
     }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace RansacRealTime
+namespace RansacsRealTime
 {
 	public class LevelOfRansacs
 	{
@@ -42,7 +42,7 @@ namespace RansacRealTime
 				string line = ransac.firstTickIndex.ToString() + ';'
 					+ ransac.firstBuildTickIndex.ToString() + ';'
 					+ ransac.LastRebuildTickIndex.ToString() + ';'
-					+ (ransac.EndIndexTick - 1).ToString() + ';' +
+					+ (ransac.EndTickIndex - 1).ToString() + ';' +
 					((decimal)ransac.Slope).ToString() + ';' +
 					((decimal)ransac.Intercept).ToString() + ';' +
 					((decimal)ransac.Sigma).ToString() + ';' +
@@ -113,7 +113,7 @@ namespace RansacRealTime
 			{
 				ran--;
 
-				if (Ransacs[ran].EndIndexTick <= ransac.EndIndexTick)
+				if (Ransacs[ran].EndTickIndex <= ransac.EndTickIndex)
 					return Ransacs[ran];
 			}
 			while (ran > 0);
@@ -149,7 +149,7 @@ namespace RansacRealTime
 		/// builds new ransac if no is currently building
 		/// </summary>
 		/// <param name="ticks"></param>
-		private void CreateNewRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile = 0)
+		private void CreateNewRansac(List<Tick> ticks, int firstIndex, SigmaType typeSigma, double percentile = 0)
 		{
 			if (IsBuilding)
 				throw new Exception("can't create ransac while previous is not finished");
@@ -164,7 +164,7 @@ namespace RansacRealTime
 			Ransacs[^1].StopRansac += OnRansacStop;
 			Ransacs[^1].NeedRebuilding += OnRebuildRansacNeed;
 		}
-		public void RebuildRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile)
+		public void RebuildRansac(List<Tick> ticks, int firstIndex, SigmaType typeSigma, double percentile)
 		{
 			Ransacs[^1].Rebuild(new Ransac(ticks, firstIndex, typeSigma, percentile));
 		}
@@ -172,7 +172,7 @@ namespace RansacRealTime
 		{
 			RebuildRansacNeed?.Invoke(level, Ransacs[^1]);
 		}
-		public void BuildNewRansac(List<Tick> ticks, int firstIndex, TypeSigma typeSigma, double percentile)
+		public void BuildNewRansac(List<Tick> ticks, int firstIndex, SigmaType typeSigma, double percentile)
 		{
 			CreateNewRansac(ticks, firstIndex, typeSigma, percentile);
 		}

@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace RansacRealTime
+namespace RansacsRealTime
 {
 	public class Vertexes
 	{
 		
 		public readonly List<Tick> vertexList = new();
 		public readonly List<RansacsCascade> cascades = new();
-		public int FirstIndexPermited { get; private set; } = -1;
+		public int LastIndexPermited { get; private set; } = -1;
 
 		public event VertexHandler NewVertex;
 
@@ -34,7 +34,7 @@ namespace RansacRealTime
 		{
 			if (vertexList.Count < 2)
             {
-				FirstIndexPermited = -1;
+				LastIndexPermited = -1;
 				return;
 			}
 
@@ -47,17 +47,17 @@ namespace RansacRealTime
 
 				if ((vertexList[index].PRICE - vertexList[index - 1].PRICE) * lastSlope < 0)
 				{
-					FirstIndexPermited = index - 1;
+					LastIndexPermited = index - 1;
 					return;
 				}
 			} 
 			while (index > 1);
 
-			FirstIndexPermited = -1;
+			LastIndexPermited = -1;
 		}
 		public int GetFirstIndexForNew(Ransac lastRansac)
 		{
-			int startInd = lastRansac.EndIndexTick - 1;
+			int startInd = lastRansac.EndTickIndex - 1;
 
 			if (vertexList[startInd - 1].PRICE > vertexList[startInd].PRICE)
 				startInd -= 1;
@@ -68,7 +68,7 @@ namespace RansacRealTime
 		{
 			int minInd = ransac.firstTickIndex;
 
-			for (int i = ransac.firstTickIndex; i < ransac.EndIndexTick; i++)
+			for (int i = ransac.firstTickIndex; i < ransac.EndTickIndex; i++)
 				if (vertexList[i].PRICE <= vertexList[minInd].PRICE)
 					minInd = i;			
 			
@@ -78,7 +78,7 @@ namespace RansacRealTime
 		{
 			int maxInd = ransac.firstTickIndex;
 
-			for (int i = ransac.firstTickIndex; i < ransac.EndIndexTick; i++)
+			for (int i = ransac.firstTickIndex; i < ransac.EndTickIndex; i++)
 				if (vertexList[i].PRICE >= vertexList[maxInd].PRICE)
 					maxInd = i;
 			

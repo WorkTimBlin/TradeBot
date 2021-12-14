@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using RansacBot;
-using RansacRealTime;
+using RansacsRealTime;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
@@ -89,7 +89,7 @@ namespace BotTests
 			Materials.ClearTestSavesFolder();
 			FileFeeder fileFeeder = new();
 			ObservingSession orig = InstantiateStandartSession();
-			orig.AddNewRansacsCascade(TypeSigma.ErrorThreshold);
+			orig.AddNewRansacsCascade(SigmaType.ErrorThreshold);
 			orig.SubscribeTo(fileFeeder);
 			fileFeeder.FeedAllStandart();
 			orig.SaveStandart(Materials.PathForTestSaves);
@@ -102,7 +102,7 @@ namespace BotTests
 			Materials.ClearTestSavesFolder();
 			FileFeeder fileFeeder = new();
 			ObservingSession orig = InstantiateStandartSession();
-			orig.AddNewRansacsCascade(TypeSigma.Sigma);
+			orig.AddNewRansacsCascade(SigmaType.Sigma);
 			orig.SubscribeTo(fileFeeder);
 			fileFeeder.FeedAllStandart();
 			orig.SaveStandart(Materials.PathForTestSaves);
@@ -115,7 +115,7 @@ namespace BotTests
 			Materials.ClearTestSavesFolder();
 			FileFeeder fileFeeder = new();
 			ObservingSession orig = InstantiateStandartSession();
-			orig.AddNewRansacsCascade(TypeSigma.SigmaInliers);
+			orig.AddNewRansacsCascade(SigmaType.SigmaInliers);
 			orig.SubscribeTo(fileFeeder);
 			fileFeeder.FeedAllStandart();
 			orig.SaveStandart(Materials.PathForTestSaves);
@@ -128,7 +128,7 @@ namespace BotTests
 			Materials.ClearTestSavesFolder();
 			FileFeeder fileFeeder = new();
 			ObservingSession orig = InstantiateStandartSession();
-			orig.AddNewRansacsCascade(TypeSigma.СonfidenceInterval);
+			orig.AddNewRansacsCascade(SigmaType.СonfidenceInterval);
 			orig.SubscribeTo(fileFeeder);
 			fileFeeder.FeedAllStandart();
 			orig.SaveStandart(Materials.PathForTestSaves);
@@ -141,10 +141,10 @@ namespace BotTests
 			Materials.ClearTestSavesFolder();
 			FileFeeder fileFeeder = new();
 			ObservingSession orig = InstantiateStandartSession();
-			orig.AddNewRansacsCascade(TypeSigma.ErrorThreshold);
-			orig.AddNewRansacsCascade(TypeSigma.Sigma);
-			orig.AddNewRansacsCascade(TypeSigma.SigmaInliers);
-			orig.AddNewRansacsCascade(TypeSigma.СonfidenceInterval);
+			orig.AddNewRansacsCascade(SigmaType.ErrorThreshold);
+			orig.AddNewRansacsCascade(SigmaType.Sigma);
+			orig.AddNewRansacsCascade(SigmaType.SigmaInliers);
+			orig.AddNewRansacsCascade(SigmaType.СonfidenceInterval);
 			orig.SubscribeTo(fileFeeder);
 			fileFeeder.FeedAllStandart();
 			orig.SaveStandart(Materials.PathForTestSaves);

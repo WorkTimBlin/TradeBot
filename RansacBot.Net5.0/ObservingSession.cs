@@ -126,23 +126,12 @@ namespace RansacBot
 			new RansacsCascade(this.ransacs.vertexes, typeSigma, percentile);
 		}
 
-
-		//TODO:delete
-		/// <summary>
-		/// TO DELETE!! METHOD FOR TESTS ONLY!!
-		/// </summary>
-		public void UpdateEmpty()
-		{
-			isUpdated = true;
-		}
-
-
 		/// <summary>
 		/// Feeds ticks from finam hystory into ransacs session, stops when ID of tick from hystory equals to given
 		/// Throws exception if there is no tick with such ID
 		/// </summary>
 		/// <param name="startDate"></param>
-		public void FeedRansacsWithTicksUpToID(IEnumerable<Tick> ticksHystory, long stopID)
+		private void FeedRansacsWithTicksUpToID(IEnumerable<Tick> ticksHystory, long stopID)
 		{
 			ransacs.monkeyNFilter.ReturnToLastReturned();
 			foreach (Tick tick in ticksHystory)
@@ -153,7 +142,7 @@ namespace RansacBot
 			}
 			throw new ArgumentException("hystoryDoesn't reach stopID");
 		}
-		public void FeedRansacsWithTicks(IEnumerable<Tick> ticksHystory)
+		private void FeedRansacsWithTicks(IEnumerable<Tick> ticksHystory)
 		{
 			ransacs.monkeyNFilter.ReturnToLastReturned();
 			foreach (Tick tick in ticksHystory)
@@ -161,7 +150,7 @@ namespace RansacBot
 				this.ransacs.OnNewTick(tick);
 			}
 		}
-		public void FeedRansacsWholeQueue(Queue<Tick> ticks)
+		private void FeedRansacsWholeQueue(Queue<Tick> ticks)
 		{
 			while(ticks.Count > 0)
 			{

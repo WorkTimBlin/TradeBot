@@ -14,14 +14,14 @@ namespace RansacBot.UI
 	class RansacsOxyPrinter
 	{
 		public readonly PlotModel plotModel = new();
-		LinearAxis axisX = new()
+		readonly LinearAxis axisX = new()
 		{
 			Position = AxisPosition.Bottom,
 			Title = "Vertexes",
 			LabelFormatter = (x) => x.ToString(),
 			Key = "X"
 		};
-		LinearAxis axisY = new()
+		readonly LinearAxis axisY = new()
 		{
 			Position = AxisPosition.Left,
 			Title = "Price",
@@ -29,9 +29,71 @@ namespace RansacBot.UI
 			LabelFormatter = (x) => x.ToString(),
 			Key = "Y"
 		};
-		LineSeries vertexes = new()
+		readonly LineSeries extremumVertexes = new()
 		{
-			Title = "vertexes",
+			Title = "Extremum-N",
+			Color = OxyColors.Transparent,
+			MarkerFill = OxyColors.Blue,
+			MarkerType = MarkerType.Circle,
+			MarkerSize = 4,
+			Tag = "ExtremumsN",
+			XAxisKey = "X",
+			YAxisKey = "Y"
+		};
+		readonly LineSeries MonkeyVertexes = new()
+		{
+			Title = "Vertex-Monkey",
+			Color = OxyColors.Transparent,
+			MarkerFill = OxyColors.SkyBlue,
+			MarkerType = MarkerType.Circle,
+			MarkerSize = 4,
+			Tag = "VertexesMonkey",
+			XAxisKey = "X",
+			YAxisKey = "Y"
+		};
+		readonly LineSeries VertexesLine = new()
+		{
+			Title = "Vertexes",
+			Color = OxyColors.Gray,
+			StrokeThickness = 1,
+			Tag = "Vertexes",
+			XAxisKey = "X",
+			YAxisKey = "Y"
+		};
+
+		readonly LineSegmentSeries ransacsUp = new()
+		{
+			Color = OxyColors.Lime,
+			StrokeThickness = 3,
+			XAxisKey = "X",
+			YAxisKey = "Y",
+			Tag = "ransac"
+		};
+		readonly LineSegmentSeries ransacsDown = new()
+		{
+			Color = OxyColors.Red,
+			StrokeThickness = 3,
+			XAxisKey = "X",
+			YAxisKey = "Y",
+			Tag = "ransac"
+		};
+		readonly LineSegmentSeries sigmasUp = new()
+		{
+			Color = OxyColors.Lime,
+			StrokeThickness = 2,
+			LineStyle = LineStyle.Dot,
+			XAxisKey = "X",
+			YAxisKey = "Y",
+			Tag = "sigma"
+		};
+		readonly LineSegmentSeries sigmasDown = new()
+		{
+			Color = OxyColors.Red,
+			StrokeThickness = 2,
+			LineStyle = LineStyle.Dot,
+			XAxisKey = "X",
+			YAxisKey = "Y",
+			Tag = "sigma"
 		};
 
 		int Level { get; }
@@ -44,14 +106,7 @@ namespace RansacBot.UI
 
 		void PrintNewRansac(Ransac ransac, int level)
 		{
-			if (level != this.Level) return;
-			plotModel.Annotations.Add(new LineAnnotation()
-			{
-				Slope = ransac.Slope,
-				Intercept = ransac.Intercept,
-				MinimumX = ransac.firstTickIndex,
-				MaximumX = ransac.EndTickIndex,
-			});
+			
 		}
 
 		LineSeries GetRansacLine(Ransac ransac)

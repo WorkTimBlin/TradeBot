@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using RansacBot;
 using RansacsRealTime;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 
 namespace BotTests

@@ -8,7 +8,9 @@ namespace BotTests
 {
 	static class Materials
 	{
+		//public static readonly string PathForTestSaves = @"F:\tim\folderForTests";
 		public static readonly string PathForTestSaves = @"F:\tim\folderForTests";
+		//public static readonly string FilesForTestingPath = @"F:\tim\ParserDataFinam\ParserDataFinam\bin\Debug\Data";
 		public static readonly string FilesForTestingPath = @"F:\tim\ParserDataFinam\ParserDataFinam\bin\Debug\Data";
 		public static TicksLazyParser ticks = new(
 					File.ReadAllText(FilesForTestingPath + @"/1.txt").

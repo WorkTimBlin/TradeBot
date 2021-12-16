@@ -17,24 +17,24 @@ namespace BotTests
 			[TestMethod]
 			public void Initialise()
 			{
-				RansacColourfulSeries series = new();
+				RansacColorfulSeries series = new();
 			}
 			[TestMethod]
 			public void AddOneRaising()
 			{
-				RansacColourfulSeries ransacs = new();
+				RansacColorfulSeries ransacs = new();
 				ransacs.Add(new(0, 10, 20, 30, 50, 50, 10, 10));
 			}
 			[TestMethod]
 			public void AddOneFalling()
 			{
-				RansacColourfulSeries ransacs = new();
+				RansacColorfulSeries ransacs = new();
 				ransacs.Add(new(0, 10, 20, 30, -50, 50, 10, 10));
 			}
 			[TestMethod]
 			public void AddMillionOfRaisingAndFallingEach()
 			{
-				RansacColourfulSeries ransacs = new();
+				RansacColorfulSeries ransacs = new();
 				for(int i = 0; i < 1000000; i++)
 				{
 					ransacs.Add(new(i * 10, i * 10, i * 10, 10, i, i, 1f / i, 1f / i));

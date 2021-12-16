@@ -10,7 +10,7 @@ using System.Collections;
 
 namespace RansacBot.UI
 {
-	class RansacColourfulSeries : RansacSeries
+	class RansacColorfulSeries : RansacSeries
 	{
 		readonly LineSegmentSeries ransacsRaising = new()
 		{

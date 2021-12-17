@@ -8,22 +8,30 @@ using System.Globalization;
 
 namespace RansacBot
 {
-	static class Connector
+	class Connector
 	{
-		public static readonly Quik quik;
+		public readonly Quik quik;
 		public delegate void NewPriceHandler(double price);
-		private static readonly Dictionary<string, TickHandler> recievers = new();
+		private readonly Dictionary<string, TickHandler> recievers = new();
+		private static Connector _instance;
 
-		private static readonly Char separator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
 
-		static Connector()
+		private Connector()
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 			quik = new Quik();
 			quik.Events.OnAllTrade += OnNewTrade;
 		}
+		public static Connector GetInstance()
+		{
+			if(_instance == null)
+			{
+				_instance = new();
+			}
+			return _instance;
+		}
 
-		static public void OnNewTrade(AllTrade trade)
+		public void OnNewTrade(AllTrade trade)
 		{
 			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out TickHandler handler))
 			{
@@ -31,7 +39,7 @@ namespace RansacBot
 			}
 		}
 
-		static public void Subscribe(string classCode, string secCode, TickHandler handler)
+		public void Subscribe(string classCode, string secCode, TickHandler handler)
 		{
 			if (recievers.ContainsKey(classCode + secCode))
 			{
@@ -42,26 +50,28 @@ namespace RansacBot
 				recievers.Add(classCode + secCode, handler);
 			}
 		}
-		static public void Subscribe(Instrument instrument, TickHandler handler)
+		public void Subscribe(Instrument instrument, TickHandler handler)
 		{
 			Subscribe(instrument.classCode, instrument.securityCode, handler);
 		}
-		static public void Unsubscribe(string classCode, string secCode, TickHandler handler)
+		public void Unsubscribe(string classCode, string secCode, TickHandler handler)
 		{
 			if (recievers.ContainsKey(classCode + secCode))
 			{
 				recievers[classCode + secCode] -= handler ?? throw new Exception("tried to unsubscribe null");
 			}
 		}
-		static public void Unsubscribe(Instrument instrument, TickHandler handler)
+		public void Unsubscribe(Instrument instrument, TickHandler handler)
 		{
 			Unsubscribe(instrument.classCode, instrument.securityCode, handler);
 		}
 
+		/*
+		private static readonly Char separator { get; set; } = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
 		/// <summary>
 		/// имя, шаг цены и ее точность
 		/// </summary>
-		private static (string name, double step, int priceAccuracy) 
+		private (string name, double step, int priceAccuracy) 
 			GetSecurityInfo(string classCode, string securityCode)
 		{
 			if (classCode != null && classCode != "")
@@ -96,7 +106,7 @@ namespace RansacBot
 		/// <param name="classCode"></param>
 		/// <param name="securityCode"></param>
 		/// <returns>кортеж с маржой на покупку и продажу и шаг цены</returns>
-		private static (double initialMarginBuy, double initialMarginSell, double stepPrice) 
+		private (double initialMarginBuy, double initialMarginSell, double stepPrice) 
 			GetInitialMarginInfo(string classCode, string securityCode)
 		{
 			try
@@ -113,6 +123,6 @@ namespace RansacBot
 					ex.Message);
 			}
 		}
-
+		*/
 	}
 }

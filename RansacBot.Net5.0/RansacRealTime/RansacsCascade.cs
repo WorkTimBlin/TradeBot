@@ -68,12 +68,10 @@ namespace RansacsRealTime
 		{
 			return levels.Select(x => x.GetRansacsAsArray()).ToArray();
 		}
-
 		public LevelOfRansacs GetLevel(int level)
 		{
 			return levels[level];
 		}
-
 		/// <summary>
 		/// Warning: deletes the entire directory to save recursevly before writing!
 		/// </summary>

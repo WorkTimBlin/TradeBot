@@ -15,6 +15,7 @@ namespace RansacBot
 		public readonly List<RansacsCascade> ransacsCascades;
 		private bool isActive = false;
 		private bool isUpdated = false;
+		public readonly ITickByInstrumentProvider provider;
 		DateTime dateTimeOfLastSave;
 
 		/// <summary>
@@ -22,57 +23,44 @@ namespace RansacBot
 		/// </summary>
 		/// <param name="instrument"></param>
 		/// <param name="N">N from monkeyN</param>
-		public ObservingSession(Instrument instrument, int N)
+		public ObservingSession(Instrument instrument, ITickByInstrumentProvider provider, int N)
 		{
 			this.instrument = instrument;
+			this.provider = provider;
 			this.ransacs = new(N);
 			ransacsCascades = this.ransacs.vertexes.cascades;
 			isUpdated = true;
+			SubscribeToProvider();
 		}
-
 		/// <summary>
 		/// Initialises Instrument and ransacs session from file
 		/// </summary>
 		/// <param name="path"></param>
-		public ObservingSession(string path)
+		public ObservingSession(string path, ITickByInstrumentProvider provider)
 		{
 			instrument = new(path);
+			this.provider = provider;
 			ransacs = new(path);
 			ransacsCascades = ransacs.vertexes.cascades;
 			dateTimeOfLastSave = LoadMetadata(path).dateTimeOfLastSave;
 		}
 
-		public void SubscribeToQuik()
-		{
-			if (!isUpdated) throw new Exception("Can't subscribe until is not updated!");
-			if (isActive) throw new Exception("Can't subscribe while subscribed!!");
-			Connector.Subscribe(instrument.classCode, instrument.securityCode, this.ransacs.OnNewTick);
-			isActive = true;
-		}
-		public void UnsubscribeOfQuik()
-		{
-			if (!isActive) return;
-			Connector.Unsubscribe(instrument, this.ransacs.OnNewTick);
-			isActive = false;
-			isUpdated = false;
-		}
-		public void SubscribeTo(ITickByInstrumentProvider provider)
+		public void SubscribeToProvider()
 		{
 			if (!isUpdated) throw new Exception("Can't subscribe until is not updated!");
 			if (isActive) throw new Exception("Can't subscribe while subscribed!!");
 			provider.Subscribe(instrument, this.ransacs.OnNewTick);
 			isActive = true;
 		}
-		public void UnsubscribeOf(ITickByInstrumentProvider provider)
+		public void UnsubscribeOfProvider()
 		{
 			if (!isActive) return;
 			provider.Unsubscribe(instrument, this.ransacs.OnNewTick);
 			isActive = false;
 			isUpdated = false;
 		}
-
 		public void UpdateFromTicksUpToEndKeepingUpWithProviderWaitingForTime(
-			IList<Tick> ticks, ITickByInstrumentProvider provider, TimeSpan time)
+			IList<Tick> ticks, TimeSpan time)
 		{
 			if (isUpdated) return;
 			Queue<Tick> hub = new();
@@ -93,12 +81,16 @@ namespace RansacBot
 				ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID));
 			isUpdated = true;
 		}
-		public void UpdateFromFinamAndLaunchUsingQuik()
+		public void AddNewRansacsCascade(SigmaType typeSigma, double percentile = 90)
 		{
-			UnsubscribeOfQuik();
-			UpdateUpToNowUsingFinam();
-			SubscribeToQuik();
+			new RansacsCascade(this.ransacs.vertexes, typeSigma, percentile);
 		}
+		//public void UpdateFromFinamAndLaunchUsingQuik()
+		//{
+		//	UnsubscribeOfQuik();
+		//	UpdateUpToNowUsingFinam();
+		//	SubscribeToQuik();
+		//}
 		/// <summary>
 		/// feeds ransacs with ticks from finam from given date
 		/// ransacs should be Unsubscribed when this function is called
@@ -108,7 +100,7 @@ namespace RansacBot
 		{
 			if (isUpdated) return;
 			Queue<Tick> hub = new();
-			Connector.Subscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			Connector.GetInstance().Subscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
 			DateTime targetDateTime = DateTime.Now + new TimeSpan(0, 2, 0);
 			while (DateTime.Now < targetDateTime || hub.Count == 0) ;
 			FeedRansacsWithTicksUpToID(
@@ -118,12 +110,8 @@ namespace RansacBot
 						DateTime.Now)).SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID),
 				hub.Peek().ID);
 			FeedRansacsWholeQueue(hub);
-			Connector.Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			Connector.GetInstance().Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
 			isUpdated = true;
-		}
-		public void AddNewRansacsCascade(SigmaType typeSigma, double percentile = 90)
-		{
-			new RansacsCascade(this.ransacs.vertexes, typeSigma, percentile);
 		}
 
 		/// <summary>

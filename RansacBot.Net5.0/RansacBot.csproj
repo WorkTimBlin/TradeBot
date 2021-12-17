@@ -18,7 +18,7 @@
     <Compile Remove="old\FormLogin.Designer.cs" />
     <Compile Remove="old\FormTestLogin.cs" />
     <Compile Remove="old\FormTestLogin.Designer.cs" />
-    <Compile Remove="Prototypes\SaveLoadManager.cs" />
+    <Compile Remove="old\LOGGER.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,7 +38,7 @@
     <None Include="old\FormTestLogin.cs" />
     <None Include="old\FormTestLogin.Designer.cs" />
     <None Include="old\FormTestLogin.resx" />
-    <None Include="Prototypes\SaveLoadManager.cs" />
+    <None Include="old\LOGGER.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -17,7 +17,7 @@ namespace RansacBot.UI
 		readonly LinearAxis axisX = new()
 		{
 			Position = AxisPosition.Bottom,
-			Title = "Vertexes",
+			Title = "VertexIndexes",
 			LabelFormatter = (x) => x.ToString(),
 			Key = "X"
 		};
@@ -29,123 +29,60 @@ namespace RansacBot.UI
 			LabelFormatter = (x) => x.ToString(),
 			Key = "Y"
 		};
-		readonly LineSeries extremumVertexes = new()
-		{
-			Title = "Extremum-N",
-			Color = OxyColors.Transparent,
-			MarkerFill = OxyColors.Blue,
-			MarkerType = MarkerType.Circle,
-			MarkerSize = 4,
-			Tag = "ExtremumsN",
-			XAxisKey = "X",
-			YAxisKey = "Y"
-		};
-		readonly LineSeries MonkeyVertexes = new()
-		{
-			Title = "Vertex-Monkey",
-			Color = OxyColors.Transparent,
-			MarkerFill = OxyColors.SkyBlue,
-			MarkerType = MarkerType.Circle,
-			MarkerSize = 4,
-			Tag = "VertexesMonkey",
-			XAxisKey = "X",
-			YAxisKey = "Y"
-		};
-		readonly LineSeries VertexesLine = new()
+
+		readonly RansacSeries ransacs = new RansacColorfulSeries();
+		readonly LineSeries vertexes = new()
 		{
 			Title = "Vertexes",
 			Color = OxyColors.Gray,
+			MarkerFill = OxyColors.Blue,
+			MarkerType = MarkerType.Circle,
+			MarkerSize = 4,
 			StrokeThickness = 1,
 			Tag = "Vertexes",
 			XAxisKey = "X",
 			YAxisKey = "Y"
 		};
 
-		readonly LineSegmentSeries ransacsUp = new()
+		readonly int level;
+		public RansacsOxyPrinter(int level, RansacsCascade cascade)
 		{
-			Color = OxyColors.Lime,
-			StrokeThickness = 3,
-			XAxisKey = "X",
-			YAxisKey = "Y",
-			Tag = "ransac"
-		};
-		readonly LineSegmentSeries ransacsDown = new()
-		{
-			Color = OxyColors.Red,
-			StrokeThickness = 3,
-			XAxisKey = "X",
-			YAxisKey = "Y",
-			Tag = "ransac"
-		};
-		readonly LineSegmentSeries sigmasUp = new()
-		{
-			Color = OxyColors.Lime,
-			StrokeThickness = 2,
-			LineStyle = LineStyle.Dot,
-			XAxisKey = "X",
-			YAxisKey = "Y",
-			Tag = "sigma"
-		};
-		readonly LineSegmentSeries sigmasDown = new()
-		{
-			Color = OxyColors.Red,
-			StrokeThickness = 2,
-			LineStyle = LineStyle.Dot,
-			XAxisKey = "X",
-			YAxisKey = "Y",
-			Tag = "sigma"
-		};
-
-		int Level { get; }
-
-		void InitialiseModel()
-		{
+			this.level = level;
+			cascade.NewRansac += OnNewRansac;
+			cascade.RebuildRansac += OnRebuildRansac;
+			cascade.StopRansac += OnStopRansac;
+			cascade.NewVertex += OnNewVertex;
 			plotModel.Axes.Add(axisX);
 			plotModel.Axes.Add(axisY);
+			plotModel.Series.Add(vertexes);
+			ransacs.AddTo(plotModel);
 		}
 
-		void PrintNewRansac(Ransac ransac, int level)
+		public void OnNewRansac(Ransac ransac, int level)
 		{
-			
+			if (level != this.level) return;
+			ransacs.BuildNewRansac(ransac);
+			InvalidatePlot(true);
 		}
-
-		LineSeries GetRansacLine(Ransac ransac)
+		public void OnRebuildRansac(Ransac ransac, int level)
 		{
-			LineSeries line = new()
-			{
-				Color = ransac.Slope > 0 ? OxyColors.Lime : OxyColors.Red,
-				StrokeThickness = 3,
-				XAxisKey = "X",
-				YAxisKey = "Y",
-				Tag = "ransac"
-			};
-			line.Points.Add(new(ransac.firstTickIndex, ransac.GetValueAtPoint(ransac.firstTickIndex)));
-			line.Points.Add(new(ransac.LastTickIndex, ransac.GetValueAtPoint(ransac.LastTickIndex)));
-			return line;
+			if (level != this.level) return;
+			ransacs.RebuildLastRansac(ransac);
+			InvalidatePlot(true);
 		}
-
-		LineSeries GetSigmaLine(Ransac ransac)
+		public void OnStopRansac(Ransac ransac, int level)
 		{
-			LineSeries sigma = new()
-			{
-				Color = ransac.Slope > 0 ? OxyColors.Lime : OxyColors.Red,
-				StrokeThickness = 2,
-				LineStyle = LineStyle.Dot,
-				XAxisKey = "X",
-				YAxisKey = "Y",
-				Tag = "sigma"
-			};
-			if (ransac.Slope > 0)
-			{
-				sigma.Points.Add(new(ransac.firstTickIndex, ransac.GetValueAtPoint(ransac.firstTickIndex) - ransac.Sigma));
-				sigma.Points.Add(new(ransac.LastTickIndex, ransac.GetValueAtPoint(ransac.LastTickIndex) - ransac.Sigma));
-			}
-			else
-			{
-				sigma.Points.Add(new(ransac.firstTickIndex, ransac.GetValueAtPoint(ransac.firstTickIndex) + ransac.Sigma));
-				sigma.Points.Add(new(ransac.LastTickIndex, ransac.GetValueAtPoint(ransac.LastTickIndex) + ransac.Sigma));
-			}
-			return sigma;
+			if (level != this.level) return;
+			ransacs.StopLastRansac(ransac);
+		}
+		public void OnNewVertex(Tick tick)
+		{
+			vertexes.Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
+			InvalidatePlot(true);
+		}
+		private void InvalidatePlot(bool updateData)
+		{
+			this.plotModel.InvalidatePlot(updateData);
 		}
 	}
 }

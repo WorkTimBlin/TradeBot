@@ -5,7 +5,7 @@ namespace RansacsRealTime
 {
 	public class LevelOfRansacs
 	{
-		private int level;
+		public readonly int level;
 		private List<Ransac> Ransacs;
 		public bool IsBuilding { get; private set; } = false;
 		public int LastIndexPermited { get; private set; } = -1;
@@ -192,6 +192,5 @@ namespace RansacsRealTime
 			FindLastPermitedIndex();
 			StopRansac?.Invoke(level, ransac);
 		}
-
 	}
 }

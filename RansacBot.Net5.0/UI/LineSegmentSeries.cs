@@ -70,10 +70,30 @@ namespace RansacBot.UI
 				}
 			}
 
-			rc.DrawLineSegments(screenPoints, this.ActualColor, this.StrokeThickness, this.EdgeRenderingMode, null, this.LineJoin);
-			rc.DrawLineSegments(verticalLines, this.ActualColor, this.StrokeThickness / 3, EdgeRenderingMode, null, this.LineJoin);
+			rc.DrawLineSegments(
+				screenPoints, 
+				this.ActualColor, 
+				this.StrokeThickness, 
+				this.EdgeRenderingMode, 
+				this.BrokenLineStyle.GetDashArray(), 
+				this.LineJoin);
+			rc.DrawLineSegments(
+				verticalLines, 
+				this.ActualColor, 
+				this.StrokeThickness / 3, 
+				EdgeRenderingMode,
+				this.BrokenLineStyle.GetDashArray(), 
+				this.LineJoin);
 
-			rc.DrawMarkers(screenPoints, this.MarkerType, null, this.MarkerSize, this.MarkerFill, this.MarkerStroke, this.MarkerStrokeThickness, EdgeRenderingMode);
+			rc.DrawMarkers(
+				screenPoints, 
+				this.MarkerType, 
+				null, 
+				this.MarkerSize, 
+				this.MarkerFill, 
+				this.MarkerStroke,
+				this.MarkerStrokeThickness, 
+				EdgeRenderingMode);
 		}
 		/// <summary>
 		/// Gets the point on the series that is nearest the specified point.

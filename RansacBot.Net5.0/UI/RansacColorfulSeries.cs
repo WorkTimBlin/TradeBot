@@ -12,20 +12,16 @@ namespace RansacBot.UI
 {
 	class RansacColorfulSeries : RansacSeries
 	{
-		readonly LineSegmentSeries ransacsRaising = new()
+		readonly LineSegmentSeries ransacsRising = new()
 		{
 			Color = OxyColors.Lime,
 			StrokeThickness = 3,
-			XAxisKey = "X",
-			YAxisKey = "Y",
 			Tag = "ransac"
 		};
 		readonly LineSegmentSeries ransacsFalling = new()
 		{
 			Color = OxyColors.Red,
 			StrokeThickness = 3,
-			XAxisKey = "X",
-			YAxisKey = "Y",
 			Tag = "ransac"
 		};
 		readonly LineSegmentSeries sigmasRising = new()
@@ -33,8 +29,6 @@ namespace RansacBot.UI
 			Color = OxyColors.Lime,
 			StrokeThickness = 2,
 			LineStyle = LineStyle.Dot,
-			XAxisKey = "X",
-			YAxisKey = "Y",
 			Tag = "sigma"
 		};
 		readonly LineSegmentSeries sigmasFalling = new()
@@ -42,46 +36,82 @@ namespace RansacBot.UI
 			Color = OxyColors.Red,
 			StrokeThickness = 2,
 			LineStyle = LineStyle.Dot,
-			XAxisKey = "X",
-			YAxisKey = "Y",
 			Tag = "sigma"
 		};
+		private bool wasLastRaising;
 
-		public override int Count => (ransacsFalling.Points.Count + ransacsRaising.Points.Count) / 2;
-		public override void Add(Ransac ransac)
+		public override int Count => (ransacsFalling.Points.Count + ransacsRising.Points.Count) / 2;
+		public override void BuildNewRansac(Ransac ransac)
 		{
 			if(IsRaising(ransac))
 			{
 				AddRansacRaising(ransac);
 				AddSigmaRaising(ransac);
+				wasLastRaising = true;
 			}
 			else
 			{
 				AddRansacFalling(ransac);
 				AddSigmaFalling(ransac);
+				wasLastRaising = false;
 			}
+		}
+		public override void RebuildLastRansac(Ransac ransac)
+		{
+			RemoveLast();
+			BuildNewRansac(ransac);
+		}
+		public override void StopLastRansac(Ransac ransac)
+		{
+			RebuildLastRansac(ransac);
 		}
 		public override void Clear()
 		{
 			ransacsFalling.Points.Clear();
 			sigmasFalling.Points.Clear();
-			ransacsRaising.Points.Clear();
+			ransacsRising.Points.Clear();
 			sigmasRising.Points.Clear();
 		}
 
-		public override void Render(IRenderContext rc)
+		public override void AddTo(PlotModel model)
 		{
-			ransacsFalling.Render(rc);
-			ransacsRaising.Render(rc);
-			sigmasFalling.Render(rc);
-			sigmasRising.Render(rc);
+			model.Series.Add(ransacsFalling);
+			model.Series.Add(ransacsRising);
+			model.Series.Add(sigmasFalling);
+			model.Series.Add(sigmasRising);
+		}
+		public override void RemoveFrom(PlotModel model)
+		{
+			model.Series.Remove(ransacsFalling);
+			model.Series.Remove(ransacsRising);
+			model.Series.Remove(sigmasFalling);
+			model.Series.Remove(sigmasRising);
 		}
 
+		private void RemoveLast()
+		{
+			if (wasLastRaising)
+			{
+				RemoveLastAt(ransacsRising);
+				RemoveLastAt(sigmasRising);
+			}
+			else
+			{
+				RemoveLastAt(ransacsFalling);
+				RemoveLastAt(sigmasFalling);
+			}
+		}
+
+		private void RemoveLastAt(LineSegmentSeries series)
+		{
+			series.Points.RemoveAt(series.Points.Count - 1);
+			series.Points.RemoveAt(series.Points.Count - 1);
+		}
 		private void AddRansacRaising(Ransac ransac)
 		{
 			var startEndPoints = GetStartEndPoints(ransac);
-			ransacsRaising.Points.Add(startEndPoints.start);
-			ransacsRaising.Points.Add(startEndPoints.end);
+			ransacsRising.Points.Add(startEndPoints.start);
+			ransacsRising.Points.Add(startEndPoints.end);
 		}
 		private void AddRansacFalling(Ransac ransac)
 		{
@@ -101,11 +131,15 @@ namespace RansacBot.UI
 		}
 	}
 
-	public abstract class RansacSeries : XYAxisSeries
+	public abstract class RansacSeries 
 	{
 		public abstract int Count { get; }
-		public abstract void Add(Ransac ransac);
+		public abstract void BuildNewRansac(Ransac ransac);
+		public abstract void RebuildLastRansac(Ransac ransac);
+		public abstract void StopLastRansac(Ransac ransac);
 		public abstract void Clear();
+		public abstract void AddTo(PlotModel model);
+		public abstract void RemoveFrom(PlotModel model);
 		protected static bool IsRaising(Ransac ransac)
 		{
 			return ransac.Slope > 0;

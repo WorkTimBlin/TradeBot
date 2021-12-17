@@ -8,10 +8,8 @@ namespace BotTests
 {
 	static class Materials
 	{
-		//public static readonly string PathForTestSaves = @"F:\tim\folderForTests";
-		public static readonly string PathForTestSaves = @"F:\tim\folderForTests";
-		//public static readonly string FilesForTestingPath = @"F:\tim\ParserDataFinam\ParserDataFinam\bin\Debug\Data";
-		public static readonly string FilesForTestingPath = @"F:\tim\ParserDataFinam\ParserDataFinam\bin\Debug\Data";
+		public static readonly string PathForTestSaves = Directory.GetCurrentDirectory() + @"\TestsProperties\TestSaves";
+		public static readonly string FilesForTestingPath = Directory.GetCurrentDirectory() + @"\TestsProperties\FolderForTests";
 		public static TicksLazyParser ticks = new(
 					File.ReadAllText(FilesForTestingPath + @"/1.txt").
 					Split("\r\n", StringSplitOptions.RemoveEmptyEntries));//used for feeding

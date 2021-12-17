@@ -21,7 +21,6 @@ namespace BotTests
 					tickHandler.Invoke(tick);
 				}
 			}
-
 			public void FeedRangeOfStandart(int startIndex, int count)
 			{
 				for (int i = startIndex; i < startIndex + count; i++)
@@ -190,7 +189,15 @@ namespace BotTests
 			task.Wait();
 			Assert.AreEqual(JsonConvert.SerializeObject(orig.ransacs), JsonConvert.SerializeObject(gapFilled.ransacs));
 		}
-
-
+		//[TestMethod]
+		public void SaveHystoryFileInNewLocation()
+		{
+			using StreamWriter streamWriter = new(Directory.GetCurrentDirectory() + "/TestsProperties/1.txt");
+			string[] HystoryStrings = FinamDataLoader.RawFinamHystory.GetTickLines(new System.DateTime(2021, 12, 1), new System.DateTime(2021, 12, 2));
+			for(int i = 0; i < HystoryStrings.Length; i++)
+			{
+				streamWriter.WriteLine(HystoryStrings[i]);
+			}
+		}
 	}
 }

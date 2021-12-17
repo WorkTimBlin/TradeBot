@@ -2,26 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace RansacRealTime
+namespace RansacsRealTime
 {
 	public class Vertexes
 	{
-		#region Свойства
-
-		/// <summary>
-		/// Список вершин MonkeyN.
-		/// </summary>
-		public List<Tick> VertexList { get; private set; } = new();
-		/// <summary>
-		/// Список подписантов(ранзаков) на вершины.
-		/// </summary>
-		public List<RansacHystory> Hystories { get; set; } = new();
-		/// <summary>
-		/// Индекс последнего тика, в который выполнилось условия разнонаправленных ранзаков.
-		/// </summary>
+		
+		public readonly List<Tick> vertexList = new();
+		public readonly List<RansacsCascade> cascades = new();
 		public int LastIndexPermited { get; private set; } = -1;
-
-		#endregion
 
 		public event VertexHandler NewVertex;
 
@@ -29,40 +17,35 @@ namespace RansacRealTime
 		{
 
 		}
-
 		public Vertexes(string path)
 		{
 			LoadStandart(path);
 			FindLastIndexPermited();
 		}
-
-
 		public Vertexes(string path, bool loadHystoryesToo)
 		{
 			LoadStandart(path);
 			FindLastIndexPermited();
-
-			if (loadHystoryesToo)
-				LoadAllHystories(path);
+			if (loadHystoryesToo) LoadAllHystories(path);
 		}
 
 
-		public void FindLastIndexPermited()
+		private void FindLastIndexPermited()
 		{
-			if (VertexList.Count < 2)
+			if (vertexList.Count < 2)
             {
 				LastIndexPermited = -1;
 				return;
 			}
 
-			int index = VertexList.Count;
-			double lastSlope = VertexList[index - 1].PRICE - VertexList[index - 2].PRICE;
+			int index = vertexList.Count;
+			double lastSlope = vertexList[index - 1].PRICE - vertexList[index - 2].PRICE;
 
 			do
 			{
 				index--;
 
-				if ((VertexList[index].PRICE - VertexList[index - 1].PRICE) * lastSlope < 0)
+				if ((vertexList[index].PRICE - vertexList[index - 1].PRICE) * lastSlope < 0)
 				{
 					LastIndexPermited = index - 1;
 					return;
@@ -74,41 +57,40 @@ namespace RansacRealTime
 		}
 		public int GetFirstIndexForNew(Ransac lastRansac)
 		{
-			int startInd = lastRansac.EndIndexTick - 1;
+			int startInd = lastRansac.EndTickIndex - 1;
 
-			if (VertexList[startInd - 1].PRICE > VertexList[startInd].PRICE)
+			if (vertexList[startInd - 1].PRICE > vertexList[startInd].PRICE)
 				startInd -= 1;
 			
 			return startInd;
 		}
 		public int GetIndexOfMinTickInRansac(Ransac ransac)
 		{
-			int minInd = ransac.FirstIndexTick;
+			int minInd = ransac.firstTickIndex;
 
-			for (int i = ransac.FirstIndexTick; i < ransac.EndIndexTick; i++)
-				if (VertexList[i].PRICE <= VertexList[minInd].PRICE)
+			for (int i = ransac.firstTickIndex; i < ransac.EndTickIndex; i++)
+				if (vertexList[i].PRICE <= vertexList[minInd].PRICE)
 					minInd = i;			
 			
 			return minInd;
 		}
 		public int GetIndexOfMaxTickInRansac(Ransac ransac)
 		{
-			int maxInd = ransac.FirstIndexTick;
+			int maxInd = ransac.firstTickIndex;
 
-			for (int i = ransac.FirstIndexTick; i < ransac.EndIndexTick; i++)
-				if (VertexList[i].PRICE >= VertexList[maxInd].PRICE)
+			for (int i = ransac.firstTickIndex; i < ransac.EndTickIndex; i++)
+				if (vertexList[i].PRICE >= vertexList[maxInd].PRICE)
 					maxInd = i;
 			
 			return maxInd;
 		}
 
-
 		public void OnNewVertex(Tick tick)
 		{
-			VertexList.Add(tick);
+			vertexList.Add(tick);
 			FindLastIndexPermited();
 
-			foreach (RansacHystory hystory in Hystories)
+			foreach (RansacsCascade hystory in cascades)
 				hystory.OnNewVertex(tick);
 		}
 		public void OnNewVertex(Tick tick, VertexType vertexType)
@@ -117,65 +99,62 @@ namespace RansacRealTime
 			NewVertex?.Invoke(tick, vertexType);
 		}
 
-
-		public virtual void SaveStandart(string path)
+		private const string stdFileName = "vertexes.csv";
+		private void LoadStandart(string path, string fileName = stdFileName)
+		{
+			using StreamReader reader = new(path + @"\" + fileName);
+			reader.ReadLine();
+			while (!reader.EndOfStream)
+			{
+				string[] data = reader.ReadLine().Split(';');
+				vertexList.Add(new Tick(Convert.ToInt64(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
+			}
+		}
+		public virtual void SaveStandart(string path, string fileName = stdFileName)
 		{
 			if(!new DirectoryInfo(path).Exists)
 			{
 				Directory.CreateDirectory(path);
 			}
-			using StreamWriter writer = new(path + "/vertexes.csv");
+			using StreamWriter writer = new(path + @"\" + fileName);
 			writer.WriteLine("localIndex; globalIndex; price");
-			foreach (Tick vertex in VertexList)
+			foreach (Tick vertex in vertexList)
 			{
-				writer.WriteLine(vertex.ID.ToString() + ';' + vertex.VERTEXINDEX.ToString() + ';' + vertex.PRICE.ToString() + ';');
+				writer.WriteLine(vertex.ToString());
 			}
 		}
-		private void LoadStandart(string path)
-		{
-			using StreamReader reader = new(path + "/vertexes.csv");
-			reader.ReadLine();
-			while (!reader.EndOfStream)
-			{
-				string[] data = reader.ReadLine().Split(';');
-				VertexList.Add(new Tick(Convert.ToInt64(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
-			}
-		}
-
 		public void SaveStandart(string path, bool saveHystoriesToo)
 		{
 			SaveStandart(path);
 			if(saveHystoriesToo)
 				SaveAllHystories(path);
 		}
-
 		public void SaveAllHystories(string path)
 		{
-			foreach(RansacHystory hystory in Hystories)
+			foreach(RansacsCascade hystory in cascades)
 			{
 				hystory.SaveStandart(path);
 			}
 		}
-
 		/// <summary>
 		/// warning:deletes all current ransac hystories if there was
 		/// </summary>
 		/// <param name="path"></param>
 		/// <returns>List of loaded hystories</returns>
-		private List<RansacHystory> LoadAllHystories(string path)
+		private List<RansacsCascade> LoadAllHystories(string path)
 		{
-			Hystories.Clear();
+			cascades.Clear();
 			DirectoryInfo[] dirs = new DirectoryInfo(path).GetDirectories();
 
 			foreach(DirectoryInfo hDir in dirs)
 			{
 				if (hDir.Name.Contains("Hystory"))
 				{
-					new RansacHystory(this, hDir.FullName);
+					new RansacsCascade(this, hDir.FullName);
 				}
 			}
 
-			return Hystories;
+			return cascades;
 		}
 	}
 }

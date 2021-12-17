@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <RootNamespace>RansacBot</RootNamespace>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>RansacBot</AssemblyName>
+    <ApplicationIcon />
+    <StartupObject />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="old\Form1.cs" />
+    <Compile Remove="old\Form1.Designer.cs" />
+    <Compile Remove="old\FormLogin.cs" />
+    <Compile Remove="old\FormLogin.Designer.cs" />
+    <Compile Remove="old\FormTestLogin.cs" />
+    <Compile Remove="old\FormTestLogin.Designer.cs" />
+    <Compile Remove="old\LOGGER.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="old\Form1.resx" />
+    <EmbeddedResource Remove="old\FormLogin.resx" />
+    <EmbeddedResource Remove="old\FormTestLogin.resx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+    <None Include="old\Form1.cs" />
+    <None Include="old\Form1.Designer.cs" />
+    <None Include="old\Form1.resx" />
+    <None Include="old\FormLogin.cs" />
+    <None Include="old\FormLogin.Designer.cs" />
+    <None Include="old\FormLogin.resx" />
+    <None Include="old\FormTestLogin.cs" />
+    <None Include="old\FormTestLogin.Designer.cs" />
+    <None Include="old\FormTestLogin.resx" />
+    <None Include="old\LOGGER.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Accord" Version="3.8.0" />
+    <PackageReference Include="Accord.Math" Version="3.8.0" />
+    <PackageReference Include="Accord.Statistics" Version="3.8.0" />
+    <PackageReference Include="NLog" Version="4.7.12" />
+    <PackageReference Include="NLog.Config" Version="4.7.12" />
+    <PackageReference Include="OxyPlot.Core" Version="2.1.0" />
+    <PackageReference Include="OxyPlot.WindowsForms" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\QUIKSharp-master\src\QuikSharp\QuikSharp.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="C:\Users\ir2\.nuget\packages\nlog.config\4.7.12\contentFiles\any\any\NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>BotTests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>

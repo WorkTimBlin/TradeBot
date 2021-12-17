@@ -1,0 +1,173 @@
+﻿using RansacsRealTime;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace RansacBot
+{
+	class ObservingSession
+	{
+		public readonly Instrument instrument;
+		public readonly RansacsSession ransacs;
+		public readonly List<RansacsCascade> ransacsCascades;
+		private bool isActive = false;
+		private bool isUpdated = false;
+		public readonly ITickByInstrumentProvider provider;
+		DateTime dateTimeOfLastSave;
+
+		/// <summary>
+		/// starts a new session on given instrument without any loading and immediatly subscribes ransacs to new ticks
+		/// </summary>
+		/// <param name="instrument"></param>
+		/// <param name="N">N from monkeyN</param>
+		public ObservingSession(Instrument instrument, ITickByInstrumentProvider provider, int N)
+		{
+			this.instrument = instrument;
+			this.provider = provider;
+			this.ransacs = new(N);
+			ransacsCascades = this.ransacs.vertexes.cascades;
+			isUpdated = true;
+			SubscribeToProvider();
+		}
+		/// <summary>
+		/// Initialises Instrument and ransacs session from file
+		/// </summary>
+		/// <param name="path"></param>
+		public ObservingSession(string path, ITickByInstrumentProvider provider)
+		{
+			instrument = new(path);
+			this.provider = provider;
+			ransacs = new(path);
+			ransacsCascades = ransacs.vertexes.cascades;
+			dateTimeOfLastSave = LoadMetadata(path).dateTimeOfLastSave;
+		}
+
+		public void SubscribeToProvider()
+		{
+			if (!isUpdated) throw new Exception("Can't subscribe until is not updated!");
+			if (isActive) throw new Exception("Can't subscribe while subscribed!!");
+			provider.Subscribe(instrument, this.ransacs.OnNewTick);
+			isActive = true;
+		}
+		public void UnsubscribeOfProvider()
+		{
+			if (!isActive) return;
+			provider.Unsubscribe(instrument, this.ransacs.OnNewTick);
+			isActive = false;
+			isUpdated = false;
+		}
+		public void UpdateFromTicksUpToEndKeepingUpWithProviderWaitingForTime(
+			IList<Tick> ticks, TimeSpan time)
+		{
+			if (isUpdated) return;
+			Queue<Tick> hub = new();
+			provider.Subscribe(instrument, hub.Enqueue);
+			DateTime targetDateTime = DateTime.Now + time;
+			while (DateTime.Now < targetDateTime || hub.Count == 0) ;
+			FeedRansacsWithTicksUpToID(
+				ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID),
+				hub.Peek().ID);
+			FeedRansacsWholeQueue(hub);
+			provider.Unsubscribe(instrument, hub.Enqueue);
+			isUpdated = true;
+		}
+		public void UpdateFromTicksUpToEnd(IList<Tick> ticks)
+		{
+			if (isUpdated) return;
+			FeedRansacsWithTicks(
+				ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID));
+			isUpdated = true;
+		}
+		public void AddNewRansacsCascade(SigmaType typeSigma, double percentile = 90)
+		{
+			new RansacsCascade(this.ransacs.vertexes, typeSigma, percentile);
+		}
+		//public void UpdateFromFinamAndLaunchUsingQuik()
+		//{
+		//	UnsubscribeOfQuik();
+		//	UpdateUpToNowUsingFinam();
+		//	SubscribeToQuik();
+		//}
+		/// <summary>
+		/// feeds ransacs with ticks from finam from given date
+		/// ransacs should be Unsubscribed when this function is called
+		/// </summary>
+		/// <param name="dateTimeOfLastSave"></param>
+		private void UpdateUpToNowUsingFinam()
+		{
+			if (isUpdated) return;
+			Queue<Tick> hub = new();
+			Connector.GetInstance().Subscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			DateTime targetDateTime = DateTime.Now + new TimeSpan(0, 2, 0);
+			while (DateTime.Now < targetDateTime || hub.Count == 0) ;
+			FeedRansacsWithTicksUpToID(
+				new TicksLazyParser(
+					FinamDataLoader.RawFinamHystory.GetTickLines(
+						dateTimeOfLastSave,
+						DateTime.Now)).SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID),
+				hub.Peek().ID);
+			FeedRansacsWholeQueue(hub);
+			Connector.GetInstance().Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			isUpdated = true;
+		}
+
+		/// <summary>
+		/// Feeds ticks from finam hystory into ransacs session, stops when ID of tick from hystory equals to given
+		/// Throws exception if there is no tick with such ID
+		/// </summary>
+		/// <param name="startDate"></param>
+		private void FeedRansacsWithTicksUpToID(IEnumerable<Tick> ticksHystory, long stopID)
+		{
+			ransacs.monkeyNFilter.ReturnToLastReturned();
+			foreach (Tick tick in ticksHystory)
+			{
+				if (tick.ID >= stopID) 
+					return;
+				this.ransacs.OnNewTick(tick);
+			}
+			throw new ArgumentException("hystoryDoesn't reach stopID");
+		}
+		private void FeedRansacsWithTicks(IEnumerable<Tick> ticksHystory)
+		{
+			ransacs.monkeyNFilter.ReturnToLastReturned();
+			foreach (Tick tick in ticksHystory)
+			{
+				this.ransacs.OnNewTick(tick);
+			}
+		}
+		private void FeedRansacsWholeQueue(Queue<Tick> ticks)
+		{
+			while(ticks.Count > 0)
+			{
+				ransacs.OnNewTick(ticks.Dequeue());
+			}
+		}
+
+		public void SaveStandart(string path)
+		{
+			SaveMetadata(path);
+			instrument.SaveStandart(path);
+			ransacs.SaveStandart(path);
+		}
+
+		private const string metadataName = "metadata";
+		private void SaveMetadata(string path, string fileName = metadataName)
+		{
+			using(StreamWriter writer = new(path + @"/" + fileName))
+			{
+				writer.WriteLine("dateTimeOfLastSave;" + DateTime.Now.ToString());
+			}
+		}
+
+		private (DateTime dateTimeOfLastSave, object? someFool) LoadMetadata(string path, string fileName = metadataName)
+		{
+			using (StreamReader reader = new(path + @"/" + fileName))
+			{
+				return (DateTime.Parse(reader.ReadLine().Split(';', StringSplitOptions.RemoveEmptyEntries)[1]), null);
+			}
+		}
+	}
+}

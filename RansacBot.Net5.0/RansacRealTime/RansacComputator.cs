@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace RansacRealTime
+namespace RansacsRealTime
 {
 	/// <summary>
 	/// Класс предоставляет 1 единственный функционал (Compute) - выдает построенный ранзак с указанными параметрами.
@@ -20,7 +20,7 @@ namespace RansacRealTime
 		private static readonly object locker = new();
 
 
-		public static void Compute(List<Tick> ticks, TypeSigma typeSigma, double percentile,
+		public static void Compute(List<Tick> ticks, SigmaType typeSigma, double percentile,
 			out SimpleLinearRegression bestReg, out double errorThreshold, out double sigma)
 		{
 			x = ticks.Select(n => (double)n.VERTEXINDEX).ToArray();
@@ -50,11 +50,11 @@ namespace RansacRealTime
 
 			sigma = typeSigma switch
 			{
-				TypeSigma.Sigma => Math.Sqrt(y.Zip(x.Select(x => x * slope + intercept), (a, b) => Math.Pow(a - b, 2)).Sum() / ticks.Count),
-				TypeSigma.SigmaInliers => Math.Sqrt(
+				SigmaType.Sigma => Math.Sqrt(y.Zip(x.Select(x => x * slope + intercept), (a, b) => Math.Pow(a - b, 2)).Sum() / ticks.Count),
+				SigmaType.SigmaInliers => Math.Sqrt(
 					y.Select(y => Math.Abs(y - median) <= error ? y : 0).Zip(x.Select(x => x * slope + intercept),
 					(a, b) => a == 0 ? 0 : Math.Pow(a - b, 2)).Sum() / y.Count(y => Math.Abs(y - median) <= error)),
-				TypeSigma.СonfidenceInterval => GetPercentileSigma(ticks, bestReg.Slope, bestReg.Intercept, error, percentile / 100.0),
+				SigmaType.СonfidenceInterval => GetPercentileSigma(ticks, bestReg.Slope, bestReg.Intercept, error, percentile / 100.0),
 				_ => error,
 			};
 		}

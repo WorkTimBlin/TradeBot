@@ -1,29 +1,25 @@
-﻿namespace RansacRealTime
+﻿using System;
+
+namespace RansacsRealTime
 {
 
-	public delegate void NewTickHandler(Tick tick);
+	public delegate void TickHandler(Tick tick);
 
-	/// <summary>
-	/// Тик не из QUIK.
-	/// </summary>
 	public readonly struct Tick
 	{
 		/// <summary>
-		/// ID тика из  QUIK.
+		/// ID тика из QUIK
 		/// </summary>
-		public readonly long ID { get; }
+		public readonly long ID;
 		/// <summary>
-		/// Порядковый индекс вершины из MonkeyN.
+		/// Порядковый номер вершины
 		/// </summary>
-		public readonly int VERTEXINDEX { get; }
-		/// <summary>
-		/// Цена тика.
-		/// </summary>
-		public readonly double PRICE { get; }
+		public readonly int VERTEXINDEX;
+		public readonly double PRICE;
 
 
 		/// <summary>
-		/// Базовый конструктор
+		/// полный конструктор
 		/// </summary>
 		/// <param name="id">ID тика.</param>
 		/// <param name="index">Пользовательский индекс вершин MonkeyN.</param>
@@ -33,6 +29,30 @@
 			ID = id;
 			VERTEXINDEX = index;
 			PRICE = price;
+		}
+
+		/// <summary>
+		/// serialises the tick
+		/// </summary>
+		/// <returns>serialised tick in format ID;VERTEXINDEX;PRICE</returns>
+		public override string ToString()
+		{
+			return ID.ToString() + ';' + VERTEXINDEX.ToString() + ';' + PRICE.ToString();
+		}
+
+		/// <summary>
+		/// Parses given line
+		/// </summary>
+		/// <param name="line"></param>
+		/// <returns>tick parsed from format ID;VERTEXINDEX;PRICE</returns>
+		public static Tick StandartParse(string line)
+		{
+			return StandartParse(line.Split(';', StringSplitOptions.RemoveEmptyEntries));
+		}
+
+		public static Tick StandartParse(string[] fields)
+		{
+			return new(Convert.ToInt64(fields[0]), Convert.ToInt32(fields[1]), Convert.ToDouble(fields[2]));
 		}
 	}
 }

@@ -21,7 +21,7 @@ namespace RansacBot
 			InitializeComponent();
 		}
 
-		private void InitialiseTestPlot()
+		private void InitialiseTestPlotOneByOneInTime()
 		{
 			FileFeeder fileFeeder = new();
 			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
@@ -37,6 +37,16 @@ namespace RansacBot
 					Task.Delay(1).Wait();
 				}
 			});
+			//session.SaveStandart("");
+		}
+		private void InitialiseTestPlotAllAtOnce()
+		{
+			FileFeeder fileFeeder = new();
+			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
+			session.AddNewRansacsCascade(SigmaType.ErrorThreshold);
+			ransacsPrinter = new(1, session.ransacsCascades[0]);
+			plotView1.Model = ransacsPrinter.plotModel;
+			fileFeeder.FeedAllStandart();
 			//session.SaveStandart("");
 		}
 
@@ -76,9 +86,13 @@ namespace RansacBot
 			}
 		}
 
-		private void OnShowDemo(object sender, EventArgs e)
+		private void OnShowDemoProgressing(object sender, EventArgs e)
 		{
-			InitialiseTestPlot();
+			InitialiseTestPlotOneByOneInTime();
+		}
+		private void OnShowDemoAllAtOnce(object sender, EventArgs e)
+		{
+			InitialiseTestPlotAllAtOnce();
 		}
 	}
 }

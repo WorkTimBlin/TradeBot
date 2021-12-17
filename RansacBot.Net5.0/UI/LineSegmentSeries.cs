@@ -75,14 +75,14 @@ namespace RansacBot.UI
 				this.ActualColor, 
 				this.StrokeThickness, 
 				this.EdgeRenderingMode, 
-				this.BrokenLineStyle.GetDashArray(), 
+				this.LineStyle.GetDashArray(), 
 				this.LineJoin);
 			rc.DrawLineSegments(
 				verticalLines, 
 				this.ActualColor, 
 				this.StrokeThickness / 3, 
 				EdgeRenderingMode,
-				this.BrokenLineStyle.GetDashArray(), 
+				this.LineStyle.GetDashArray(), 
 				this.LineJoin);
 
 			rc.DrawMarkers(

@@ -10,7 +10,8 @@ namespace RansacsRealTime
 	public interface IVertexFinder
 	{
 		void OnNewTick(Tick tick);
-		public event VertexHandler NewVertex;
+		public event VertexHandler NewVertex; 
+		public event VertexHandler LastVertexWasExtremum;
 	}
 
 	public interface IVertexFilter
@@ -19,7 +20,7 @@ namespace RansacsRealTime
 		public event VertexHandler NewVertex;
 	}
 
-	public class MonkeyNFilter : IVertexFinder
+	public class MonkeyNFinder : IVertexFinder
 	{
 		public readonly double n;
 		int count = 0;
@@ -28,13 +29,13 @@ namespace RansacsRealTime
 		Tick last;
 		Tick lastReturned;
 
-		public MonkeyNFilter(double n)
+		public MonkeyNFinder(double n)
 		{
 			this.n = n;
 			OnNewTickChooser = OnNewTick0;
 		}
 		private const string stdFileName = "monkeyNFilter.csv";
-		public MonkeyNFilter(string path, string name = stdFileName)
+		public MonkeyNFinder(string path, string name = stdFileName)
 		{
 			var data = LoadStandart(path, name);
 			this.n = data.n;
@@ -116,11 +117,14 @@ namespace RansacsRealTime
 		}
 
 		public event VertexHandler NewVertex;
+		public event VertexHandler LastVertexWasExtremum;
 
 		private void RaiseNewVertexEvent(Tick tick, VertexType vertexType)
 		{
 			if (tick.Equals(lastReturned))
 			{
+				tick = new Tick(tick.ID, count, tick.PRICE);
+				LastVertexWasExtremum?.Invoke(tick, vertexType);
 				return;
 			}
 			lastReturned = tick;
@@ -202,7 +206,7 @@ namespace RansacsRealTime
 				RaiseNewVertexEvent(min, VertexType.Low);
 			}
 		}
-		public bool Equals(MonkeyNFilter other)
+		public bool Equals(MonkeyNFinder other)
 		{
 			if (this.n == other.n &&
 				this.max.Equals(other.max) &&

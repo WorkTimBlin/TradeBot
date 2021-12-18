@@ -15,36 +15,54 @@ namespace RansacBot
 {
 	public partial class FormMain : Form
 	{
+		private bool stopRequired = false;
+		private bool isRunning = false;
 		RansacsOxyPrinter ransacsPrinter;
 		public FormMain()
 		{
 			InitializeComponent();
+			sigmaType.Items.Add(SigmaType.СonfidenceInterval);
+			sigmaType.Items.Add(SigmaType.ErrorThreshold);
+			sigmaType.Items.Add(SigmaType.Sigma);
+			sigmaType.Items.Add(SigmaType.SigmaInliers);
+			sigmaType.SelectedIndex = 0;
 		}
 
 		private void InitialiseTestPlotOneByOneInTime()
 		{
 			FileFeeder fileFeeder = new();
 			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
-			session.AddNewRansacsCascade(SigmaType.ErrorThreshold);
-			ransacsPrinter = new(1, session.ransacsCascades[0]);
+			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
+			ransacsPrinter = new RansacsOxyPrinterDemo(0, session.ransacsCascades[0], firstOnly.Checked);
 			plotView1.Model = ransacsPrinter.plotModel;
 			//fileFeeder.FeedAllStandart();
-			Task.Run(() =>
+			LockSigmaType();
+			Task feeding = Task.Run(() =>
 			{
+				isRunning = true;
 				for (int i = 0; i < fileFeeder.ticks.Count; i++)
 				{
+					while (pause.Checked) { }
+					if (stopRequired)
+					{
+						stopRequired = false;
+						isRunning = false;
+						return;
+					}
 					fileFeeder.FeedOneTick(i);
 					Task.Delay(1).Wait();
 				}
+				isRunning = false;
 			});
+			feeding.GetAwaiter().OnCompleted(UnlockSigmaType);
 			//session.SaveStandart("");
 		}
 		private void InitialiseTestPlotAllAtOnce()
 		{
 			FileFeeder fileFeeder = new();
 			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
-			session.AddNewRansacsCascade(SigmaType.ErrorThreshold);
-			ransacsPrinter = new(1, session.ransacsCascades[0]);
+			session.AddNewRansacsCascade(RansacsRealTime.SigmaType.ErrorThreshold);
+			ransacsPrinter = new RansacsOxyPrinterDemo(0, session.ransacsCascades[0], firstOnly.Checked);
 			plotView1.Model = ransacsPrinter.plotModel;
 			fileFeeder.FeedAllStandart();
 			//session.SaveStandart("");
@@ -93,6 +111,32 @@ namespace RansacBot
 		private void OnShowDemoAllAtOnce(object sender, EventArgs e)
 		{
 			InitialiseTestPlotAllAtOnce();
+		}
+
+		private void pause_CheckedChanged(object sender, EventArgs e)
+		{
+			if (pause.Checked)
+			{
+				pause.Text = ">";
+			}
+			else
+			{
+				pause.Text = "II";
+			}
+		}
+
+		private void stop_Click(object sender, EventArgs e)
+		{
+			if(isRunning) stopRequired = true;
+		}
+
+		private void LockSigmaType()
+		{
+			sigmaType.Enabled = false;
+		}
+		private void UnlockSigmaType()
+		{
+			sigmaType.Enabled = true;
 		}
 	}
 }

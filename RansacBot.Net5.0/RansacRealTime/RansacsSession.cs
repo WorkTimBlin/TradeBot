@@ -13,14 +13,14 @@ namespace RansacsRealTime
 	public class RansacsSession
 	{
 		public readonly Vertexes vertexes;
-		public readonly MonkeyNFilter monkeyNFilter;
+		public readonly MonkeyNFinder monkeyNFilter;
 
 		/// <summary>
 		/// принимает объекты вершин и MonkeyNFilter
 		/// </summary>
 		/// <param name="vertexes"></param>
 		/// <param name="monkeyNFilter"></param>
-		public RansacsSession(Vertexes vertexes, MonkeyNFilter monkeyNFilter)
+		public RansacsSession(Vertexes vertexes, MonkeyNFinder monkeyNFilter)
 		{
 			this.vertexes = vertexes;
 			this.monkeyNFilter = monkeyNFilter;

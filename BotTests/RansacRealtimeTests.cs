@@ -32,8 +32,8 @@ namespace BotTests
 			[TestMethod]
 			public void EqualsEmpty()
 			{
-				MonkeyNFilter first = new(100);
-				MonkeyNFilter second = new(100);
+				MonkeyNFinder first = new(100);
+				MonkeyNFinder second = new(100);
 				bool bob = first.Equals(second);
 				Assert.IsTrue(first.Equals(second), "equal objects are not equal");
 			}
@@ -41,7 +41,7 @@ namespace BotTests
 			[TestMethod]
 			public void EqualsSelf()
 			{
-				MonkeyNFilter filter = new(1);
+				MonkeyNFinder filter = new(1);
 				Assert.IsTrue(filter.Equals(filter), "object is not equal to itself!");
 			}
 
@@ -49,7 +49,7 @@ namespace BotTests
 			public void SaveLoad()
 			{
 				//Arrange
-				MonkeyNFilter first = new(100);
+				MonkeyNFinder first = new(100);
 				//feeding with ticks of 01.12.2012 from finam
 				foreach (Tick tick in ticks)
 				{
@@ -58,7 +58,7 @@ namespace BotTests
 				//saving
 				first.SaveStandart(PathForTestSaves);
 				//loading into new
-				MonkeyNFilter loaded = new(PathForTestSaves);
+				MonkeyNFinder loaded = new(PathForTestSaves);
 
 				//Assert
 				Assert.IsTrue(first.Equals(loaded), "feeded and loaded are not equal!");

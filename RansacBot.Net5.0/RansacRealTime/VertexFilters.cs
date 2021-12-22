@@ -6,6 +6,7 @@ using System.Collections;
 namespace RansacsRealTime
 {
     public delegate void VertexHandler(Tick tick, VertexType vertexType);
+	public delegate void ExtremumHandler(Tick extremum, VertexType vertexType, Tick current);
 
 	public interface IVertexFinder
 	{
@@ -18,6 +19,12 @@ namespace RansacsRealTime
 	{
 		void OnNewVertex(Tick tick, VertexType vertexType);
 		public event VertexHandler NewVertex;
+	}
+
+	public interface IExtremumFilter
+	{
+		void OnNewExtremum(Tick extremum, VertexType vertexType, Tick current);
+		public event ExtremumHandler NewExtremum;
 	}
 
 	public class MonkeyNFinder : IVertexFinder
@@ -118,6 +125,7 @@ namespace RansacsRealTime
 
 		public event VertexHandler NewVertex;
 		public event VertexHandler LastVertexWasExtremum;
+		public event ExtremumHandler NewExtremum;
 
 		private void RaiseNewVertexEvent(Tick tick, VertexType vertexType)
 		{
@@ -131,6 +139,11 @@ namespace RansacsRealTime
 			tick = new Tick(tick.ID, count, tick.PRICE);
 			count++;
 			NewVertex?.Invoke(tick, vertexType);
+		}
+		private void RaiseNewExtremumEvent(Tick extremum, VertexType vertexType, Tick current)
+		{
+			extremum = new Tick(extremum.ID, count, extremum.PRICE);
+			NewExtremum?.Invoke(extremum, vertexType, current);
 		}
 
 		private TickHandler OnNewTickChooser;
@@ -160,12 +173,14 @@ namespace RansacsRealTime
 				last = tick;
 				OnNewTickChooser = OnNewTickSearchHigh;
 				RaiseNewVertexEvent(min, VertexType.Low);
+				RaiseNewExtremumEvent(min, VertexType.Low, tick);
 			}
 			if (tick.PRICE <= max.PRICE - n)
 			{
 				last = tick;
 				OnNewTickChooser = OnNewTickSearchLow;
 				RaiseNewVertexEvent(max, VertexType.High);
+				RaiseNewExtremumEvent(max, VertexType.High, tick);
 			}
 		}
 		private void OnNewTickSearchHigh(Tick tick)
@@ -185,6 +200,7 @@ namespace RansacsRealTime
 				min = tick;
 				OnNewTickChooser = OnNewTickSearchLow;
 				RaiseNewVertexEvent(max, VertexType.High);
+				RaiseNewExtremumEvent(max, VertexType.High, tick);
 			}
 		}
 		private void OnNewTickSearchLow(Tick tick)
@@ -204,6 +220,7 @@ namespace RansacsRealTime
 				max = tick;
 				OnNewTickChooser = OnNewTickSearchHigh;
 				RaiseNewVertexEvent(min, VertexType.Low);
+				RaiseNewExtremumEvent(min, VertexType.Low, tick);
 			}
 		}
 		public bool Equals(MonkeyNFinder other)

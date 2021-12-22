@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Trading
 {
-	public readonly struct Trade
+	public class Trade
 	{
-		readonly double price;
-		readonly TradeDirection direction;
+		public readonly double price;
+		public readonly TradeDirection direction;
+		public Trade(double price, TradeDirection direction)
+		{
+			this.direction = direction;
+			this.price = price;
+		}
 	}
 	public enum TradeDirection
 	{

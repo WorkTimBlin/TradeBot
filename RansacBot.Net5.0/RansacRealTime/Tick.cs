@@ -22,12 +22,12 @@ namespace RansacsRealTime
 		/// полный конструктор
 		/// </summary>
 		/// <param name="id">ID тика.</param>
-		/// <param name="index">Пользовательский индекс вершин MonkeyN.</param>
+		/// <param name="vertexIndex">Пользовательский индекс вершин MonkeyN.</param>
 		/// <param name="price">Цена тика.</param>
-		public Tick(long id, int index, double price)
+		public Tick(long id, int vertexIndex, double price)
 		{
 			ID = id;
-			VERTEXINDEX = index;
+			VERTEXINDEX = vertexIndex;
 			PRICE = price;
 		}
 

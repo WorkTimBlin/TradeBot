@@ -9,9 +9,17 @@ namespace RansacBot.Trading
 {
 	class RansacDirectionFilter:ITradeFilter
 	{
-		int ransacLevel;
+		readonly int ransacLevel;
 		RansacType currentRansac = RansacType.None;
 		public event TradeHandler NewTrade;
+
+		public RansacDirectionFilter(RansacsCascade cascade, int ransacLevel)
+		{
+			this.ransacLevel = ransacLevel;
+			cascade.NewRansac += OnNewRansac;
+			cascade.RebuildRansac += OnRebuildRansac;
+			cascade.StopRansac += OnStopRansac;
+		}
 		public void OnNewTrade(Trade trade)
 		{
 			if (

@@ -16,6 +16,14 @@ namespace RansacBot.Trading
 			this.price = price;
 		}
 	}
+	public class TradeWithStop:Trade
+	{
+		public readonly Trade stop;
+		public TradeWithStop(Trade trade, Trade stop):base(trade.price, trade.direction)
+		{
+			this.stop = stop;
+		}
+	}
 	public enum TradeDirection
 	{
 		buy,

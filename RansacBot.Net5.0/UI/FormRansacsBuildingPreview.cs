@@ -13,12 +13,12 @@ using RansacBot.UI;
 
 namespace RansacBot
 {
-	public partial class FormMain : Form
+	public partial class FormRnsacsBuildingPreview : Form
 	{
 		private bool stopRequired = false;
 		private bool isRunning = false;
 		RansacsOxyPrinter ransacsPrinter;
-		public FormMain()
+		public FormRnsacsBuildingPreview()
 		{
 			InitializeComponent();
 			sigmaType.Items.Add(SigmaType.СonfidenceInterval);

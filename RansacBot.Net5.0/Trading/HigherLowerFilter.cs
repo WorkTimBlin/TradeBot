@@ -9,8 +9,8 @@ namespace RansacBot.Trading
 {
 	class HigherLowerFilter:IExtremumFilter
 	{
-		Tick high;
-		Tick low;
+		Tick high = new Tick(0, 0, double.MaxValue);
+		Tick low = new Tick(0, 0, double.MinValue);
 		public event ExtremumHandler NewExtremum;
 		public void OnNewExtremum(Tick extremum, VertexType vertexType, Tick current)
 		{

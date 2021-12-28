@@ -19,9 +19,15 @@ namespace RansacBot.Trading
 	public class TradeWithStop:Trade
 	{
 		public readonly Trade stop;
-		public TradeWithStop(Trade trade, Trade stop):base(trade.price, trade.direction)
+		public TradeWithStop(Trade trade, double stopPrice):base(trade.price, trade.direction)
 		{
-			this.stop = stop;
+			this.stop = new Trade(stopPrice, Opposite(direction));
+		}
+		public TradeDirection Opposite(TradeDirection direction)
+		{
+			if (direction == TradeDirection.buy) return TradeDirection.sell;
+			if (direction == TradeDirection.sell) return TradeDirection.buy;
+			throw new Exception("direction is neither buy or sell!");
 		}
 	}
 	public enum TradeDirection

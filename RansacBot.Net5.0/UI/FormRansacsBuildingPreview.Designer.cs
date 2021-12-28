@@ -1,7 +1,7 @@
 ﻿
 namespace RansacBot
 {
-	partial class FormMain
+	partial class FormRnsacsBuildingPreview
 	{
 		/// <summary>
 		/// Required designer variable.

@@ -10,6 +10,7 @@ namespace RansacBot.Trading
 	public delegate void TradeHandler(Trade trade);
 	public interface ITradeByVertexDecider
 	{
+		void OnNewExtremum(Tick extremum, VertexType vertexType, Tick current);
 		void OnNewVertex(Tick tick, VertexType vertexType);
 		public event TradeHandler NewTrade;
 	}

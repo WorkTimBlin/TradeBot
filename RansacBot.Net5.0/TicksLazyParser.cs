@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace RansacBot
 {
-	public class TicksLazyParser : IEnumerable<Tick>, IList<Tick>
+	public class TicksLazyParser : IEnumerable<Tick>, IList<Tick>, ITicksHystoryGetter
 	{
 		private readonly IList<string> rawStrings;
 		public TicksLazyParser(IList<string> rawStrings)
@@ -86,6 +86,18 @@ namespace RansacBot
 		}
 		public int Count { get => rawStrings.Count; }
 		public bool IsReadOnly { get => true; }
+		#endregion
+		#region ITicksHystoryGetter
+		/// <summary>
+		/// Warning: just returns this, from and to doesn't matter
+		/// </summary>
+		/// <param name="from"></param>
+		/// <param name="to"></param>
+		/// <returns></returns>
+		public IList<Tick> GetTicks(DateTime from, DateTime to)
+		{
+			return this;
+		}
 		#endregion
 		static public Tick ParseTick(string[] data)
 		{

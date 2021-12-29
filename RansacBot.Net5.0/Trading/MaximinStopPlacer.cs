@@ -11,21 +11,31 @@ namespace RansacBot.Trading
 	{
 		double min;
 		double max;
-		int level;
+		readonly int level;
 		bool wasCurrentRansacRaising = false;
 		Ransac? currentRansac;
 		Ransac? previousRansac;
-		Vertexes vertexes;
+		readonly Vertexes vertexes;
 		
-
 		public event TradeWithStopHandler NewTradeWithStop;
+
+		public MaximinStopPlacer(RansacsCascade cascade, int level)
+		{
+			this.level = level;
+			this.vertexes = cascade.GetVertexes();
+			vertexes.NewVertex += OnNewVertex;
+			cascade.NewRansac += OnNewRansac;
+			cascade.RebuildRansac += OnRebuildRansac;
+			cascade.StopRansac += OnStopRansac;
+		}
+
 		public void OnNewTrade(Trade trade)
 		{
 			double stopPrice = trade.direction == TradeDirection.buy ? min : max;
 			NewTradeWithStop?.Invoke(new TradeWithStop(trade, stopPrice));
 		}
 
-		public void OnNewVertex(Tick tick)
+		public void OnNewVertex(Tick tick, VertexType type)
 		{
 			if(currentRansac != null)
 			{
@@ -39,7 +49,6 @@ namespace RansacBot.Trading
 				}
 			}
 		}
-		
 		public void OnNewRansac(Ransac ransac, int level)
 		{
 			if (level != this.level) return;
@@ -55,7 +64,6 @@ namespace RansacBot.Trading
 				wasCurrentRansacRaising = false;
 			}
 		}
-
 		public void OnRebuildRansac(Ransac ransac, int level)
 		{
 			if (level != this.level) return;
@@ -74,7 +82,6 @@ namespace RansacBot.Trading
 				wasCurrentRansacRaising = true;
 			}
 		}
-
 		public void OnStopRansac(Ransac ransac, int level)
 		{
 			if (level != this.level) return;

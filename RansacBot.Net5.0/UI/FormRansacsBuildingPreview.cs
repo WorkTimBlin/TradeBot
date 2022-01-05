@@ -33,6 +33,7 @@ namespace RansacBot
 			FileFeeder fileFeeder = new();
 			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
 			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
+			session.SubscribeToProvider();
 			ransacsPrinter = new RansacsOxyPrinterDemo(0, session.ransacsCascades[0], firstOnly.Checked);
 			plotView1.Model = ransacsPrinter.plotModel;
 			//fileFeeder.FeedAllStandart();
@@ -61,6 +62,7 @@ namespace RansacBot
 		{
 			FileFeeder fileFeeder = new();
 			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
+			session.SubscribeToProvider();
 			session.AddNewRansacsCascade(RansacsRealTime.SigmaType.ErrorThreshold);
 			ransacsPrinter = new RansacsOxyPrinterDemo(0, session.ransacsCascades[0], firstOnly.Checked);
 			plotView1.Model = ransacsPrinter.plotModel;

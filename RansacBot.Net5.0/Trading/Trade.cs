@@ -15,6 +15,7 @@ namespace RansacBot.Trading
 			this.direction = direction;
 			this.price = price;
 		}
+
 	}
 	public class TradeWithStop:Trade
 	{

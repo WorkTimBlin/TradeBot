@@ -75,13 +75,15 @@ namespace BotTests
 				{
 					Tick testExtremumTick = new(0, rnd.Next(1, 1000000), (double)rnd.Next(50000, 200000));
 					Tick testCurrentTick = new(0, rnd.Next(1, 1000000), (double)rnd.Next(50000, 200000));
-					Trade testTrade = new(testCurrentTick.PRICE, TradeDirection.buy);
+					TradeWithStop testTradeWithStop = new(new Trade(testCurrentTick.PRICE, TradeDirection.buy), testCurrentTick.PRICE - 500);
 
 					ransacPrinterWithTrades.OnNewExtremum(testExtremumTick, VertexType.Low, testCurrentTick);
-					ransacPrinterWithTrades.OnNewTrade(testTrade);
+					ransacPrinterWithTrades.OnNewTradeWithStop(testTradeWithStop);
 
 					Assert.AreEqual(ransacPrinterWithTrades.longs.Points[^1].X, testExtremumTick.VERTEXINDEX + 0.5);
-					Assert.AreEqual(ransacPrinterWithTrades.longs.Points[^1].Y, testTrade.price);
+					Assert.AreEqual(ransacPrinterWithTrades.longs.Points[^1].Y, testTradeWithStop.price);
+					Assert.AreEqual(ransacPrinterWithTrades.stops.Points[^1].X, testExtremumTick.VERTEXINDEX + 0.5);
+					Assert.AreEqual(ransacPrinterWithTrades.stops.Points[^1].Y, testTradeWithStop.price - 500);
 				}
 			}
 			[TestMethod]
@@ -95,15 +97,18 @@ namespace BotTests
 
 				for (int n = 0; n < 500; n++)
 				{
-					Trade testTrade = new((double)rnd.Next(50000, 200000), TradeDirection.sell);
+					double testPrice = (double)rnd.Next(50000, 200000);
+					TradeWithStop testTradeWithStop = new(new Trade(testPrice, TradeDirection.sell), testPrice + 500);
 					Tick testExtremumTick = new(0, rnd.Next(1, 1000000), (double)rnd.Next(50000, 200000));
-					Tick testCurrentTick = new(0, rnd.Next(1, 1000000), testTrade.price);
+					Tick testCurrentTick = new(0, rnd.Next(1, 1000000), testTradeWithStop.price);
 
-					ransacPrinterWithTrades.OnNewTrade(testTrade);
+					ransacPrinterWithTrades.OnNewTradeWithStop(testTradeWithStop);
 					ransacPrinterWithTrades.OnNewExtremum(testExtremumTick, VertexType.High, testCurrentTick);
 
 					Assert.AreEqual(ransacPrinterWithTrades.shorts.Points[^1].X, testExtremumTick.VERTEXINDEX + 0.5);
-					Assert.AreEqual(ransacPrinterWithTrades.shorts.Points[^1].Y, testTrade.price);
+					Assert.AreEqual(ransacPrinterWithTrades.shorts.Points[^1].Y, testTradeWithStop.price);
+					Assert.AreEqual(ransacPrinterWithTrades.stops.Points[^1].X, testExtremumTick.VERTEXINDEX + 0.5);
+					Assert.AreEqual(ransacPrinterWithTrades.stops.Points[^1].Y, testTradeWithStop.price + 500);
 				}
 			}
         }

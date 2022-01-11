@@ -9,8 +9,8 @@ namespace RansacBot.Trading
 {
 	class MaximinStopPlacer:IStopPlacer
 	{
-		double min;
-		double max;
+		double min = 0;
+		double max = 0;
 		readonly int level;
 		bool wasCurrentRansacRaising = false;
 		Ransac? currentRansac;
@@ -32,7 +32,8 @@ namespace RansacBot.Trading
 		public void OnNewTrade(Trade trade)
 		{
 			double stopPrice = trade.direction == TradeDirection.buy ? min : max;
-			NewTradeWithStop?.Invoke(new TradeWithStop(trade, stopPrice));
+			if(stopPrice != 0)
+				NewTradeWithStop?.Invoke(new TradeWithStop(trade, stopPrice));
 		}
 
 		public void OnNewVertex(Tick tick, VertexType type)
@@ -71,14 +72,14 @@ namespace RansacBot.Trading
 			{
 				if (ransac.Slope > 0) return;
 				max = vertexes.vertexList[vertexes.GetIndexOfMaxTickInRansac(ransac)].PRICE;
-				min = vertexes.vertexList[vertexes.GetIndexOfMinTickInRansac(previousRansac ?? ransac)].PRICE;
+				min = previousRansac != null ? vertexes.vertexList[vertexes.GetIndexOfMinTickInRansac(previousRansac)].PRICE : 0;
 				wasCurrentRansacRaising = false;
 			}
 			else
 			{
 				if (ransac.Slope <= 0) return;
 				min = vertexes.vertexList[vertexes.GetIndexOfMinTickInRansac(ransac)].PRICE;
-				max = vertexes.vertexList[vertexes.GetIndexOfMaxTickInRansac(previousRansac ?? ransac)].PRICE;
+				max = previousRansac != null ? vertexes.vertexList[vertexes.GetIndexOfMaxTickInRansac(previousRansac)].PRICE : 0;
 				wasCurrentRansacRaising = true;
 			}
 		}

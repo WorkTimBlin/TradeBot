@@ -45,6 +45,8 @@ namespace RansacBot.UI
 		};
 
 		readonly int level;
+
+		Ransac? currentRansac;
 		public RansacsOxyPrinter(int level, RansacsCascade cascade)
 		{
 			this.level = level;
@@ -62,6 +64,7 @@ namespace RansacBot.UI
 		{
 			if (level != this.level) return;
 			ransacs.BuildNewRansac(ransac);
+			currentRansac = ransac;
 			InvalidatePlot(true);
 		}
 		public void OnRebuildRansac(Ransac ransac, int level)
@@ -74,12 +77,21 @@ namespace RansacBot.UI
 		{
 			if (level != this.level) return;
 			ransacs.StopLastRansac(ransac);
+			currentRansac = null;
 		}
 		public void OnNewVertex(Tick tick)
 		{
 			vertexes.Points.Add(new DataPoint(tick.VERTEXINDEX, tick.PRICE));
+			RedrawCurrentRansacToNewVertex();
 			InvalidatePlot(true);
 		}
+		public void RedrawCurrentRansacToNewVertex()
+        {
+			if (currentRansac != null)
+            {
+				OnRebuildRansac(currentRansac, level);
+            }
+        }
 		private void InvalidatePlot(bool updateData)
 		{
 			this.plotModel.InvalidatePlot(updateData);

@@ -190,7 +190,7 @@ namespace BotTests
 			task.Wait();
 			Assert.AreEqual(JsonConvert.SerializeObject(orig.ransacs), JsonConvert.SerializeObject(gapFilled.ransacs));
 		}
-		//[TestMethod] //uncomment only for reconstructing the dataset test file
+		[TestMethod] //uncomment only for reconstructing the dataset test file
 		public void SaveHystoryFileInNewLocation()
 		{
 			using StreamWriter streamWriter = new(Directory.GetCurrentDirectory() + "/TestsProperties/FolderForTests/1.txt");

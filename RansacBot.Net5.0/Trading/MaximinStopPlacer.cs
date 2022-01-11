@@ -33,7 +33,9 @@ namespace RansacBot.Trading
 		{
 			double stopPrice = trade.direction == TradeDirection.buy ? min : max;
 			if(stopPrice != 0)
+			{
 				NewTradeWithStop?.Invoke(new TradeWithStop(trade, stopPrice));
+			}
 		}
 
 		public void OnNewVertex(Tick tick, VertexType type)
@@ -91,7 +93,7 @@ namespace RansacBot.Trading
 			if(ransac.Slope > 0) 
 				max = vertexes.vertexList[vertexes.GetIndexOfMaxTickInRansac(ransac)].PRICE;
 			else 
-				min = vertexes.vertexList[vertexes.GetIndexOfMaxTickInRansac(ransac)].PRICE;
+				min = vertexes.vertexList[vertexes.GetIndexOfMinTickInRansac(ransac)].PRICE;
 		}
 	}
 }

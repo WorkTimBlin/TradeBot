@@ -185,7 +185,7 @@ namespace BotTests
 			gapFilled.SaveStandart(Materials.PathForTestSaves);
 			fileFeeder.FeedRangeOfStandart(200000, 100000);
 			gapFilled = new(Materials.PathForTestSaves, fileFeeder);
-			Task task = Task.Run(() => gapFilled.UpdateFromTicksUpToEndKeepingUpWithProviderWaitingForTime(Materials.ticks, new System.TimeSpan(0, 0, 5)));
+			Task task = Task.Run(() => gapFilled.UpdateFromTicksKeepingUpUsingDelayTimeAndStaySubscribed(Materials.ticks, new System.TimeSpan(0, 0, 5)));
 			Task.Run(() => fileFeeder.FeedRangeOfStandart(300000, 100000));
 			task.Wait();
 			Assert.AreEqual(JsonConvert.SerializeObject(orig.ransacs), JsonConvert.SerializeObject(gapFilled.ransacs));

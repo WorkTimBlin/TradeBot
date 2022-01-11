@@ -87,6 +87,10 @@ namespace RansacsRealTime
 			SaveLevels(path);
 			SaveMetadata(path);
 		}
+		public Vertexes GetVertexes()
+		{
+			return this.vertexes;
+		}
 
 		private const string stdMetadataFileName = "metadata.csv";
 		private void SaveMetadata(string path, string fileName = stdMetadataFileName)

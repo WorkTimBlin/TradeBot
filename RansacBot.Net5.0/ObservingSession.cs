@@ -30,7 +30,6 @@ namespace RansacBot
 			this.ransacs = new(N);
 			ransacsCascades = this.ransacs.vertexes.cascades;
 			isUpdated = true;
-			SubscribeToProvider();
 		}
 		/// <summary>
 		/// Initialises Instrument and ransacs session from file
@@ -59,8 +58,8 @@ namespace RansacBot
 			isActive = false;
 			isUpdated = false;
 		}
-		public void UpdateFromTicksUpToEndKeepingUpWithProviderWaitingForTime(
-			IList<Tick> ticks, TimeSpan time)
+		public void UpdateFromTicksKeepingUpUsingDelayTimeAndStaySubscribed(
+			ITicksHystoryGetter ticks, TimeSpan time)
 		{
 			if (isUpdated) return;
 			Queue<Tick> hub = new();
@@ -68,7 +67,7 @@ namespace RansacBot
 			DateTime targetDateTime = DateTime.Now + time;
 			while (DateTime.Now < targetDateTime || hub.Count == 0) ;
 			FeedRansacsWithTicksUpToID(
-				ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID),
+				ticks.GetTicks(dateTimeOfLastSave, DateTime.Now).SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID),
 				hub.Peek().ID);
 			FeedRansacsWholeQueue(hub);
 			provider.Unsubscribe(instrument, hub.Enqueue);

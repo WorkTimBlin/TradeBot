@@ -74,7 +74,7 @@ namespace RansacBot
 		class FileFeeder : ITickByInstrumentProvider
 		{
 			public TicksLazyParser ticks = new(
-					File.ReadAllText(@"C:\Users\Home\Desktop\Reps\RansacBot\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt").
+					File.ReadAllText(Directory.GetCurrentDirectory().Replace(@"\RansacBot.Net5.0\bin\Debug\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt")).
 					Split("\r\n", StringSplitOptions.RemoveEmptyEntries));//used for feeding
 			private event TickHandler NewTick;
 

@@ -12,8 +12,7 @@ using RansacsRealTime;
 using RansacBot.UI;
 
 namespace RansacBot
-{
-	
+{ 
 	public partial class FormRnsacsBuildingPreview : Form
 	{
 		private bool stopRequired = false;

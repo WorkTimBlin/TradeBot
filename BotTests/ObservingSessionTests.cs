@@ -191,14 +191,14 @@ namespace BotTests
 			Assert.AreEqual(JsonConvert.SerializeObject(orig.ransacs), JsonConvert.SerializeObject(gapFilled.ransacs));
 		}
 		//[TestMethod] //uncomment only for reconstructing the dataset test file
-		//public void SaveHystoryFileInNewLocation()
-		//{
-		//	using StreamWriter streamWriter = new(Directory.GetCurrentDirectory() + "/TestsProperties/FolderForTests/1.txt");
-		//	string[] HystoryStrings = FinamDataLoader.RawFinamHystory.GetTickLines(new System.DateTime(2021, 12, 1), new System.DateTime(2021, 12, 2));
-		//	for(int i = 0; i < HystoryStrings.Length; i++)
-		//	{
-		//		streamWriter.WriteLine(HystoryStrings[i]);
-		//	}
-		//}
+		public void SaveHystoryFileInNewLocation()
+		{
+			using StreamWriter streamWriter = new(Directory.GetCurrentDirectory() + "/TestsProperties/FolderForTests/1.txt");
+			string[] HystoryStrings = FinamDataLoader.RawFinamHystory.GetTickLines(new System.DateTime(2021, 12, 1), new System.DateTime(2021, 12, 2));
+			for(int i = 0; i < HystoryStrings.Length; i++)
+			{
+				streamWriter.WriteLine(HystoryStrings[i]);
+			}
+		}
 	}
 }

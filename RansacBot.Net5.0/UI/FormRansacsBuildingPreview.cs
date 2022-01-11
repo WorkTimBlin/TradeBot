@@ -13,6 +13,7 @@ using RansacBot.UI;
 
 namespace RansacBot
 {
+	
 	public partial class FormRnsacsBuildingPreview : Form
 	{
 		private bool stopRequired = false;
@@ -71,7 +72,7 @@ namespace RansacBot
 		class FileFeeder : ITickByInstrumentProvider
 		{
 			public TicksLazyParser ticks = new(
-					File.ReadAllText(@"D:\work\programming\MMRC\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt").
+					File.ReadAllText(@"C:\Users\Home\Desktop\Reps\RansacBot\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt").
 					Split("\r\n", StringSplitOptions.RemoveEmptyEntries));//used for feeding
 			private event TickHandler NewTick;
 

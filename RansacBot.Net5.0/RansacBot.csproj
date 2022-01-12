@@ -12,33 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="old\Form1.cs" />
-    <Compile Remove="old\Form1.Designer.cs" />
-    <Compile Remove="old\FormLogin.cs" />
-    <Compile Remove="old\FormLogin.Designer.cs" />
-    <Compile Remove="old\FormTestLogin.cs" />
-    <Compile Remove="old\FormTestLogin.Designer.cs" />
-    <Compile Remove="old\LOGGER.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Remove="old\Form1.resx" />
-    <EmbeddedResource Remove="old\FormLogin.resx" />
-    <EmbeddedResource Remove="old\FormTestLogin.resx" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
-    <None Include="old\Form1.cs" />
-    <None Include="old\Form1.Designer.cs" />
-    <None Include="old\Form1.resx" />
-    <None Include="old\FormLogin.cs" />
-    <None Include="old\FormLogin.Designer.cs" />
-    <None Include="old\FormLogin.resx" />
-    <None Include="old\FormTestLogin.cs" />
-    <None Include="old\FormTestLogin.Designer.cs" />
-    <None Include="old\FormTestLogin.resx" />
-    <None Include="old\LOGGER.cs" />
   </ItemGroup>
 
   <ItemGroup>

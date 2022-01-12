@@ -111,6 +111,12 @@ namespace BotTests
 					Assert.AreEqual(ransacPrinterWithTrades.stops.Points[^1].Y, testTradeWithStop.price + 500);
 				}
 			}
+			[TestMethod]
+			public void ResearchOfSearch()
+			{
+				List<double> list = new() { 1, 3, 5, 6, 8 };
+				throw new Exception(list.BinarySearch(2).ToString());
+			}
         }
 	}
 }

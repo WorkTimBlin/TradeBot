@@ -31,7 +31,15 @@ namespace RansacBot.Trading
 
 		public void OnNewTrade(Trade trade)
 		{
-			double stopPrice = trade.direction == TradeDirection.buy ? min : max;
+			double stopPrice = 0;
+			if(trade.direction == TradeDirection.buy && min < trade.price)
+			{
+				stopPrice = min;
+			}
+			else if(trade.direction == TradeDirection.sell && max > trade.price)
+			{
+				stopPrice = max;
+			}
 			if(stopPrice != 0)
 			{
 				NewTradeWithStop?.Invoke(new TradeWithStop(trade, stopPrice));

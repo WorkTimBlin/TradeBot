@@ -190,11 +190,11 @@ namespace BotTests
 			task.Wait();
 			Assert.AreEqual(JsonConvert.SerializeObject(orig.ransacs), JsonConvert.SerializeObject(gapFilled.ransacs));
 		}
-		[TestMethod] //uncomment only for reconstructing the dataset test file
+		//[TestMethod] //uncomment only for reconstructing the dataset test file
 		public void SaveHystoryFileInNewLocation()
 		{
 			using StreamWriter streamWriter = new(Directory.GetCurrentDirectory() + "/TestsProperties/FolderForTests/1.txt");
-			string[] HystoryStrings = FinamDataLoader.RawFinamHystory.GetTickLines(new System.DateTime(2021, 12, 1), new System.DateTime(2021, 12, 1));
+			string[] HystoryStrings = FinamDataLoader.RawFinamHystory.GetTickLines(new System.DateTime(2021, 12, 5), new System.DateTime(2021, 12, 8));
 			for(int i = 0; i < HystoryStrings.Length; i++)
 			{
 				streamWriter.WriteLine(HystoryStrings[i]);

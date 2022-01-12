@@ -98,5 +98,35 @@ namespace RansacBot.UI
 				priceWhereLastExtremumFound = 0.0;
 			}
 		}
+
+		public void OnCloseLongs(List<double> closedStopsLongs)
+		{
+			foreach (double stopPrice in closedStopsLongs)
+			{
+				foreach (ScatterPoint stopPoint in stops.Points)
+				{
+					if (stopPoint.Y == stopPrice)
+					{
+						stops.Points.Remove(stopPoint);
+						break;
+					}
+				}
+			}
+		}
+
+		public void OnCloseShorts(List<double> closedStopsShorts)
+		{
+			foreach (double stopPrice in closedStopsShorts)
+			{
+				foreach (ScatterPoint stopPoint in stops.Points)
+				{
+					if (stopPoint.Y == stopPrice)
+					{
+						stops.Points.Remove(stopPoint);
+						break;
+					}
+				}
+			}
+		}
 	}
 }

@@ -32,6 +32,7 @@ namespace RansacBot
 		}
 
 		public void OnNewTrade(AllTrade trade)
+		
 		{
 			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out TickHandler handler))
 			{

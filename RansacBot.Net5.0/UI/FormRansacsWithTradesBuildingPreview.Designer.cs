@@ -36,9 +36,13 @@ namespace RansacBot
 			this.stop = new System.Windows.Forms.Button();
 			this.plotView1 = new OxyPlot.WindowsForms.PlotView();
 			this.sigmaType = new System.Windows.Forms.ComboBox();
-			this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+			this.numericUpDown_Speed = new System.Windows.Forms.NumericUpDown();
 			this.buttonQuickWatch = new System.Windows.Forms.Button();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+			this.numericUpDown_NSetter = new System.Windows.Forms.NumericUpDown();
+			this.labelNSetter = new System.Windows.Forms.Label();
+			this.labelSpeed = new System.Windows.Forms.Label();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Speed)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_NSetter)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// ShowDemoContinous
@@ -140,23 +144,24 @@ namespace RansacBot
 			this.sigmaType.TabIndex = 5;
 			this.sigmaType.Tag = "Sigma Type";
 			// 
-			// numericUpDown1
+			// numericUpDown_Speed
 			// 
-			this.numericUpDown1.Increment = new decimal(new int[] {
+			this.numericUpDown_Speed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.numericUpDown_Speed.Increment = new decimal(new int[] {
             5,
             0,
             0,
             0});
-			this.numericUpDown1.Location = new System.Drawing.Point(695, 297);
-			this.numericUpDown1.Maximum = new decimal(new int[] {
+			this.numericUpDown_Speed.Location = new System.Drawing.Point(695, 323);
+			this.numericUpDown_Speed.Maximum = new decimal(new int[] {
             200,
             0,
             0,
             0});
-			this.numericUpDown1.Name = "numericUpDown1";
-			this.numericUpDown1.Size = new System.Drawing.Size(93, 23);
-			this.numericUpDown1.TabIndex = 7;
-			this.numericUpDown1.Value = new decimal(new int[] {
+			this.numericUpDown_Speed.Name = "numericUpDown_Speed";
+			this.numericUpDown_Speed.Size = new System.Drawing.Size(93, 23);
+			this.numericUpDown_Speed.TabIndex = 7;
+			this.numericUpDown_Speed.Value = new decimal(new int[] {
             200,
             0,
             0,
@@ -164,13 +169,60 @@ namespace RansacBot
 			// 
 			// buttonQuickWatch
 			// 
-			this.buttonQuickWatch.Location = new System.Drawing.Point(695, 326);
+			this.buttonQuickWatch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.buttonQuickWatch.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+			this.buttonQuickWatch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.buttonQuickWatch.Location = new System.Drawing.Point(695, 415);
 			this.buttonQuickWatch.Name = "buttonQuickWatch";
 			this.buttonQuickWatch.Size = new System.Drawing.Size(93, 23);
 			this.buttonQuickWatch.TabIndex = 8;
 			this.buttonQuickWatch.Text = "QuickTicks";
-			this.buttonQuickWatch.UseVisualStyleBackColor = true;
+			this.buttonQuickWatch.UseVisualStyleBackColor = false;
 			this.buttonQuickWatch.Click += new System.EventHandler(this.buttonQuickWatch_Click);
+			// 
+			// numericUpDown_NSetter
+			// 
+			this.numericUpDown_NSetter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.numericUpDown_NSetter.Increment = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+			this.numericUpDown_NSetter.Location = new System.Drawing.Point(695, 386);
+			this.numericUpDown_NSetter.Minimum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+			this.numericUpDown_NSetter.Name = "numericUpDown_NSetter";
+			this.numericUpDown_NSetter.ReadOnly = true;
+			this.numericUpDown_NSetter.Size = new System.Drawing.Size(93, 23);
+			this.numericUpDown_NSetter.TabIndex = 9;
+			this.numericUpDown_NSetter.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+			// 
+			// labelNSetter
+			// 
+			this.labelNSetter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelNSetter.AutoSize = true;
+			this.labelNSetter.Location = new System.Drawing.Point(695, 368);
+			this.labelNSetter.Name = "labelNSetter";
+			this.labelNSetter.Size = new System.Drawing.Size(19, 15);
+			this.labelNSetter.TabIndex = 10;
+			this.labelNSetter.Text = "N:";
+			// 
+			// labelSpeed
+			// 
+			this.labelSpeed.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.labelSpeed.AutoSize = true;
+			this.labelSpeed.Location = new System.Drawing.Point(695, 305);
+			this.labelSpeed.Name = "labelSpeed";
+			this.labelSpeed.Size = new System.Drawing.Size(42, 15);
+			this.labelSpeed.TabIndex = 11;
+			this.labelSpeed.Text = "Speed:";
 			// 
 			// FormRansacsWithTradesBuildingPreview
 			// 
@@ -178,8 +230,11 @@ namespace RansacBot
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.labelSpeed);
+			this.Controls.Add(this.labelNSetter);
+			this.Controls.Add(this.numericUpDown_NSetter);
 			this.Controls.Add(this.buttonQuickWatch);
-			this.Controls.Add(this.numericUpDown1);
+			this.Controls.Add(this.numericUpDown_Speed);
 			this.Controls.Add(this.plotView1);
 			this.Controls.Add(this.sigmaType);
 			this.Controls.Add(this.stop);
@@ -190,8 +245,10 @@ namespace RansacBot
 			this.MinimumSize = new System.Drawing.Size(816, 489);
 			this.Name = "FormRansacsWithTradesBuildingPreview";
 			this.Text = "Form1";
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Speed)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_NSetter)).EndInit();
 			this.ResumeLayout(false);
+			this.PerformLayout();
 
 		}
 
@@ -203,7 +260,10 @@ namespace RansacBot
         private System.Windows.Forms.Button stop;
         private OxyPlot.WindowsForms.PlotView plotView1;
 		private System.Windows.Forms.ComboBox sigmaType;
-		private System.Windows.Forms.NumericUpDown numericUpDown1;
+		private System.Windows.Forms.NumericUpDown numericUpDown_Speed;
 		private System.Windows.Forms.Button buttonQuickWatch;
+		private System.Windows.Forms.NumericUpDown numericUpDown_NSetter;
+		private System.Windows.Forms.Label labelNSetter;
+		private System.Windows.Forms.Label labelSpeed;
 	}
 }

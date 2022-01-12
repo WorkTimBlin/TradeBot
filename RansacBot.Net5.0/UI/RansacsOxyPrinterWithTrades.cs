@@ -58,7 +58,6 @@ namespace RansacBot.UI
 			plotModel.Series.Add(stops);
 		}
 
-		Trade? lastTrade = null;
 		TradeWithStop? lastTradeWithStop = null;
 		int lastExtremumVertexIndex;
 		bool lastExtremumFound = false;

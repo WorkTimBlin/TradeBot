@@ -37,6 +37,7 @@ namespace RansacBot
 			this.plotView1 = new OxyPlot.WindowsForms.PlotView();
 			this.sigmaType = new System.Windows.Forms.ComboBox();
 			this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+			this.buttonQuickWatch = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
 			this.SuspendLayout();
 			// 
@@ -133,7 +134,7 @@ namespace RansacBot
 			this.sigmaType.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
 			this.sigmaType.FormattingEnabled = true;
 			this.sigmaType.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-			this.sigmaType.Location = new System.Drawing.Point(695, 278);
+			this.sigmaType.Location = new System.Drawing.Point(695, 268);
 			this.sigmaType.Name = "sigmaType";
 			this.sigmaType.Size = new System.Drawing.Size(93, 23);
 			this.sigmaType.TabIndex = 5;
@@ -146,7 +147,7 @@ namespace RansacBot
             0,
             0,
             0});
-			this.numericUpDown1.Location = new System.Drawing.Point(695, 336);
+			this.numericUpDown1.Location = new System.Drawing.Point(695, 297);
 			this.numericUpDown1.Maximum = new decimal(new int[] {
             200,
             0,
@@ -161,12 +162,23 @@ namespace RansacBot
             0,
             0});
 			// 
+			// buttonQuickWatch
+			// 
+			this.buttonQuickWatch.Location = new System.Drawing.Point(695, 326);
+			this.buttonQuickWatch.Name = "buttonQuickWatch";
+			this.buttonQuickWatch.Size = new System.Drawing.Size(93, 23);
+			this.buttonQuickWatch.TabIndex = 8;
+			this.buttonQuickWatch.Text = "QuickTicks";
+			this.buttonQuickWatch.UseVisualStyleBackColor = true;
+			this.buttonQuickWatch.Click += new System.EventHandler(this.buttonQuickWatch_Click);
+			// 
 			// FormRansacsWithTradesBuildingPreview
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.buttonQuickWatch);
 			this.Controls.Add(this.numericUpDown1);
 			this.Controls.Add(this.plotView1);
 			this.Controls.Add(this.sigmaType);
@@ -192,5 +204,6 @@ namespace RansacBot
         private OxyPlot.WindowsForms.PlotView plotView1;
 		private System.Windows.Forms.ComboBox sigmaType;
 		private System.Windows.Forms.NumericUpDown numericUpDown1;
+		private System.Windows.Forms.Button buttonQuickWatch;
 	}
 }

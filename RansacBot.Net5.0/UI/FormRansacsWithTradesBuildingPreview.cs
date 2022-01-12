@@ -37,7 +37,7 @@ namespace RansacBot
 		{
 			FileFeeder fileFeeder = new();
 
-			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
+			ObservingSession session = new(new Instrument("SPBFUT", "RIH2", "", "", ""), fileFeeder, 100);
 			
 			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
 			session.SubscribeToProvider();
@@ -64,6 +64,8 @@ namespace RansacBot
 			maximinStopPlacer.NewTradeWithStop += ransacsPrinter.OnNewTradeWithStop;
 			session.ransacs.monkeyNFilter.NewExtremum += ransacsPrinter.OnNewExtremum;
 
+
+
 			LockSigmaType();
 			Task feeding = Task.Run(() =>
 			{
@@ -77,7 +79,7 @@ namespace RansacBot
 						isRunning = false;
 						return;
 					}
-					int j = i + (int)numericUpDown1.Value;
+					int j = i + (int)numericUpDown_Speed.Value;
 					for(; i < j; i++)
 					{
 						fileFeeder.FeedOneTick(i);
@@ -93,10 +95,10 @@ namespace RansacBot
 		private void InitialiseTestPlotAllAtOnce()
 		{
 			FileFeeder fileFeeder = new();
-			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
+			ObservingSession session = new(new Instrument("SPBFUT", "RIH2", "", "", ""), fileFeeder, 100);
 			
 			session.SubscribeToProvider();
-			session.AddNewRansacsCascade(RansacsRealTime.SigmaType.ErrorThreshold);
+			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
 			
 			RansacsCascade filterCascade = session.AddNewRansacsCascade(SigmaType.СonfidenceInterval, 1, 90);
 			RansacsCascade stopCascade = session.AddNewRansacsCascade(SigmaType.SigmaInliers, 4, 90);
@@ -114,11 +116,12 @@ namespace RansacBot
 			invertedNDecider.NewTrade += ransacDirectionFilter.OnNewTrade;
 
 			MaximinStopPlacer maximinStopPlacer = new(stopCascade, 3);
-
 			ransacDirectionFilter.NewTrade += maximinStopPlacer.OnNewTrade;
 
 			maximinStopPlacer.NewTradeWithStop += ransacsPrinter.OnNewTradeWithStop;
 			session.ransacs.monkeyNFilter.NewExtremum += ransacsPrinter.OnNewExtremum;
+
+
 			fileFeeder.FeedAllStandart();
 			//session.SaveStandart("");
 		}
@@ -126,11 +129,12 @@ namespace RansacBot
 
 		private void BuildPlotFromQuickTicks()
 		{
-
 			Connector _instance = Connector.GetInstance();
-			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), _instance, 100);
 
-			session.AddNewRansacsCascade(RansacsRealTime.SigmaType.ErrorThreshold);
+			LockNSetter();
+			ObservingSession session = new(new Instrument("SPBFUT", "RIH2", "", "", ""), _instance, (int)numericUpDown_NSetter.Value);
+
+			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
 
 			RansacsCascade filterCascade = session.AddNewRansacsCascade(SigmaType.СonfidenceInterval, 1, 90);
 			RansacsCascade stopCascade = session.AddNewRansacsCascade(SigmaType.SigmaInliers, 4, 90);
@@ -148,15 +152,12 @@ namespace RansacBot
 			invertedNDecider.NewTrade += ransacDirectionFilter.OnNewTrade;
 
 			MaximinStopPlacer maximinStopPlacer = new(stopCascade, 3);
-
 			ransacDirectionFilter.NewTrade += maximinStopPlacer.OnNewTrade;
 
 			maximinStopPlacer.NewTradeWithStop += ransacsPrinter.OnNewTradeWithStop;
 			session.ransacs.monkeyNFilter.NewExtremum += ransacsPrinter.OnNewExtremum;
 
-
 			session.SubscribeToProvider();
-
 		}
 
 
@@ -240,6 +241,11 @@ namespace RansacBot
 		private void buttonQuickWatch_Click(object sender, EventArgs e)
 		{
 			BuildPlotFromQuickTicks();
+		}
+
+		private void LockNSetter()
+		{
+			numericUpDown_NSetter.Enabled = false;
 		}
 	}
 }

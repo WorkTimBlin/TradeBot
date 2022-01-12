@@ -13,6 +13,7 @@ using RansacBot.UI;
 using RansacBot.Trading;
 using OxyPlot.Series;
 using OxyPlot;
+using QuikSharp;
 
 namespace RansacBot
 {
@@ -31,11 +32,11 @@ namespace RansacBot
 			sigmaType.SelectedIndex = 0;
 		}
 		int level = 3;
-		int speed;
 		
 		private void InitialiseTestPlotOneByOneInTime()
 		{
 			FileFeeder fileFeeder = new();
+
 			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
 			
 			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
@@ -122,6 +123,43 @@ namespace RansacBot
 			//session.SaveStandart("");
 		}
 
+
+		private void BuildPlotFromQuickTicks()
+		{
+
+			Connector _instance = Connector.GetInstance();
+			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), _instance, 100);
+
+			session.AddNewRansacsCascade(RansacsRealTime.SigmaType.ErrorThreshold);
+
+			RansacsCascade filterCascade = session.AddNewRansacsCascade(SigmaType.СonfidenceInterval, 1, 90);
+			RansacsCascade stopCascade = session.AddNewRansacsCascade(SigmaType.SigmaInliers, 4, 90);
+
+			ransacsPrinter = new RansacsOxyPrinterWithTradesDemo(3, stopCascade, firstOnly.Checked);
+			plotView1.Model = ransacsPrinter.plotModel;
+
+			HigherLowerFilter higherLowerFilter = new();
+			session.ransacs.monkeyNFilter.NewExtremum += higherLowerFilter.OnNewExtremum;
+
+			InvertedNDecider invertedNDecider = new();
+			higherLowerFilter.NewExtremum += invertedNDecider.OnNewExtremum;
+
+			RansacDirectionFilter ransacDirectionFilter = new(filterCascade, 0);
+			invertedNDecider.NewTrade += ransacDirectionFilter.OnNewTrade;
+
+			MaximinStopPlacer maximinStopPlacer = new(stopCascade, 3);
+
+			ransacDirectionFilter.NewTrade += maximinStopPlacer.OnNewTrade;
+
+			maximinStopPlacer.NewTradeWithStop += ransacsPrinter.OnNewTradeWithStop;
+			session.ransacs.monkeyNFilter.NewExtremum += ransacsPrinter.OnNewExtremum;
+
+
+			session.SubscribeToProvider();
+
+		}
+
+
 		class FileFeeder : ITickByInstrumentProvider
 		{
 			public TicksLazyParser ticks = new(
@@ -197,6 +235,11 @@ namespace RansacBot
 		private void UnlockSigmaType()
 		{
 			sigmaType.Enabled = true;
+		}
+
+		private void buttonQuickWatch_Click(object sender, EventArgs e)
+		{
+			BuildPlotFromQuickTicks();
 		}
 	}
 }

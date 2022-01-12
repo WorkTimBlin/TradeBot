@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace RansacBot
 {
-	class Connector
+	class Connector : ITickByInstrumentProvider
 	{
 		public readonly Quik quik;
 		public delegate void NewPriceHandler(double price);

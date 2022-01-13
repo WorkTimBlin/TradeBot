@@ -54,7 +54,6 @@ namespace RansacBot
 				ConditionPrice = (decimal)tradeWithStop.price
 			};
 			if(quik.StopOrders.CreateStopOrder(lastStop).Result < 0) throw new Exception("couldn't send stop order");
-			
 		}
 
 	}

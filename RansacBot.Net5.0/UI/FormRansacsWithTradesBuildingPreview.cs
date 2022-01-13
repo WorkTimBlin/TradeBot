@@ -14,6 +14,7 @@ using RansacBot.Trading;
 using OxyPlot.Series;
 using OxyPlot;
 using QuikSharp;
+using QuikSharp.DataStructures.Transaction;
 
 namespace RansacBot
 {
@@ -32,26 +33,15 @@ namespace RansacBot
 			sigmaType.SelectedIndex = 0;
 		}
 		int level = 1;
-		
-		private void InitialiseTestPlotOneByOneInTime()
-		{
-			FileFeeder fileFeeder = new();
 
-			ObservingSession session = new(new Instrument("SPBFUT", "RIH2", "", "", ""), fileFeeder, 100);
-			
-			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
-			session.SubscribeToProvider();
-			
+		private (MaximinStopPlacer stopPlacer, RansacsCascade filterCascade, RansacsCascade stopCascade) SetupTradeFilters(ObservingSession session)
+		{
 			RansacsCascade filterCascade = session.AddNewRansacsCascade(SigmaType.СonfidenceInterval, 1, 90);
 			RansacsCascade stopCascade = session.AddNewRansacsCascade(SigmaType.SigmaInliers, 4, 90);
-			
-			ransacsPrinter = new RansacsOxyPrinterWithTradesDemo(level, stopCascade, firstOnly.Checked);
-			plotView1.Model = ransacsPrinter.plotModel;
-			//fileFeeder.FeedAllStandart();
 
 			HigherLowerFilter higherLowerFilter = new();
 			session.ransacs.monkeyNFilter.NewExtremum += higherLowerFilter.OnNewExtremum;
-			
+
 			InvertedNDecider invertedNDecider = new();
 			higherLowerFilter.NewExtremum += invertedNDecider.OnNewExtremum;
 
@@ -60,27 +50,51 @@ namespace RansacBot
 
 			MaximinStopPlacer maximinStopPlacer = new(stopCascade, 3);
 			ransacDirectionFilter.NewTrade += maximinStopPlacer.OnNewTrade;
+			return (maximinStopPlacer, filterCascade, stopCascade);
+		}
+
+		private ObservingSession InitAndSetupSession(ITickByInstrumentProvider provider)
+		{
+			ObservingSession session = new(new Param("SPBFUT", "RIH2"), provider, (int)numericUpDown_NSetter.Value);
+			
+			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
+
+			var setup = SetupTradeFilters(session);
+			RansacsCascade stopCascade = setup.stopCascade;
+			RansacsCascade filterCascade = setup.filterCascade;
+			MaximinStopPlacer maximinStopPlacer = setup.stopPlacer;
+			
+			ransacsPrinter = new RansacsOxyPrinterWithTradesDemo(level, stopCascade, firstOnly.Checked);
+			plotView1.Model = ransacsPrinter.plotModel;
+
 
 			maximinStopPlacer.NewTradeWithStop += ransacsPrinter.OnNewTradeWithStop;
 			session.ransacs.monkeyNFilter.NewExtremum += ransacsPrinter.OnNewExtremum;
 
 			TradesHystory tradesHystory = new();
-			
-			//CloserOnRansacStops closerOnRansacStops = new(tradesHystory, stopCascade, 1, 50);
-			//CloserOnRansacStops closerOnRansacStops1 = new(tradesHystory, filterCascade, 0, 100);
-			
+
+			CloserOnRansacStops closerOnRansacStops = new(tradesHystory, stopCascade, 1, 50);
+			CloserOnRansacStops closerOnRansacStops1 = new(tradesHystory, filterCascade, 0, 100);
+
 			maximinStopPlacer.NewTradeWithStop += tradesHystory.OnNewTrade;
 
 			tradesHystory.CloseLongs += ransacsPrinter.OnClosePos;
 			tradesHystory.CloseShorts += ransacsPrinter.OnClosePos;
 			tradesHystory.ExecuteLongStops += ransacsPrinter.OnClosePos;
 			tradesHystory.ExecuteShortStops += ransacsPrinter.OnClosePos;
-
-			session.ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops(tick.PRICE); };
+			tradesHystory.ExecuteLongStops += (List<double> list) => { Console.WriteLine("long stops executed"); };
+			tradesHystory.ExecuteShortStops += (List<double> list) => { Console.WriteLine("short stops executed"); };
 			
 
-
-
+			session.ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops(tick.PRICE); };
+			session.SubscribeToProvider();
+			return session;
+		}
+		
+		private void InitialiseTestPlotOneByOneInTime()
+		{
+			FileFeeder fileFeeder = new();
+			InitAndSetupSession(fileFeeder);
 
 			LockSigmaType();
 			Task feeding = Task.Run(() =>
@@ -105,38 +119,12 @@ namespace RansacBot
 				isRunning = false;
 			});
 			feeding.GetAwaiter().OnCompleted(UnlockSigmaType);
-			//session.SaveStandart("");
 		}
 
 		private void InitialiseTestPlotAllAtOnce()
 		{
 			FileFeeder fileFeeder = new();
-			ObservingSession session = new(new Instrument("SPBFUT", "RIH2", "", "", ""), fileFeeder, 100);
-			
-			session.SubscribeToProvider();
-			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
-			
-			RansacsCascade filterCascade = session.AddNewRansacsCascade(SigmaType.СonfidenceInterval, 1, 90);
-			RansacsCascade stopCascade = session.AddNewRansacsCascade(SigmaType.SigmaInliers, 4, 90);
-			
-			ransacsPrinter = new RansacsOxyPrinterWithTradesDemo(3, stopCascade, firstOnly.Checked);
-			plotView1.Model = ransacsPrinter.plotModel;
-			
-			HigherLowerFilter higherLowerFilter = new();
-			session.ransacs.monkeyNFilter.NewExtremum += higherLowerFilter.OnNewExtremum;
-			
-			InvertedNDecider invertedNDecider = new();
-			higherLowerFilter.NewExtremum += invertedNDecider.OnNewExtremum;
-
-			RansacDirectionFilter ransacDirectionFilter = new(filterCascade, 0);
-			invertedNDecider.NewTrade += ransacDirectionFilter.OnNewTrade;
-
-			MaximinStopPlacer maximinStopPlacer = new(stopCascade, 3);
-			ransacDirectionFilter.NewTrade += maximinStopPlacer.OnNewTrade;
-
-			maximinStopPlacer.NewTradeWithStop += ransacsPrinter.OnNewTradeWithStop;
-			session.ransacs.monkeyNFilter.NewExtremum += ransacsPrinter.OnNewExtremum;
-
+			InitAndSetupSession(fileFeeder);
 
 			fileFeeder.FeedAllStandart();
 			//session.SaveStandart("");
@@ -145,35 +133,18 @@ namespace RansacBot
 
 		private void BuildPlotFromQuickTicks()
 		{
-			QuikTickProvider _instance = QuikTickProvider.GetInstance();
+			QuikTickProvider quikTickProvider = QuikTickProvider.GetInstance();
 
 			LockNSetter();
-			ObservingSession session = new(new Instrument("SPBFUT", "RIH2", "", "", ""), _instance, (int)numericUpDown_NSetter.Value);
-
-			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
-
-			RansacsCascade filterCascade = session.AddNewRansacsCascade(SigmaType.СonfidenceInterval, 1, 90);
-			RansacsCascade stopCascade = session.AddNewRansacsCascade(SigmaType.SigmaInliers, 4, 90);
-
-			ransacsPrinter = new RansacsOxyPrinterWithTradesDemo(3, stopCascade, firstOnly.Checked);
-			plotView1.Model = ransacsPrinter.plotModel;
-
-			HigherLowerFilter higherLowerFilter = new();
-			session.ransacs.monkeyNFilter.NewExtremum += higherLowerFilter.OnNewExtremum;
-
-			InvertedNDecider invertedNDecider = new();
-			higherLowerFilter.NewExtremum += invertedNDecider.OnNewExtremum;
-
-			RansacDirectionFilter ransacDirectionFilter = new(filterCascade, 0);
-			invertedNDecider.NewTrade += ransacDirectionFilter.OnNewTrade;
-
-			MaximinStopPlacer maximinStopPlacer = new(stopCascade, 3);
-			ransacDirectionFilter.NewTrade += maximinStopPlacer.OnNewTrade;
-
-			maximinStopPlacer.NewTradeWithStop += ransacsPrinter.OnNewTradeWithStop;
-			session.ransacs.monkeyNFilter.NewExtremum += ransacsPrinter.OnNewExtremum;
-
-			session.SubscribeToProvider();
+			ObservingSession session = InitAndSetupSession(quikTickProvider);
+			void OnStopClick(object sender, EventArgs e)
+			{
+				this.stop.Click -= OnStopClick;
+				session.UnsubscribeOfProvider();
+				stopRequired = false;
+				UnlockNSetter();
+			}
+			this.stop.Click += OnStopClick;
 		}
 
 
@@ -209,11 +180,11 @@ namespace RansacBot
 				NewTick.Invoke(ticks[index]);
 			}
 
-			public void Subscribe(Instrument instrument, TickHandler handler)
+			public void Subscribe(Param instrument, TickHandler handler)
 			{
 				NewTick += handler;
 			}
-			public void Unsubscribe(Instrument instrument, TickHandler handler)
+			public void Unsubscribe(Param instrument, TickHandler handler)
 			{
 				NewTick -= handler;
 			}
@@ -262,6 +233,10 @@ namespace RansacBot
 		private void LockNSetter()
 		{
 			numericUpDown_NSetter.Enabled = false;
+		}
+		private void UnlockNSetter()
+		{
+			numericUpDown_NSetter.Enabled = true;
 		}
 	}
 }

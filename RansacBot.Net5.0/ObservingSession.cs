@@ -10,7 +10,7 @@ namespace RansacBot
 {
 	class ObservingSession
 	{
-		public readonly Instrument instrument;
+		public readonly Param instrument;
 		public readonly RansacsSession ransacs;
 		public readonly List<RansacsCascade> ransacsCascades;
 		private bool isActive = false;
@@ -23,7 +23,7 @@ namespace RansacBot
 		/// </summary>
 		/// <param name="instrument"></param>
 		/// <param name="N">N from monkeyN</param>
-		public ObservingSession(Instrument instrument, ITickByInstrumentProvider provider, int N)
+		public ObservingSession(Param instrument, ITickByInstrumentProvider provider, int N)
 		{
 			this.instrument = instrument;
 			this.provider = provider;
@@ -37,7 +37,7 @@ namespace RansacBot
 		/// <param name="path"></param>
 		public ObservingSession(string path, ITickByInstrumentProvider provider)
 		{
-			instrument = new(path);
+			instrument = Param.GetParamFromFile(path);
 			this.provider = provider;
 			ransacs = new(path);
 			ransacsCascades = ransacs.vertexes.cascades;
@@ -104,7 +104,7 @@ namespace RansacBot
 		{
 			if (isUpdated) return;
 			Queue<Tick> hub = new();
-			QuikTickProvider.GetInstance().Subscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			QuikTickProvider.GetInstance().Subscribe(instrument.classCode, instrument.secCode, hub.Enqueue);
 			DateTime targetDateTime = DateTime.Now + new TimeSpan(0, 2, 0);
 			while (DateTime.Now < targetDateTime || hub.Count == 0) ;
 			FeedRansacsWithTicksUpToID(
@@ -114,7 +114,7 @@ namespace RansacBot
 						DateTime.Now)).SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID),
 				hub.Peek().ID);
 			FeedRansacsWholeQueue(hub);
-			QuikTickProvider.GetInstance().Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			QuikTickProvider.GetInstance().Unsubscribe(instrument.classCode, instrument.secCode, hub.Enqueue);
 			isUpdated = true;
 		}
 

@@ -29,11 +29,11 @@ namespace BotTests
 				}
 			}
 
-			public void Subscribe(Instrument instrument, TickHandler handler)
+			public void Subscribe(Param param, TickHandler handler)
 			{
 				NewTick += handler;
 			}
-			public void Unsubscribe(Instrument instrument, TickHandler handler)
+			public void Unsubscribe(Param param, TickHandler handler)
 			{
 				NewTick -= handler;
 			}
@@ -41,7 +41,7 @@ namespace BotTests
 
 		ObservingSession InstantiateStandartSession(ITickByInstrumentProvider fileFeeder)
 		{
-			return new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
+			return new(new Param("RIZ1", "SPBFUT"), fileFeeder, 100);
 		}
 
 		[TestMethod]

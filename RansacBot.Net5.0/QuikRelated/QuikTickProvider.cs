@@ -10,8 +10,7 @@ namespace RansacBot
 {
 	class QuikTickProvider : ITickByInstrumentProvider
 	{
-		public readonly Quik quik;
-		public delegate void NewPriceHandler(double price);
+		readonly static Quik quik = QuikContainer.quik;
 		private readonly Dictionary<string, TickHandler> recievers = new();
 		private static QuikTickProvider _instance;
 
@@ -19,7 +18,6 @@ namespace RansacBot
 		private QuikTickProvider()
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-			quik = new Quik();
 			quik.Events.OnAllTrade += OnNewAllTrade;
 		}
 		public static QuikTickProvider GetInstance()
@@ -51,9 +49,9 @@ namespace RansacBot
 				recievers.Add(classCode + secCode, handler);
 			}
 		}
-		public void Subscribe(Instrument instrument, TickHandler handler)
+		public void Subscribe(Param instrument, TickHandler handler)
 		{
-			Subscribe(instrument.classCode, instrument.securityCode, handler);
+			Subscribe(instrument.classCode, instrument.secCode, handler);
 		}
 		public void Unsubscribe(string classCode, string secCode, TickHandler handler)
 		{
@@ -62,9 +60,9 @@ namespace RansacBot
 				recievers[classCode + secCode] -= handler ?? throw new Exception("tried to unsubscribe null");
 			}
 		}
-		public void Unsubscribe(Instrument instrument, TickHandler handler)
+		public void Unsubscribe(Param instrument, TickHandler handler)
 		{
-			Unsubscribe(instrument.classCode, instrument.securityCode, handler);
+			Unsubscribe(instrument.classCode, instrument.secCode, handler);
 		}
 
 		/*

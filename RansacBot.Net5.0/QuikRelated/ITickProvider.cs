@@ -9,7 +9,7 @@ namespace RansacBot
 {
 	interface ITickByInstrumentProvider
 	{
-		void Subscribe(Instrument instrument, TickHandler handler);
-		void Unsubscribe(Instrument instrument, TickHandler handler);
+		void Subscribe(Param instrument, TickHandler handler);
+		void Unsubscribe(Param instrument, TickHandler handler);
 	}
 }

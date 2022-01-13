@@ -31,7 +31,7 @@ namespace RansacBot
 		private void InitialiseTestPlotOneByOneInTime()
 		{
 			FileFeeder fileFeeder = new();
-			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
+			ObservingSession session = new(new Param("RIZ1", "SPBFUT"), fileFeeder, 100);
 			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
 			session.SubscribeToProvider();
 			ransacsPrinter = new RansacsOxyPrinterDemo(0, session.ransacsCascades[0], firstOnly.Checked);
@@ -61,7 +61,7 @@ namespace RansacBot
 		private void InitialiseTestPlotAllAtOnce()
 		{
 			FileFeeder fileFeeder = new();
-			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
+			ObservingSession session = new(new Param("RIZ1", "SPBFUT"), fileFeeder, 100);
 			session.SubscribeToProvider();
 			session.AddNewRansacsCascade(RansacsRealTime.SigmaType.ErrorThreshold);
 			ransacsPrinter = new RansacsOxyPrinterDemo(0, session.ransacsCascades[0], firstOnly.Checked);
@@ -102,11 +102,11 @@ namespace RansacBot
 				NewTick.Invoke(ticks[index]);
 			}
 
-			public void Subscribe(Instrument instrument, TickHandler handler)
+			public void Subscribe(Param instrument, TickHandler handler)
 			{
 				NewTick += handler;
 			}
-			public void Unsubscribe(Instrument instrument, TickHandler handler)
+			public void Unsubscribe(Param instrument, TickHandler handler)
 			{
 				NewTick -= handler;
 			}

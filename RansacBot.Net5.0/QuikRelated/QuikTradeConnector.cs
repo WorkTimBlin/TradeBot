@@ -17,18 +17,23 @@ namespace RansacBot
 		readonly string accountId;
 		Order? lastOrder = null;
 		StopOrder? lastStop = null;
+		TradeWithStop? lastTradeWithStop = null;
+		public event TradeWithStopHandler NewTradeWithStop;
 
 		public QuikTradeConnector(Param param)
 		{
 			this.param = param;
 		}
 
-		public void OnOrder(Order order)
+		public void OnOrderChanged(Order order)
 		{
 			if(lastOrder != null && order.TransID == lastOrder.TransID)
 			{
 				if(order.State == State.Completed)
 				{
+					NewTradeWithStop?.Invoke(lastTradeWithStop ?? throw new Exception(
+						"last trade with stop is null but lfst order is not"));
+
 					lastOrder = null;
 					lastStop = null;
 				}
@@ -39,10 +44,13 @@ namespace RansacBot
 		{
 			if(lastOrder == null)
 			{
-				if(quik.Orders.KillOrder(lastOrder).Result < 0) throw new Exception("couldn't kill last order");
-				if(quik.StopOrders.KillStopOrder(lastStop).Result < 0) throw new Exception("couldn't kill last stop order");
+				if(quik.Orders.KillOrder(lastOrder).Result < 0) 
+					throw new Exception("couldn't kill last order");
+				if(quik.StopOrders.KillStopOrder(lastStop).Result < 0) 
+					throw new Exception("couldn't kill last stop order");
 			}
-			lastOrder = quik.Orders.SendMarketOrder(param.classCode, param.secCode, accountId, tradeWithStop.GetOperation(), 1).Result;
+			lastOrder = quik.Orders.SendMarketOrder(
+				param.classCode, param.secCode, accountId, tradeWithStop.GetOperation(), 1).Result;
 			lastStop = new StopOrder()
 			{
 				Account = accountId,
@@ -53,9 +61,10 @@ namespace RansacBot
 				Condition = tradeWithStop.GetStopCondition(),
 				ConditionPrice = (decimal)tradeWithStop.price
 			};
-			if(quik.StopOrders.CreateStopOrder(lastStop).Result < 0) throw new Exception("couldn't send stop order");
-		}
 
+			if(quik.StopOrders.CreateStopOrder(lastStop).Result < 0) 
+				throw new Exception("couldn't send stop order");
+		}
 	}
 	internal static class TradeExtention
 	{
@@ -65,7 +74,8 @@ namespace RansacBot
 		}
 		public static Condition GetStopCondition(this TradeWithStop trade)
 		{
-			return trade.stop.direction == TradeDirection.buy ? Condition.MoreOrEqual : Condition.LessOrEqual;
+			return trade.stop.direction == TradeDirection.buy ? 
+				Condition.MoreOrEqual : Condition.LessOrEqual;
 		}
 	}
 }

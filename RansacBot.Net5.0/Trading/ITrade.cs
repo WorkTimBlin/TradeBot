@@ -19,4 +19,9 @@ namespace RansacBot.Trading
 		void OnNewTrade(Trade trade);
 		public event TradeHandler NewTrade;
 	}
+
+	public interface ITradeHystory
+	{
+
+	}
 }

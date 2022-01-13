@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+
 
 namespace RansacBot.Trading
 {
@@ -45,26 +45,26 @@ namespace RansacBot.Trading
 
 		public void CheckForStops(double price)
 		{
-			if(longStops[^1] > price)
+			if(longStops.Count > 0 && longStops[^1] > price)
 			{
 				int i = longStops.Count;
 				do
 				{
 					i--;
 				}
-				while (longStops[i] >= price);
+				while (i >= 0 && longStops[i] >= price);
 				i++;
 				ExecuteLongStops?.Invoke(longStops.GetRange(i, longStops.Count - i));
 				longStops.RemoveRange(i, longStops.Count - i);
 			}
-			else if (shortStops[^1] > price)
+			else if (shortStops.Count > 0 && shortStops[^1] < price)
 			{
 				int i = shortStops.Count;
 				do
 				{
 					i--;
 				}
-				while (shortStops[i] >= price);
+				while (i >= 0 && shortStops[i] <= price);
 				i++;
 				ExecuteShortStops?.Invoke(shortStops.GetRange(i, shortStops.Count - i));
 				shortStops.RemoveRange(i, shortStops.Count - i);
@@ -83,9 +83,13 @@ namespace RansacBot.Trading
 	}
 	class UpSortedList<T>:List<T>
 	{
+		
 		public new void Add(T item)
 		{
-			Insert(Math.Abs(BinarySearch(item)) - 1, item);
+			int IndexForItem = BinarySearch(item);
+			
+			if (IndexForItem < 0) Insert(Math.Abs(IndexForItem) - 1, item);
+			else Insert(IndexForItem, item);
 		}
 	}
 	class SortedList<T> : List<T>
@@ -101,7 +105,10 @@ namespace RansacBot.Trading
 		}
 		public new void Add(T item)
 		{
-			Insert(Math.Abs(base.BinarySearch(item)) - 1, item);
+			int IndexForItem = BinarySearch(item);
+
+			if (IndexForItem < 0) Insert(Math.Abs(IndexForItem) - 1, item);
+			else Insert(IndexForItem, item);
 		}
 	}
 }

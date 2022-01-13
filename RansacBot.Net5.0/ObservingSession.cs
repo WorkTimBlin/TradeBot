@@ -104,7 +104,7 @@ namespace RansacBot
 		{
 			if (isUpdated) return;
 			Queue<Tick> hub = new();
-			Connector.GetInstance().Subscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			QuikTickProvider.GetInstance().Subscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
 			DateTime targetDateTime = DateTime.Now + new TimeSpan(0, 2, 0);
 			while (DateTime.Now < targetDateTime || hub.Count == 0) ;
 			FeedRansacsWithTicksUpToID(
@@ -114,7 +114,7 @@ namespace RansacBot
 						DateTime.Now)).SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID),
 				hub.Peek().ID);
 			FeedRansacsWholeQueue(hub);
-			Connector.GetInstance().Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
+			QuikTickProvider.GetInstance().Unsubscribe(instrument.classCode, instrument.securityCode, hub.Enqueue);
 			isUpdated = true;
 		}
 

@@ -8,21 +8,21 @@ using System.Globalization;
 
 namespace RansacBot
 {
-	class Connector : ITickByInstrumentProvider
+	class QuikTickProvider : ITickByInstrumentProvider
 	{
 		public readonly Quik quik;
 		public delegate void NewPriceHandler(double price);
 		private readonly Dictionary<string, TickHandler> recievers = new();
-		private static Connector _instance;
+		private static QuikTickProvider _instance;
 
 
-		private Connector()
+		private QuikTickProvider()
 		{
 			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 			quik = new Quik();
-			quik.Events.OnAllTrade += OnNewTrade;
+			quik.Events.OnAllTrade += OnNewAllTrade;
 		}
-		public static Connector GetInstance()
+		public static QuikTickProvider GetInstance()
 		{
 			if(_instance == null)
 			{
@@ -31,7 +31,7 @@ namespace RansacBot
 			return _instance;
 		}
 
-		public void OnNewTrade(AllTrade trade)
+		public void OnNewAllTrade(AllTrade trade)
 		
 		{
 			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out TickHandler handler))

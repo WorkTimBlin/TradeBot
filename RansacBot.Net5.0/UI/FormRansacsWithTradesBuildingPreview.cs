@@ -31,7 +31,7 @@ namespace RansacBot
 			sigmaType.Items.Add(SigmaType.SigmaInliers);
 			sigmaType.SelectedIndex = 0;
 		}
-		int level = 3;
+		int level = 1;
 		
 		private void InitialiseTestPlotOneByOneInTime()
 		{
@@ -64,6 +64,22 @@ namespace RansacBot
 			maximinStopPlacer.NewTradeWithStop += ransacsPrinter.OnNewTradeWithStop;
 			session.ransacs.monkeyNFilter.NewExtremum += ransacsPrinter.OnNewExtremum;
 
+			TradesHystory tradesHystory = new();
+			
+			//CloserOnRansacStops closerOnRansacStops = new(tradesHystory, stopCascade, 1, 50);
+			//CloserOnRansacStops closerOnRansacStops1 = new(tradesHystory, filterCascade, 0, 100);
+			
+			maximinStopPlacer.NewTradeWithStop += tradesHystory.OnNewTrade;
+
+			tradesHystory.CloseLongs += ransacsPrinter.OnClosePos;
+			tradesHystory.CloseShorts += ransacsPrinter.OnClosePos;
+			tradesHystory.ExecuteLongStops += ransacsPrinter.OnClosePos;
+			tradesHystory.ExecuteShortStops += ransacsPrinter.OnClosePos;
+
+			session.ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops(tick.PRICE); };
+			
+
+
 
 
 			LockSigmaType();
@@ -80,7 +96,7 @@ namespace RansacBot
 						return;
 					}
 					int j = i + (int)numericUpDown_Speed.Value;
-					for(; i < j; i++)
+					for(; i < j && i < fileFeeder.ticks.Count; i++)
 					{
 						fileFeeder.FeedOneTick(i);
 					}
@@ -129,7 +145,7 @@ namespace RansacBot
 
 		private void BuildPlotFromQuickTicks()
 		{
-			Connector _instance = Connector.GetInstance();
+			QuikTickProvider _instance = QuikTickProvider.GetInstance();
 
 			LockNSetter();
 			ObservingSession session = new(new Instrument("SPBFUT", "RIH2", "", "", ""), _instance, (int)numericUpDown_NSetter.Value);

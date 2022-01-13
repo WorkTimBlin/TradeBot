@@ -99,9 +99,9 @@ namespace RansacBot.UI
 			}
 		}
 
-		public void OnCloseLongs(List<double> closedStopsLongs)
+		public void OnClosePos(List<double> closedStops)
 		{
-			foreach (double stopPrice in closedStopsLongs)
+			foreach (double stopPrice in closedStops)
 			{
 				foreach (ScatterPoint stopPoint in stops.Points)
 				{
@@ -114,19 +114,6 @@ namespace RansacBot.UI
 			}
 		}
 
-		public void OnCloseShorts(List<double> closedStopsShorts)
-		{
-			foreach (double stopPrice in closedStopsShorts)
-			{
-				foreach (ScatterPoint stopPoint in stops.Points)
-				{
-					if (stopPoint.Y == stopPrice)
-					{
-						stops.Points.Remove(stopPoint);
-						break;
-					}
-				}
-			}
-		}
+
 	}
 }

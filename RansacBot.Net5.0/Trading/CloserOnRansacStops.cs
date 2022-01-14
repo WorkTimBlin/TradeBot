@@ -9,10 +9,10 @@ namespace RansacBot.Trading
 {
 	class CloserOnRansacStops
 	{
-		readonly TradesHystory tradesHystory;
+		readonly ITradesHystory tradesHystory;
 		readonly int level;
 		readonly double percent;
-		public CloserOnRansacStops(TradesHystory tradesHystory, RansacsCascade cascade, int level, double percent)
+		public CloserOnRansacStops(ITradesHystory tradesHystory, RansacsCascade cascade, int level, double percent)
 		{
 			this.tradesHystory = tradesHystory;
 			this.level = level;

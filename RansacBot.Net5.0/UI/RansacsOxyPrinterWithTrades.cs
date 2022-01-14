@@ -99,21 +99,17 @@ namespace RansacBot.UI
 			}
 		}
 
-		public void OnClosePos(List<double> closedStops)
+		public void OnClosePos(decimal stopPrice)
 		{
-			foreach (double stopPrice in closedStops)
+			for(int i = 0; i < stops.Points.Count; i++)
 			{
-				foreach (ScatterPoint stopPoint in stops.Points)
+				if(stops.Points[i].Y == (double)stopPrice)
 				{
-					if (stopPoint.Y == stopPrice)
-					{
-						stops.Points.Remove(stopPoint);
-						break;
-					}
+					stops.Points.RemoveAt(i);
+					return;
 				}
 			}
 		}
-
 
 	}
 }

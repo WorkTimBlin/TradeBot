@@ -17,7 +17,6 @@ namespace RansacBot
 
 		private QuikTickProvider()
 		{
-			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 			quik.Events.OnAllTrade += OnNewAllTrade;
 		}
 		public static QuikTickProvider GetInstance()

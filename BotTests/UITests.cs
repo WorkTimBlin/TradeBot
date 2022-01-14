@@ -111,11 +111,30 @@ namespace BotTests
 					Assert.AreEqual(ransacPrinterWithTrades.stops.Points[^1].Y, testTradeWithStop.price + 500);
 				}
 			}
-			[TestMethod]
-			public void ResearchOfSearch()
+			struct dd
 			{
-				List<double> list = new() { 1, 3, 5, 6, 8 };
-				throw new Exception(list.BinarySearch(2).ToString());
+				public double d;
+				public double c;
+				public dd(double d, double c)
+				{
+					this.d = d;
+					this.c = c;
+				}
+			}
+			class comparer:IComparer<dd>
+			{
+				public int Compare(dd first, dd second)
+				{
+					if (first.d > second.d) return 1;
+					else if (first.d == second.d) return 0;
+					else return -1;
+				}
+			}
+			[TestMethod]
+			public void ResearchOfSortedSet()
+			{
+				SortedSet<dd> set = new(new comparer()) { new(1, 2), new(1, 5) };
+				set.Add(new(1, 3));
 			}
         }
 	}

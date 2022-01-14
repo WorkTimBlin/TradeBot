@@ -9,6 +9,11 @@ namespace RansacBot
 {
 	public static class QuikContainer
 	{
-		public static readonly Quik quik = new();
+		public static readonly Quik quik;
+		static QuikContainer()
+		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+			quik = new();
+		}
 	}
 }

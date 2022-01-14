@@ -41,8 +41,14 @@ namespace RansacBot
 			this.numericUpDown_NSetter = new System.Windows.Forms.NumericUpDown();
 			this.labelNSetter = new System.Windows.Forms.Label();
 			this.labelSpeed = new System.Windows.Forms.Label();
+			this.plotView2 = new OxyPlot.WindowsForms.PlotView();
+			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Speed)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_NSetter)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+			this.splitContainer1.Panel1.SuspendLayout();
+			this.splitContainer1.Panel2.SuspendLayout();
+			this.splitContainer1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// ShowDemoContinous
@@ -119,11 +125,11 @@ namespace RansacBot
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.plotView1.BackColor = System.Drawing.SystemColors.ControlDarkDark;
 			this.plotView1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-			this.plotView1.Location = new System.Drawing.Point(12, 12);
-			this.plotView1.MinimumSize = new System.Drawing.Size(677, 426);
+			this.plotView1.Location = new System.Drawing.Point(-3, 0);
+			this.plotView1.MinimumSize = new System.Drawing.Size(677, 0);
 			this.plotView1.Name = "plotView1";
 			this.plotView1.PanCursor = System.Windows.Forms.Cursors.Hand;
-			this.plotView1.Size = new System.Drawing.Size(677, 426);
+			this.plotView1.Size = new System.Drawing.Size(677, 210);
 			this.plotView1.TabIndex = 0;
 			this.plotView1.Text = "plotView1";
 			this.plotView1.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
@@ -224,18 +230,57 @@ namespace RansacBot
 			this.labelSpeed.TabIndex = 11;
 			this.labelSpeed.Text = "Speed:";
 			// 
+			// plotView2
+			// 
+			this.plotView2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.plotView2.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+			this.plotView2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+			this.plotView2.Location = new System.Drawing.Point(0, -1);
+			this.plotView2.MinimumSize = new System.Drawing.Size(677, 0);
+			this.plotView2.Name = "plotView2";
+			this.plotView2.PanCursor = System.Windows.Forms.Cursors.Hand;
+			this.plotView2.Size = new System.Drawing.Size(677, 200);
+			this.plotView2.TabIndex = 0;
+			this.plotView2.Text = "plotView1";
+			this.plotView2.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
+			this.plotView2.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
+			this.plotView2.ZoomVerticalCursor = System.Windows.Forms.Cursors.SizeNS;
+			// 
+			// splitContainer1
+			// 
+			this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.splitContainer1.Cursor = System.Windows.Forms.Cursors.HSplit;
+			this.splitContainer1.Location = new System.Drawing.Point(12, 12);
+			this.splitContainer1.Name = "splitContainer1";
+			this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+			// 
+			// splitContainer1.Panel1
+			// 
+			this.splitContainer1.Panel1.Controls.Add(this.plotView1);
+			// 
+			// splitContainer1.Panel2
+			// 
+			this.splitContainer1.Panel2.Controls.Add(this.plotView2);
+			this.splitContainer1.Size = new System.Drawing.Size(677, 426);
+			this.splitContainer1.SplitterDistance = 213;
+			this.splitContainer1.TabIndex = 12;
+			// 
 			// FormRansacsWithTradesBuildingPreview
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.splitContainer1);
 			this.Controls.Add(this.labelSpeed);
 			this.Controls.Add(this.labelNSetter);
 			this.Controls.Add(this.numericUpDown_NSetter);
 			this.Controls.Add(this.buttonQuickWatch);
 			this.Controls.Add(this.numericUpDown_Speed);
-			this.Controls.Add(this.plotView1);
 			this.Controls.Add(this.sigmaType);
 			this.Controls.Add(this.stop);
 			this.Controls.Add(this.pause);
@@ -247,6 +292,10 @@ namespace RansacBot
 			this.Text = "Form1";
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Speed)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_NSetter)).EndInit();
+			this.splitContainer1.Panel1.ResumeLayout(false);
+			this.splitContainer1.Panel2.ResumeLayout(false);
+			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+			this.splitContainer1.ResumeLayout(false);
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -265,5 +314,7 @@ namespace RansacBot
 		private System.Windows.Forms.NumericUpDown numericUpDown_NSetter;
 		private System.Windows.Forms.Label labelNSetter;
 		private System.Windows.Forms.Label labelSpeed;
+		private OxyPlot.WindowsForms.PlotView plotView2;
+		private System.Windows.Forms.SplitContainer splitContainer1;
 	}
 }

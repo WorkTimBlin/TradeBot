@@ -19,53 +19,94 @@ namespace RansacBot
 		public event ClosePosHandler KilledShortStop;
 		public readonly Param param;
 		public readonly string accountId;
-		readonly static Quik quik = QuikContainer.quik;
+		public bool IsLastOrderExecuted { get; private set; } = false;
+		readonly static Quik quik = QuikContainer.Quik;
 		Order? lastOrder = null;
+		Order? executedOrder = null;
 		StopOrder? lastStop = null;
 		TradeWithStop? lastTradeWithStop = null;
 		SortedList<StopOrder> longStops = new(new StopOrderComparer((first, second) => first.ConditionPrice > second.ConditionPrice ? 1 : -1));
 		SortedList<StopOrder> shortStops = new(new StopOrderComparer((first, second) => first.ConditionPrice < second.ConditionPrice ? 1 : -1));
+		int timeoutMillseconds = 1000;
 
 		public QuikTradeConnector(Param param, string accountId)
 		{
 			this.param = param;
 			this.accountId = accountId;
+			quik.Events.OnOrder += OnOrderChanged;
+			//quik.Events.OnTrade += OnTrade;
+			quik.Events.OnStopOrder += OnStopOrderChanged;
 		}
 
-		public void OnOrderChanged(Order order)
+		void OnOrderChanged(Order order)
 		{
-			if(lastOrder != null && order.TransID == lastOrder.TransID)
+			Console.WriteLine("OnOrderChanged");
+			if (order.State == State.Completed) executedOrder = order;
+			CheckIfLastOrderExecuted();
+		}
+		void CheckIfLastOrderExecuted()
+		{
+			if (lastOrder != null && executedOrder != null && executedOrder.TransID == lastOrder.TransID)
 			{
-				if(order.State == State.Completed)
-				{
-					NewTradeWithStop?.Invoke(lastTradeWithStop ?? throw new Exception(
-						"last trade with stop is null but last order is not"));
+				NewTradeWithStop?.Invoke(lastTradeWithStop ?? throw new Exception(
+					"last trade with stop is null but last order is not"));
+				AddLastStopToActiveStops();
 
-					lastOrder = null;
-					lastStop = null;
-				}
+				lastOrder = null;
+				lastStop = null;
+				executedOrder = null;
+				IsLastOrderExecuted = true;
 			}
+		}
+		void OnTrade(QuikSharp.DataStructures.Transaction.Trade trade)
+		{
+			Order? linkedOrder = quik.Orders.GetOrder_by_Number(trade.OrderNum).Result;
+			if(lastOrder != null)
+			{
+				OnOrderChanged(linkedOrder);
+			}
+			else
+			{
+				executedOrder = linkedOrder;
+			}
+			Console.WriteLine("OnTrade");
 		}
 		public void OnStopOrderChanged(StopOrder stopOrder)
 		{
+			Console.WriteLine("OnStopOrderChanged");
 			if(stopOrder.State == State.Completed)
 			{
 				if (stopOrder.IsLong())
 				{
 					ExecutedLongStop?.Invoke(stopOrder.ConditionPrice);
-					longStops.Remove(stopOrder);
+					RemoveStopByTransId(stopOrder, longStops);
 				}
 				else
 				{
 					ExecutedShortStop?.Invoke(stopOrder.ConditionPrice);
-					shortStops.Remove(stopOrder);
+					RemoveStopByTransId(stopOrder, shortStops);
 				} 
 			}
 		}
+		void RemoveStopByTransId(StopOrder stopOrder, SortedList<StopOrder> stopOrders)
+		{
+			stopOrders.RemoveAt(
+				stopOrders.FindIndex(
+					(StopOrder match) => { return (match.TransId == stopOrder.TransId); }
+					)
+				);
+		}
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
 		{
-			KillLastUnexecutedOrder();
-			SendMarketOrderWithStop(tradeWithStop);
+			if (!CanOpenTrade(tradeWithStop))
+			{
+				Console.WriteLine("can't open " + tradeWithStop.direction.ToString() + ", as reached limit");
+				return;
+			}
+			lastTradeWithStop = tradeWithStop;
+			KillLastUnexecutedOrderAndItsStop();
+			SendLimitOrderWithStop(tradeWithStop);
+			CheckIfLastOrderExecuted();
 		}
 
 		public void ClosePercentOfLongs(double percent)
@@ -77,7 +118,24 @@ namespace RansacBot
 			ClosePercentOfTrades(percent, shortStops, this.KilledShortStop);
 		}
 
-
+		bool CanOpenTrade(TradeWithStop tradeWithStop)
+		{
+			ParamNames checkingPriceParam;
+			if (tradeWithStop.direction == TradeDirection.buy) checkingPriceParam = ParamNames.HIGH;
+			else checkingPriceParam = ParamNames.LOW;
+			return (quik.Trading.CalcBuySell(
+					"SPBFUT",
+					"RIH2",
+					"53023",
+					"SPBFUT005gx",
+					Double.Parse(quik.Trading.GetParamEx(
+						"SPBFUT",
+						"RIH2",
+						checkingPriceParam
+						).Result.ParamValue, System.Globalization.CultureInfo.InvariantCulture),
+					tradeWithStop.direction == TradeDirection.buy,
+					false).Result.Qty > 0);
+		}
 		void ClosePercentOfTrades(double percent, SortedList<StopOrder> stopOrders, ClosePosHandler closePosHandler)
 		{
 			for(int i = stopOrders.Count - 1; i > (int)(stopOrders.Count * (100 - percent) / 100) - 1; i--)
@@ -87,7 +145,7 @@ namespace RansacBot
 			}
 			KillLastPercent(percent, stopOrders);
 		}
-		void KillLastUnexecutedOrder()
+		void KillLastUnexecutedOrderAndItsStop()
 		{
 			if (lastOrder != null)
 			{
@@ -95,14 +153,20 @@ namespace RansacBot
 					throw new Exception("couldn't kill last order");
 				if (quik.StopOrders.KillStopOrder(lastStop).Result < 0)
 					throw new Exception("couldn't kill last stop order");
+				lastOrder = null;
+				lastStop = null;
 			}
 		}
 		void SendMarketOrderWithStop(TradeWithStop tradeWithStop)
 		{
 			SendMarketOrder(tradeWithStop);
-			lastStop = BuildStopOrder(tradeWithStop);
-			AddLastStopToActiveStops();
-			SendStopOrder(lastStop);
+			lastStop = SendAndConfirmStopOrder(BuildStopOrder(tradeWithStop));
+		}
+		void SendLimitOrderWithStop(TradeWithStop tradeWithStop)
+		{
+			lastOrder = SendLimitOrder(tradeWithStop);
+			IsLastOrderExecuted = false;
+			lastStop = SendAndConfirmStopOrder(BuildStopOrder(tradeWithStop));
 		}
 		void AddLastStopToActiveStops()
 		{
@@ -115,17 +179,64 @@ namespace RansacBot
 				shortStops.Add(lastStop);
 			}
 		}
-		void SendMarketOrder(TradeWithStop tradeWithStop)
+		Order SendMarketOrder(TradeWithStop tradeWithStop)
 		{
-			lastOrder = quik.Orders.SendMarketOrder(
+			return quik.Orders.SendMarketOrder(
 				param.classCode, param.secCode, accountId, tradeWithStop.GetOperation(), 1).Result;
 		}
-		void SendStopOrder(StopOrder stopOrder)
+		Order SendLimitOrder(TradeWithStop tradeWithStop)
 		{
-			if (quik.StopOrders.CreateStopOrder(lastStop).Result < 0)
-				throw new Exception("couldn't send stop order");
+			return quik.Orders.SendLimitOrder(
+				param.classCode, 
+				param.secCode, 
+				accountId, 
+				tradeWithStop.GetOperation(), 
+				(decimal)tradeWithStop.price, 
+				1).Result;
 		}
-		StopOrder BuildStopOrder(TradeWithStop tradeWithStop)
+		public StopOrder SendAndConfirmStopOrder(StopOrder stopOrder)
+		{
+			StopOrder? fromQuik = null;
+			void OnStopOrder(StopOrder stopOrderFromQuik)
+			{
+				Console.WriteLine("StopOrderCallback");
+				if (AreStopOrdersMatching(stopOrder, stopOrderFromQuik))
+				{
+					Console.WriteLine("stopOrder confirmed");
+					fromQuik = stopOrderFromQuik;
+				}
+			}
+			quik.Events.OnStopOrder += OnStopOrder;
+			if (quik.StopOrders.CreateStopOrder(stopOrder).Result < 0)
+			{
+				quik.Events.OnStopOrder -= OnStopOrder;
+				throw new Exception("couldn't send stop order");
+			}
+			Task responceWaiting = Task.Run(() => { while (fromQuik == null); });
+			if (!responceWaiting.Wait(timeoutMillseconds))
+			{
+				quik.Events.OnStopOrder -= OnStopOrder;
+				throw new Exception("timeout: didn't get stop order callback");
+			}
+			quik.Events.OnStopOrder -= OnStopOrder;
+			return fromQuik;
+		}
+		bool AreStopOrdersMatching(StopOrder sent, StopOrder fromQuik)
+		{
+			return (
+				sent.Account == fromQuik.Account &&
+				sent.ClassCode == fromQuik.ClassCode &&
+				sent.SecCode == fromQuik.SecCode &&
+				sent.StopOrderType == fromQuik.StopOrderType &&
+				sent.Operation == fromQuik.Operation &&
+				sent.Condition == fromQuik.Condition &&
+				sent.ConditionPrice == fromQuik.ConditionPrice &&
+				sent.Price == fromQuik.Price &&
+				sent.Quantity == fromQuik.Quantity &&
+				sent.ClientCode == fromQuik.ClientCode
+				);
+		}
+		public StopOrder BuildStopOrder(TradeWithStop tradeWithStop)
 		{
 			return new StopOrder()
 			{
@@ -135,7 +246,10 @@ namespace RansacBot
 				StopOrderType = StopOrderType.StopLimit,
 				Operation = tradeWithStop.stop.GetOperation(),
 				Condition = tradeWithStop.GetStopCondition(),
-				ConditionPrice = (decimal)tradeWithStop.stop.price
+				ConditionPrice = (decimal)tradeWithStop.stop.price,
+				Price = (decimal)tradeWithStop.stop.price,
+				Quantity = 1,
+				ClientCode = "SPBFUT005gx"
 			};
 		}
 
@@ -149,6 +263,10 @@ namespace RansacBot
 		}
 		void KillLastPercent(double percent, SortedList<StopOrder> orders)
 		{
+			for(int i = (int)(orders.Count * (100 - percent) / 100); i < orders.Count; i++)
+			{
+				long s = quik.StopOrders.KillStopOrder(orders[i]).Result;
+			}
 			orders.RemoveRange((int)(orders.Count * (100 - percent) / 100), orders.Count - (int)(orders.Count * (100 - percent) / 100));
 		}
 

@@ -10,7 +10,7 @@ namespace RansacBot
 {
 	class QuikTickProvider : ITickByInstrumentProvider
 	{
-		readonly static Quik quik = QuikContainer.quik;
+		readonly static Quik quik = QuikContainer.Quik;
 		private readonly Dictionary<string, TickHandler> recievers = new();
 		private static QuikTickProvider _instance;
 

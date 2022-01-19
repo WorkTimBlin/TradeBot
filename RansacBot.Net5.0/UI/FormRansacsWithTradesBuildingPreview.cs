@@ -15,6 +15,7 @@ using OxyPlot.Series;
 using OxyPlot;
 using QuikSharp;
 using QuikSharp.DataStructures.Transaction;
+using QuikSharp.DataStructures;
 
 namespace RansacBot
 {
@@ -69,13 +70,14 @@ namespace RansacBot
 			plotView2.Model = filterPrinter.plotModel;
 
 
-			maximinStopPlacer.NewTradeWithStop += stopPrinter.OnNewTradeWithStop;
+			//maximinStopPlacer.NewTradeWithStop += stopPrinter.OnNewTradeWithStop;
 			session.ransacs.monkeyNFilter.NewExtremum += stopPrinter.OnNewExtremum;
 
 			CloserOnRansacStops closerOnRansacStops = new(tradesHystory, stopCascade, 1, 50);
 			CloserOnRansacStops closerOnRansacStops1 = new(tradesHystory, filterCascade, 0, 100);
 
 			maximinStopPlacer.NewTradeWithStop += tradesHystory.OnNewTradeWithStop;
+			tradesHystory.NewTradeWithStop += stopPrinter.OnNewTradeWithStop;
 
 			tradesHystory.KilledLongStop += stopPrinter.OnClosePos;
 			tradesHystory.KilledShortStop += stopPrinter.OnClosePos;
@@ -91,9 +93,9 @@ namespace RansacBot
 		private void InitialiseTestPlotOneByOneInTime()
 		{
 			FileFeeder fileFeeder = new();
-			TradesHystory tradesHystory = new();
-			InitAndSetupSession(fileFeeder, tradesHystory).
-				ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
+			QuikTradeConnector tradesHystory = new(new("SPBFUT", "RIH2"), "SPBFUT005gx");
+			InitAndSetupSession(fileFeeder, tradesHystory);
+				//ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
 
 			LockSigmaType();
 			Task feeding = Task.Run(() =>
@@ -128,7 +130,6 @@ namespace RansacBot
 				ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
 
 			fileFeeder.FeedAllStandart();
-			//session.SaveStandart("");
 		}
 
 
@@ -137,10 +138,12 @@ namespace RansacBot
 			QuikTickProvider quikTickProvider = QuikTickProvider.GetInstance();
 
 			LockNSetter();
-			QuikTradeConnector quikTradeConnector = new(new Param("SPBFUT", "RIH2"), "");
-			//TradesHystory tradesHystory = new();
+			QuikTradeConnector quikTradeConnector = new(new Param("SPBFUT", "RIH2"), "SPBFUT005gx");
 			ObservingSession session = InitAndSetupSession(quikTickProvider, quikTradeConnector);
-			//session.ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
+
+			Quik quik = QuikContainer.Quik;
+			listBox1.Items.Add(quik.Trading.GetParamEx("SPBFUT", "RIH2", ParamNames.HIGH).Result.ParamValue.ToString());
+			listBox1.Items.Add(quik.StopOrders.GetStopOrders().Result[^1].TransId);
 
 			void OnStopClick(object sender, EventArgs e)
 			{
@@ -242,6 +245,11 @@ namespace RansacBot
 		private void UnlockNSetter()
 		{
 			numericUpDown_NSetter.Enabled = true;
+		}
+
+		private void reloadQuik_Click(object sender, EventArgs e)
+		{
+			QuikContainer.ReloadQuik();
 		}
 	}
 }

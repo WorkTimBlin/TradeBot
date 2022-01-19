@@ -1,3 +1,4 @@
+using RansacBot.Trading;
 using RansacsRealTime;
 using System;
 using System.Windows.Forms;

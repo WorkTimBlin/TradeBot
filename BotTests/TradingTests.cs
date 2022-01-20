@@ -145,6 +145,7 @@ namespace BotTests
 		{
 			QuikTradeConnector tradeConnector = new(new("SPBFUT", "RIH2"), "SPBFUT005gx");
 			tradeConnector.OnNewTradeWithStop(new(new(156110, TradeDirection.buy), 148260));
+			tradeConnector.OnNewTradeWithStop(new(new(156110, TradeDirection.buy), 148260));
 			tradeConnector.ClosePercentOfLongs(100);
 			if (!tradeConnector.IsLastOrderExecuted) throw new Exception("unexecuted order");
 			//while (true) ;

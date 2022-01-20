@@ -10,6 +10,21 @@ using System.Threading.Tasks;
 
 namespace RansacBot
 {
+
+	class TradeParams
+	{
+		public readonly string classCode;
+		public readonly string secCode;
+		public readonly string accountId;
+		public readonly string clientCode;
+		public TradeParams(string classCode, string secCode, string accountId, string clientCode)
+		{
+			this.classCode = classCode;
+			this.secCode = secCode;
+			this.accountId = accountId;
+			this.clientCode = clientCode;
+		}
+	}
 	class QuikTradeConnector : ITradesHystory
 	{
 		public event TradeWithStopHandler NewTradeWithStop;
@@ -19,6 +34,7 @@ namespace RansacBot
 		public event ClosePosHandler KilledShortStop;
 		public readonly Param param;
 		public readonly string accountId;
+		public readonly string clientCode = "53023";
 		public bool IsLastOrderExecuted { get; private set; } = false;
 		readonly static Quik quik = QuikContainer.Quik;
 		Order? lastOrder = null;
@@ -27,7 +43,8 @@ namespace RansacBot
 		TradeWithStop? lastTradeWithStop = null;
 		SortedList<StopOrder> longStops = new(new StopOrderComparer((first, second) => first.ConditionPrice > second.ConditionPrice ? 1 : -1));
 		SortedList<StopOrder> shortStops = new(new StopOrderComparer((first, second) => first.ConditionPrice < second.ConditionPrice ? 1 : -1));
-		int timeoutMillseconds = 1000;
+		Task? lastStopConfirmer = null;
+		int timeoutMillseconds = 10000;
 
 		public QuikTradeConnector(Param param, string accountId)
 		{
@@ -87,6 +104,7 @@ namespace RansacBot
 					RemoveStopByTransId(stopOrder, shortStops);
 				} 
 			}
+			Console.WriteLine("OnStopOrderChangedExiting");
 		}
 		void RemoveStopByTransId(StopOrder stopOrder, SortedList<StopOrder> stopOrders)
 		{
@@ -151,6 +169,7 @@ namespace RansacBot
 			{
 				if (quik.Orders.KillOrder(lastOrder).Result < 0)
 					throw new Exception("couldn't kill last order");
+				if(lastStopConfirmer != null) if (!lastStopConfirmer.Wait(timeoutMillseconds)) throw new Exception("didn't confirm last stop");
 				if (quik.StopOrders.KillStopOrder(lastStop).Result < 0)
 					throw new Exception("couldn't kill last stop order");
 				lastOrder = null;
@@ -160,13 +179,13 @@ namespace RansacBot
 		void SendMarketOrderWithStop(TradeWithStop tradeWithStop)
 		{
 			SendMarketOrder(tradeWithStop);
-			lastStop = SendAndConfirmStopOrder(BuildStopOrder(tradeWithStop));
+			SendAndConfirmStopOrder(BuildStopOrder(tradeWithStop));
 		}
 		void SendLimitOrderWithStop(TradeWithStop tradeWithStop)
 		{
 			lastOrder = SendLimitOrder(tradeWithStop);
 			IsLastOrderExecuted = false;
-			lastStop = SendAndConfirmStopOrder(BuildStopOrder(tradeWithStop));
+			SendAndConfirmStopOrder(BuildStopOrder(tradeWithStop));
 		}
 		void AddLastStopToActiveStops()
 		{
@@ -194,32 +213,30 @@ namespace RansacBot
 				(decimal)tradeWithStop.price, 
 				1).Result;
 		}
-		public StopOrder SendAndConfirmStopOrder(StopOrder stopOrder)
+		void SendAndConfirmStopOrder(StopOrder stopOrder)
 		{
-			StopOrder? fromQuik = null;
 			void OnStopOrder(StopOrder stopOrderFromQuik)
 			{
 				Console.WriteLine("StopOrderCallback");
 				if (AreStopOrdersMatching(stopOrder, stopOrderFromQuik))
 				{
 					Console.WriteLine("stopOrder confirmed");
-					fromQuik = stopOrderFromQuik;
+					lastStop = stopOrderFromQuik;
+					quik.Events.OnStopOrder -= OnStopOrder;
 				}
 			}
+			Console.WriteLine(DateTime.Now.Ticks.ToString() + " subscribed callback catcher");
 			quik.Events.OnStopOrder += OnStopOrder;
 			if (quik.StopOrders.CreateStopOrder(stopOrder).Result < 0)
 			{
 				quik.Events.OnStopOrder -= OnStopOrder;
+				Console.WriteLine("unsubscribed callback catcher as couldn't send");
 				throw new Exception("couldn't send stop order");
 			}
-			Task responceWaiting = Task.Run(() => { while (fromQuik == null); });
-			if (!responceWaiting.Wait(timeoutMillseconds))
-			{
-				quik.Events.OnStopOrder -= OnStopOrder;
-				throw new Exception("timeout: didn't get stop order callback");
-			}
-			quik.Events.OnStopOrder -= OnStopOrder;
-			return fromQuik;
+			lastStopConfirmer = Task.Run(() =>
+				{
+					while (lastStop == null) ;
+				});
 		}
 		bool AreStopOrdersMatching(StopOrder sent, StopOrder fromQuik)
 		{

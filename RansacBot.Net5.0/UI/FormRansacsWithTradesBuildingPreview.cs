@@ -49,7 +49,7 @@ namespace RansacBot
 			RansacDirectionFilter ransacDirectionFilter = new(filterCascade, 0);
 			invertedNDecider.NewTrade += ransacDirectionFilter.OnNewTrade;
 
-			MaximinStopPlacer maximinStopPlacer = new(stopCascade, 3);
+			MaximinStopPlacer maximinStopPlacer = new(stopCascade, 2);
 			ransacDirectionFilter.NewTrade += maximinStopPlacer.OnNewTrade;
 			return (maximinStopPlacer, filterCascade, stopCascade);
 		}
@@ -63,7 +63,7 @@ namespace RansacBot
 			RansacsCascade filterCascade = setup.filterCascade;
 			MaximinStopPlacer maximinStopPlacer = setup.stopPlacer;
 			
-			stopPrinter = new RansacsOxyPrinterWithTradesDemo(3, stopCascade, firstOnly.Checked);
+			stopPrinter = new RansacsOxyPrinterWithTradesDemo(2, stopCascade, firstOnly.Checked);
 			plotView1.Model = stopPrinter.plotModel;
 
 			filterPrinter = new RansacsOxyPrinterWithTradesDemo(1, stopCascade, firstOnly.Checked);

@@ -10,7 +10,7 @@ using QuikSharp.DataStructures.Transaction;
 
 namespace RansacBot.QuikRelated
 {
-	class TradeWithStopEnsurer
+	class TradeWithStopEnsurer : ITradeWithStopFilter
 	{
 		public event TradeWithStopHandler NewTradeWithStop;
 		public event StopOrderHandler NewStopOrder;
@@ -168,7 +168,7 @@ namespace RansacBot.QuikRelated
 		}
 	}
 
-	class StopStorage
+	class StopStorage : ITradesHystory
 	{
 		public event ClosePosHandler ExecutedLongStop;
 		public event ClosePosHandler ExecutedShortStop;
@@ -212,12 +212,19 @@ namespace RansacBot.QuikRelated
 			Console.WriteLine("OnStopOrderChangedExiting");
 			
 		}
-
-		public void ClosePercentOfTrades(double percent, SortedList<StopOrder> stopOrders, ClosePosHandler closePosHandler)
+		public void ClosePercentOfLongs(double percent)
+		{
+			ClosePercentOfTrades(percent, longStops, KilledLongStop);
+		}
+		public void ClosePercentOfShorts(double percent)
+		{
+			ClosePercentOfTrades(percent, shortStops, KilledShortStop);
+		}
+		void ClosePercentOfTrades(double percent, SortedList<StopOrder> stopOrders, ClosePosHandler KillHandler)
 		{
 			for (int i = stopOrders.Count - 1; i > (int)(stopOrders.Count * (100 - percent) / 100) - 1; i--)
 			{
-				closePosHandler?.Invoke(stopOrders[i].ConditionPrice);
+				KillHandler?.Invoke(stopOrders[i].ConditionPrice);
 				quik.Orders.SendMarketOrder(tradeParams.classCode, tradeParams.secCode, tradeParams.accountId, stopOrders[i].Operation, 1).Start();
 			}
 			KillLastPercent(percent, stopOrders);

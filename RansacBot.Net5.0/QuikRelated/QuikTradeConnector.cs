@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace RansacBot
 {
-
 	class TradeParams
 	{
 		public readonly string classCode;
@@ -25,7 +24,7 @@ namespace RansacBot
 			this.clientCode = clientCode;
 		}
 	}
-	class QuikTradeConnector : ITradesHystory
+	class QuikTradeConnector : ITradesHystory, ITradeWithStopFilter
 	{
 		public event TradeWithStopHandler NewTradeWithStop;
 		public event ClosePosHandler ExecutedLongStop;

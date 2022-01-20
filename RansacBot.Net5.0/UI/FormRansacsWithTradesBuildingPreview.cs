@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using RansacsRealTime;
 using RansacBot.UI;
 using RansacBot.Trading;
+using RansacBot.QuikRelated;
 using OxyPlot.Series;
 using OxyPlot;
 using QuikSharp;
@@ -54,7 +55,7 @@ namespace RansacBot
 			return (maximinStopPlacer, filterCascade, stopCascade);
 		}
 
-		private ObservingSession InitAndSetupSession(ITickByInstrumentProvider provider, ITradesHystory tradesHystory)
+		private ObservingSession InitAndSetupSession(ITickByInstrumentProvider provider, ITradesHystory tradesHystory, ITradeWithStopFilter tradeWithStopProcessor)
 		{
 			ObservingSession session = new(new Param("SPBFUT", "RIH2"), provider, (int)numericUpDown_NSetter.Value);
 
@@ -76,8 +77,8 @@ namespace RansacBot
 			CloserOnRansacStops closerOnRansacStops = new(tradesHystory, stopCascade, 1, 50);
 			CloserOnRansacStops closerOnRansacStops1 = new(tradesHystory, filterCascade, 0, 100);
 
-			maximinStopPlacer.NewTradeWithStop += tradesHystory.OnNewTradeWithStop;
-			tradesHystory.NewTradeWithStop += stopPrinter.OnNewTradeWithStop;
+			maximinStopPlacer.NewTradeWithStop += tradeWithStopProcessor.OnNewTradeWithStop;
+			tradeWithStopProcessor.NewTradeWithStop += stopPrinter.OnNewTradeWithStop;
 
 			tradesHystory.KilledLongStop += stopPrinter.OnClosePos;
 			tradesHystory.KilledShortStop += stopPrinter.OnClosePos;
@@ -93,8 +94,9 @@ namespace RansacBot
 		private void InitialiseTestPlotOneByOneInTime()
 		{
 			FileFeeder fileFeeder = new();
-			QuikTradeConnector tradesHystory = new(new("SPBFUT", "RIH2"), "SPBFUT005gx");
-			InitAndSetupSession(fileFeeder, tradesHystory);
+			TradesHystory tradesHystory = new();
+
+			InitAndSetupSession(fileFeeder, tradesHystory, tradesHystory);
 				//ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
 
 			LockSigmaType();
@@ -126,7 +128,7 @@ namespace RansacBot
 		{
 			FileFeeder fileFeeder = new();
 			TradesHystory tradesHystory = new();
-			InitAndSetupSession(fileFeeder, tradesHystory).
+			InitAndSetupSession(fileFeeder, tradesHystory, tradesHystory).
 				ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
 
 			fileFeeder.FeedAllStandart();
@@ -138,8 +140,11 @@ namespace RansacBot
 			QuikTickProvider quikTickProvider = QuikTickProvider.GetInstance();
 
 			LockNSetter();
-			QuikTradeConnector quikTradeConnector = new(new Param("SPBFUT", "RIH2"), "SPBFUT005gx");
-			ObservingSession session = InitAndSetupSession(quikTickProvider, quikTradeConnector);
+			//QuikTradeConnector quikTradeConnector = new(new Param("SPBFUT", "RIH2"), "SPBFUT005gx");
+			TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT005gx", "53023");
+			StopStorage stopStorage = new(QuikContainer.Quik, tradeParams);
+			TradeWithStopEnsurer ensurer = new(QuikContainer.Quik, tradeParams, stopStorage);
+			ObservingSession session = InitAndSetupSession(quikTickProvider, stopStorage, ensurer);
 
 			Quik quik = QuikContainer.Quik;
 			listBox1.Items.Add(quik.Trading.GetParamEx("SPBFUT", "RIH2", ParamNames.HIGH).Result.ParamValue.ToString());

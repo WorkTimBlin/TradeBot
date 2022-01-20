@@ -3,24 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RansacBot.Trading;
 
 
 namespace RansacBot.Trading
 {
 	public interface ITradesHystory
 	{
-		public event TradeWithStopHandler NewTradeWithStop;
 		public event ClosePosHandler ExecutedLongStop;
 		public event ClosePosHandler ExecutedShortStop;
 		public event ClosePosHandler KilledLongStop;
 		public event ClosePosHandler KilledShortStop;
-		public void OnNewTradeWithStop(TradeWithStop trade);
 		public void ClosePercentOfLongs(double percent);
 		public void ClosePercentOfShorts(double percent);
 	}
+
+	public interface ITradeWithStopFilter
+	{
+		public event TradeWithStopHandler NewTradeWithStop;
+		public void OnNewTradeWithStop(TradeWithStop trade);
+	}
 	
 	public delegate void ClosePosHandler(decimal closedStops);
-	class TradesHystory : ITradesHystory
+	class TradesHystory : ITradesHystory, ITradeWithStopFilter
 	{
 		public event TradeWithStopHandler NewTradeWithStop;
 		public event ClosePosHandler ExecutedLongStop;

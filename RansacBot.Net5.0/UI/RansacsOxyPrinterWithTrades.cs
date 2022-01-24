@@ -66,6 +66,7 @@ namespace RansacBot.UI
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
 		{
 			lastTradeWithStop = tradeWithStop;
+			Console.WriteLine("trade with stop " + tradeWithStop.price.ToString());
 			CheckIfTradeWithStopHappenedThenAddToPlot();
 		}
 
@@ -79,7 +80,7 @@ namespace RansacBot.UI
 
 		private void CheckIfTradeWithStopHappenedThenAddToPlot()
 		{
-			if (lastExtremumFound && lastTradeWithStop != null && lastTradeWithStop.price == priceWhereLastExtremumFound)
+			if (lastExtremumFound && lastTradeWithStop != null)
 			{
 				if (lastTradeWithStop.direction == TradeDirection.buy)
 				{

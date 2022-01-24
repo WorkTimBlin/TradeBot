@@ -35,89 +35,116 @@ namespace RansacBot.QuikRelated
 
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
 		{
+			TradeWithStop = tradeWithStop;
 			if (!CanDoNext()) KillCurrent();
+			StateOrder = OrganisedState.Local;
+			StateStopOrder = OrganisedState.Local;
 			Order = BuildOrder(tradeWithStop);
 			StopOrder = BuildStopOrder(tradeWithStop);
-			SendOrder();
-			SendStopOrder();
-			
+			if (CanOpenTradeWithStop(tradeWithStop))
+			{
+				SendOrder();
+				SendStopOrder();
+			}
 		}
 
 		void KillCurrent()
 		{
+			Console.WriteLine("Killing current..");
 			while (StateOrder == OrganisedState.Sent) ;
 			if (StateOrder == OrganisedState.Delivered)
 			{
-				if(quik.Orders.KillOrder(Order).Result < 0)
+				Order order = quik.Orders.GetOrder_by_transID(
+					tradeParams.classCode, 
+					tradeParams.secCode, 
+					Order.TransID).Result;
+				if (order.State == State.Completed) return;
+				if(quik.Orders.KillOrder(order).Result < 0)
 					throw new Exception("couldn't kill last order");
+				Console.WriteLine("Killed order " + Order.TransID);
 			}
 			while (StateStopOrder == OrganisedState.Sent) ;
 			if (StateStopOrder == OrganisedState.Delivered)
 			{
 				if (quik.StopOrders.KillStopOrder(StopOrder).Result < 0)
 					throw new Exception("couldn't kill last stop order");
+				State stopState = StopOrder.State;
+				StopOrder.State = State.Canceled;
+				stopStorage.OnStopOrderChanged(StopOrder);
+				StopOrder.State = stopState;
+				Console.WriteLine("Killed stop order " + StopOrder.TransId);
 			}
 		}
 		bool CanDoNext()
 		{
-			return StateOrder == OrganisedState.Executed && (StateStopOrder == OrganisedState.Delivered || StateStopOrder == OrganisedState.Executed);
+			return !(StateOrder == OrganisedState.Delivered && StateStopOrder == OrganisedState.Delivered);
 		}
 		void SendOrder()
 		{
 			long transId = quik.Orders.CreateOrder(Order).Result;
-			StateOrder = OrganisedState.Sent;
 			if (transId < 0) throw new Exception("couldn't send order");
+			StateOrder = OrganisedState.Sent;
 			Order.TransID = transId;
+			Console.WriteLine("order " + Order.TransID.ToString() + " sent");
 		}
 		void SendStopOrder()
 		{
 			long transId = quik.StopOrders.CreateStopOrder(StopOrder).Result;
-			StateStopOrder = OrganisedState.Sent;
 			if (transId < 0) throw new Exception("couldn't send order");
+			StateStopOrder = OrganisedState.Sent;
 			StopOrder.TransId = transId;
+			Console.WriteLine("stop order " + StopOrder.TransId.ToString() + " sent");
 		}
 		void OnOrderChanged(Order order)
 		{
-			if (order.TransID != Order.TransID) return;
+			if (order.TransID != (Order ?? new Order()).TransID) return;
 			StateOrder = OrganisedState.Delivered;
 			this.Order = order;
 			CheckForOrderCompletion();
 		}
 		void OnStopOrderChanged(StopOrder stopOrder)
 		{
-			if (StopOrder.TransId != stopOrder.TransId) return;
+			if ((StopOrder??new StopOrder()).TransId != stopOrder.TransId) return;
+			if (StateStopOrder != OrganisedState.Delivered)
+			{
+				stopStorage.OnNewStopOrder(stopOrder);
+			}
 			StateStopOrder = OrganisedState.Delivered;
-			stopStorage.OnNewStopOrder(stopOrder);
 			this.StopOrder = stopOrder;
 			CheckForStopOrderCompletion();
 		}
 
 		void CheckForOrderCompletion()
 		{
-			if (Order.State == State.Completed)
+			Console.WriteLine("order " + Order.TransID.ToString() + " delivered" + ", State: " + Order.State.ToString());
+			if (Order.State.Equals(State.Completed))
 			{
 				StateOrder = OrganisedState.Executed;
 				InvokeTradeWithStopIfNeeded();
+				Console.WriteLine("order " + Order.TransID.ToString() + " completed");
 			}
-			if (Order.State == State.Canceled)
+			if (Order.State == QuikSharp.DataStructures.State.Canceled)
 			{
 				StateOrder = OrganisedState.Canceled;
+				Console.WriteLine("order " + Order.TransID.ToString() + " canceled");
 			}
 		}
 		void CheckForStopOrderCompletion()
 		{
+			Console.WriteLine("stop order " + StopOrder.TransId.ToString() + " delivered");
 			InvokeTradeWithStopIfNeeded();
 			if (StopOrder.State == State.Completed)
 			{
 				StateStopOrder = OrganisedState.Executed;
 				stopStorage.OnStopOrderChanged(StopOrder);
+				Console.WriteLine("stop order " + StopOrder.TransId.ToString() + " executed");
 			}
 			if (StopOrder.State == State.Canceled)
 			{
 				StateStopOrder = OrganisedState.Canceled;
 				stopStorage.OnStopOrderChanged(StopOrder);
+				Console.WriteLine("stop order " + StopOrder.TransId.ToString() + " canceled");
 			}
-
 		}
 		void InvokeTradeWithStopIfNeeded()
 		{
@@ -125,6 +152,41 @@ namespace RansacBot.QuikRelated
 			{
 				NewTradeWithStop?.Invoke(TradeWithStop ?? throw new Exception("tradeWithStop is null but order isn't"));
 			}
+		}
+		bool CanOpenTradeWithStop(TradeWithStop tradeWithStop)
+		{
+			return (CanOpenTrade(tradeWithStop) && CanOpenTrade(tradeWithStop.stop));
+		}
+
+		bool CanOpenTrade(Trading.Trade trade)
+		{
+			ParamNames checkingPriceParam;
+			if (trade.direction == TradeDirection.buy) checkingPriceParam = ParamNames.HIGH;
+			else checkingPriceParam = ParamNames.LOW;
+			int i = quik.Trading.CalcBuySell(
+					"SPBFUT",
+					"RIH2",
+					"53023",
+					"SPBFUT005gx",
+					Double.Parse(quik.Trading.GetParamEx(
+						"SPBFUT",
+						"RIH2",
+						checkingPriceParam
+						).Result.ParamValue, System.Globalization.CultureInfo.InvariantCulture),
+					trade.direction == TradeDirection.buy,
+					false).Result.Qty;
+			return (quik.Trading.CalcBuySell(
+					"SPBFUT",
+					"RIH2",
+					"53023",
+					"SPBFUT005gx",
+					Double.Parse(quik.Trading.GetParamEx(
+						"SPBFUT",
+						"RIH2",
+						checkingPriceParam
+						).Result.ParamValue, System.Globalization.CultureInfo.InvariantCulture),
+					trade.direction == TradeDirection.buy,
+					false).Result.Qty > 0);
 		}
 
 		Order BuildOrder(Trading.Trade trade)
@@ -194,23 +256,24 @@ namespace RansacBot.QuikRelated
 		}
 		public void OnStopOrderChanged(StopOrder stopOrder)
 		{
-			Console.WriteLine("OnStopOrderChanged");
-			
-			if (stopOrder.State == State.Completed)
+			SortedList<StopOrder> currentList = stopOrder.IsLong() ? longStops : shortStops;
+			int indexOfOrder = currentList.FindIndex(
+				(StopOrder stopOrderInList) => 
+				{ return stopOrder.TransId == stopOrderInList.TransId; }
+			);
+			if(indexOfOrder > -1)
 			{
-				if (stopOrder.IsLong())
+				currentList[indexOfOrder] = stopOrder;
+				if (stopOrder.State == State.Completed || stopOrder.State == State.Canceled)
 				{
-					ExecutedLongStop?.Invoke(stopOrder.ConditionPrice);
-					RemoveStopByTransId(stopOrder, longStops);
-				}
-				else
-				{
-					ExecutedShortStop?.Invoke(stopOrder.ConditionPrice);
-					RemoveStopByTransId(stopOrder, shortStops);
+					ClosePosHandler handler = 
+						stopOrder.State == State.Completed?
+							stopOrder.IsLong() ? ExecutedLongStop : ExecutedShortStop :
+							stopOrder.IsLong() ? KilledLongStop : KilledShortStop;
+					handler?.Invoke(stopOrder.ConditionPrice);
+					currentList.RemoveAt(indexOfOrder);
 				}
 			}
-			Console.WriteLine("OnStopOrderChangedExiting");
-			
 		}
 		public void ClosePercentOfLongs(double percent)
 		{
@@ -220,23 +283,28 @@ namespace RansacBot.QuikRelated
 		{
 			ClosePercentOfTrades(percent, shortStops, KilledShortStop);
 		}
+		public List<string> GetLongs()
+		{
+			return new(longStops.Select((StopOrder stopOrder) => { return stopOrder.TransId.ToString() + " " + stopOrder.ConditionPrice.ToString(); }));
+		}
+		public List<string> GetShorts()
+		{
+			return new(shortStops.Select((StopOrder stopOrder) => { return stopOrder.TransId.ToString() + " " + stopOrder.ConditionPrice.ToString(); }));
+		}
 		void ClosePercentOfTrades(double percent, SortedList<StopOrder> stopOrders, ClosePosHandler KillHandler)
 		{
 			for (int i = stopOrders.Count - 1; i > (int)(stopOrders.Count * (100 - percent) / 100) - 1; i--)
 			{
-				KillHandler?.Invoke(stopOrders[i].ConditionPrice);
 				quik.Orders.SendMarketOrder(tradeParams.classCode, tradeParams.secCode, tradeParams.accountId, stopOrders[i].Operation, 1).Start();
 			}
 			KillLastPercent(percent, stopOrders);
 		}
-		//TODO: make sure outside killed stops are processed
 		void KillLastPercent(double percent, SortedList<StopOrder> orders)
 		{
 			for (int i = (int)(orders.Count * (100 - percent) / 100); i < orders.Count; i++)
 			{
 				quik.StopOrders.KillStopOrder(orders[i]).Start();
 			}
-			orders.RemoveRange((int)(orders.Count * (100 - percent) / 100), orders.Count - (int)(orders.Count * (100 - percent) / 100));
 		}
 		void RemoveStopByTransId(StopOrder stopOrder, SortedList<StopOrder> stopOrders)
 		{

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using RansacBot;
 using QuikSharp;
 using QuikSharp.DataStructures;
+using RansacBot.QuikRelated;
 
 namespace BotTests
 {
@@ -69,55 +70,55 @@ namespace BotTests
 			stopPlacer.OnNewTrade(new(200, TradeDirection.buy));
 			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(0, TradeDirection.buy), 0)), JsonConvert.SerializeObject(recievedTradeWithStop));
 		}
-		[TestMethod]
-		public void MaximinStopPlacerFirstRansacOnly()
-		{
-			MaximinStopPlacer stopPlacer = GetTestMaximinStopPlacerInstance();
-			TradeWithStop recievedTradeWithStop = new(new(0, TradeDirection.buy), 0);
-			stopPlacer.NewTradeWithStop += (TradeWithStop trade) => { recievedTradeWithStop = trade; };
+		//[TestMethod]
+		//public void MaximinStopPlacerFirstRansacOnly()
+		//{
+		//	MaximinStopPlacer stopPlacer = GetTestMaximinStopPlacerInstance();
+		//	TradeWithStop recievedTradeWithStop = new(new(0, TradeDirection.buy), 0);
+		//	stopPlacer.NewTradeWithStop += (TradeWithStop trade) => { recievedTradeWithStop = trade; };
 
-			stopPlacer.OnNewRansac(new Ransac(0, 0, 0, 2, 1, 0, 0, 0), 0);
-			stopPlacer.OnNewTrade(new(200, TradeDirection.buy));
-			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(200, TradeDirection.buy), 100)), JsonConvert.SerializeObject(recievedTradeWithStop));
-			recievedTradeWithStop = new(new(0, TradeDirection.buy), 0);
-			stopPlacer.OnNewTrade(new(300, TradeDirection.sell));
-			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(0, TradeDirection.buy), 0)), JsonConvert.SerializeObject(recievedTradeWithStop));
+		//	stopPlacer.OnNewRansac(new Ransac(0, 0, 0, 2, 1, 0, 0, 0), 0);
+		//	stopPlacer.OnNewTrade(new(200, TradeDirection.buy));
+		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(200, TradeDirection.buy), 100)), JsonConvert.SerializeObject(recievedTradeWithStop));
+		//	recievedTradeWithStop = new(new(0, TradeDirection.buy), 0);
+		//	stopPlacer.OnNewTrade(new(300, TradeDirection.sell));
+		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(0, TradeDirection.buy), 0)), JsonConvert.SerializeObject(recievedTradeWithStop));
 
-			stopPlacer.OnRebuildRansac(new Ransac(0, 0, 0, 2, -1, 0, 0, 0), 0);
-			recievedTradeWithStop = new(new(0, TradeDirection.buy), 0);
-			stopPlacer.OnNewTrade(new(300, TradeDirection.sell));
-			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(300, TradeDirection.sell), 500)), JsonConvert.SerializeObject(recievedTradeWithStop));
-			recievedTradeWithStop = new(new(0, TradeDirection.sell), 0);
-			stopPlacer.OnNewTrade(new(200, TradeDirection.buy));
-			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(0, TradeDirection.sell), 0)), JsonConvert.SerializeObject(recievedTradeWithStop));
-		}
-		[TestMethod]
-		public void MaximinStopPlacerSecondRansacOnlyWithFirstRaising()
-		{
-			MaximinStopPlacer stopPlacer = GetTestMaximinStopPlacerInstance();
-			TradeWithStop recievedTradeWithStop = new(new(0, TradeDirection.buy), 0);
-			stopPlacer.NewTradeWithStop += (TradeWithStop trade) => { recievedTradeWithStop = trade; };
+		//	stopPlacer.OnRebuildRansac(new Ransac(0, 0, 0, 2, -1, 0, 0, 0), 0);
+		//	recievedTradeWithStop = new(new(0, TradeDirection.buy), 0);
+		//	stopPlacer.OnNewTrade(new(300, TradeDirection.sell));
+		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(300, TradeDirection.sell), 500)), JsonConvert.SerializeObject(recievedTradeWithStop));
+		//	recievedTradeWithStop = new(new(0, TradeDirection.sell), 0);
+		//	stopPlacer.OnNewTrade(new(200, TradeDirection.buy));
+		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(0, TradeDirection.sell), 0)), JsonConvert.SerializeObject(recievedTradeWithStop));
+		//}
+		//[TestMethod]
+		//public void MaximinStopPlacerSecondRansacOnlyWithFirstRaising()
+		//{
+		//	MaximinStopPlacer stopPlacer = GetTestMaximinStopPlacerInstance();
+		//	TradeWithStop recievedTradeWithStop = new(new(0, TradeDirection.buy), 0);
+		//	stopPlacer.NewTradeWithStop += (TradeWithStop trade) => { recievedTradeWithStop = trade; };
 
-			stopPlacer.OnNewRansac(new Ransac(0, 0, 0, 2, 1, 0, 0, 0), 0);
-			stopPlacer.OnStopRansac(new Ransac(0, 0, 0, 2, 1, 0, 0, 0), 0);
-			stopPlacer.OnNewTrade(new(200, TradeDirection.buy));
-			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(200, TradeDirection.buy), 100)), JsonConvert.SerializeObject(recievedTradeWithStop));
-			recievedTradeWithStop = new(new(0, TradeDirection.buy), 0);
-			stopPlacer.OnNewTrade(new(300, TradeDirection.sell));
-			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(300, TradeDirection.sell), 500)), JsonConvert.SerializeObject(recievedTradeWithStop));
+		//	stopPlacer.OnNewRansac(new Ransac(0, 0, 0, 2, 1, 0, 0, 0), 0);
+		//	stopPlacer.OnStopRansac(new Ransac(0, 0, 0, 2, 1, 0, 0, 0), 0);
+		//	stopPlacer.OnNewTrade(new(200, TradeDirection.buy));
+		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(200, TradeDirection.buy), 100)), JsonConvert.SerializeObject(recievedTradeWithStop));
+		//	recievedTradeWithStop = new(new(0, TradeDirection.buy), 0);
+		//	stopPlacer.OnNewTrade(new(300, TradeDirection.sell));
+		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(300, TradeDirection.sell), 500)), JsonConvert.SerializeObject(recievedTradeWithStop));
 
-			stopPlacer.OnNewRansac(new Ransac(2, 2, 2, 2, 1, 0, 0, 0), 0);
-			stopPlacer.OnNewTrade(new(300, TradeDirection.buy));
-			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(300, TradeDirection.buy), 200)), JsonConvert.SerializeObject(recievedTradeWithStop));
-			stopPlacer.OnNewTrade(new(400, TradeDirection.sell));
-			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(400, TradeDirection.sell), 500)), JsonConvert.SerializeObject(recievedTradeWithStop));
+		//	stopPlacer.OnNewRansac(new Ransac(2, 2, 2, 2, 1, 0, 0, 0), 0);
+		//	stopPlacer.OnNewTrade(new(300, TradeDirection.buy));
+		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(300, TradeDirection.buy), 200)), JsonConvert.SerializeObject(recievedTradeWithStop));
+		//	stopPlacer.OnNewTrade(new(400, TradeDirection.sell));
+		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(400, TradeDirection.sell), 500)), JsonConvert.SerializeObject(recievedTradeWithStop));
 
-			stopPlacer.OnRebuildRansac(new Ransac(2, 2, 2, 2, -1, 0, 0, 0), 0);
-			stopPlacer.OnNewTrade(new(300, TradeDirection.buy));
-			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(300, TradeDirection.buy), 100)), JsonConvert.SerializeObject(recievedTradeWithStop));
-			stopPlacer.OnNewTrade(new(400, TradeDirection.sell));
-			Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(400, TradeDirection.sell), 600)), JsonConvert.SerializeObject(recievedTradeWithStop));
-		}
+		//	stopPlacer.OnRebuildRansac(new Ransac(2, 2, 2, 2, -1, 0, 0, 0), 0);
+		//	stopPlacer.OnNewTrade(new(300, TradeDirection.buy));
+		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(300, TradeDirection.buy), 100)), JsonConvert.SerializeObject(recievedTradeWithStop));
+		//	stopPlacer.OnNewTrade(new(400, TradeDirection.sell));
+		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(400, TradeDirection.sell), 600)), JsonConvert.SerializeObject(recievedTradeWithStop));
+		//}
 
 		[TestMethod]
 		public void ConnectionCheck()
@@ -141,14 +142,35 @@ namespace BotTests
 		}
 
 		[TestMethod]
-		public void SendStopAndKill()
+		public void SendStopAndKillUsingTradeConnector()
 		{
 			QuikTradeConnector tradeConnector = new(new("SPBFUT", "RIH2"), "SPBFUT005gx");
-			tradeConnector.OnNewTradeWithStop(new(new(156110, TradeDirection.buy), 148260));
+			tradeConnector.OnNewTradeWithStop(new(new(155000, TradeDirection.buy), 148260));
 			tradeConnector.OnNewTradeWithStop(new(new(156110, TradeDirection.buy), 148260));
 			tradeConnector.ClosePercentOfLongs(100);
 			if (!tradeConnector.IsLastOrderExecuted) throw new Exception("unexecuted order");
 			//while (true) ;
+		}
+		[TestMethod]
+		public void SendUnrealisticTradeAndAnotherAndClose()
+		{
+			bool recieved = false;
+			Task.Run(() =>
+			{
+				TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT005gx", null);
+				StopStorage stopStorage = new(QuikContainer.Quik, tradeParams);
+				TradeWithStopEnsurer ensurer = new(QuikContainer.Quik, tradeParams, stopStorage);
+				QuikContainer.Quik.Events.OnOrder += (QuikSharp.DataStructures.Transaction.Order order) => { recieved = true; };
+				//ensurer.OnNewTradeWithStop(new(new(150000, TradeDirection.buy), 130000));
+				ensurer.OnNewTradeWithStop(new(new(154000, TradeDirection.buy), 130000));
+				Task.Run(() =>
+				{
+					Task.Delay(500).Wait();
+					stopStorage.ClosePercentOfLongs(100);
+				}).Start();
+			});
+			Task.Delay(700).Wait();
+			Console.WriteLine(recieved.ToString());
 		}
 	}
 }

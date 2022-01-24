@@ -29,6 +29,7 @@ namespace RansacBot
 		/// </summary>
 		private void InitializeComponent()
 		{
+			this.components = new System.ComponentModel.Container();
 			this.ShowDemoContinous = new System.Windows.Forms.Button();
 			this.ShowDemoAllAtOnse = new System.Windows.Forms.Button();
 			this.firstOnly = new System.Windows.Forms.CheckBox();
@@ -45,6 +46,7 @@ namespace RansacBot
 			this.splitContainer1 = new System.Windows.Forms.SplitContainer();
 			this.reloadQuik = new System.Windows.Forms.Button();
 			this.listBox1 = new System.Windows.Forms.ListBox();
+			this.timer1 = new System.Windows.Forms.Timer(this.components);
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Speed)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_NSetter)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -128,10 +130,10 @@ namespace RansacBot
 			this.plotView1.BackColor = System.Drawing.SystemColors.ControlDarkDark;
 			this.plotView1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.plotView1.Location = new System.Drawing.Point(-3, 0);
-			this.plotView1.MinimumSize = new System.Drawing.Size(677, 0);
+			this.plotView1.MinimumSize = new System.Drawing.Size(600, 0);
 			this.plotView1.Name = "plotView1";
 			this.plotView1.PanCursor = System.Windows.Forms.Cursors.Hand;
-			this.plotView1.Size = new System.Drawing.Size(802, 253);
+			this.plotView1.Size = new System.Drawing.Size(652, 253);
 			this.plotView1.TabIndex = 0;
 			this.plotView1.Text = "plotView1";
 			this.plotView1.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
@@ -240,10 +242,10 @@ namespace RansacBot
 			this.plotView2.BackColor = System.Drawing.SystemColors.ControlDarkDark;
 			this.plotView2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.plotView2.Location = new System.Drawing.Point(0, -1);
-			this.plotView2.MinimumSize = new System.Drawing.Size(677, 0);
+			this.plotView2.MinimumSize = new System.Drawing.Size(600, 0);
 			this.plotView2.Name = "plotView2";
 			this.plotView2.PanCursor = System.Windows.Forms.Cursors.Hand;
-			this.plotView2.Size = new System.Drawing.Size(802, 245);
+			this.plotView2.Size = new System.Drawing.Size(649, 255);
 			this.plotView2.TabIndex = 0;
 			this.plotView2.Text = "plotView1";
 			this.plotView2.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
@@ -256,7 +258,7 @@ namespace RansacBot
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.splitContainer1.Cursor = System.Windows.Forms.Cursors.HSplit;
-			this.splitContainer1.Location = new System.Drawing.Point(12, 12);
+			this.splitContainer1.Location = new System.Drawing.Point(162, 12);
 			this.splitContainer1.Name = "splitContainer1";
 			this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
 			// 
@@ -267,7 +269,7 @@ namespace RansacBot
 			// splitContainer1.Panel2
 			// 
 			this.splitContainer1.Panel2.Controls.Add(this.plotView2);
-			this.splitContainer1.Size = new System.Drawing.Size(802, 514);
+			this.splitContainer1.Size = new System.Drawing.Size(652, 514);
 			this.splitContainer1.SplitterDistance = 256;
 			this.splitContainer1.TabIndex = 12;
 			// 
@@ -289,10 +291,15 @@ namespace RansacBot
 			this.listBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
 			this.listBox1.FormattingEnabled = true;
 			this.listBox1.ItemHeight = 15;
-			this.listBox1.Location = new System.Drawing.Point(820, 353);
+			this.listBox1.Location = new System.Drawing.Point(12, 12);
 			this.listBox1.Name = "listBox1";
-			this.listBox1.Size = new System.Drawing.Size(93, 94);
+			this.listBox1.Size = new System.Drawing.Size(141, 514);
 			this.listBox1.TabIndex = 14;
+			// 
+			// timer1
+			// 
+			this.timer1.Interval = 500;
+			this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
 			// 
 			// FormRansacsWithTradesBuildingPreview
 			// 
@@ -345,5 +352,6 @@ namespace RansacBot
 		private System.Windows.Forms.SplitContainer splitContainer1;
 		private System.Windows.Forms.Button reloadQuik;
 		private System.Windows.Forms.ListBox listBox1;
+		private System.Windows.Forms.Timer timer1;
 	}
 }

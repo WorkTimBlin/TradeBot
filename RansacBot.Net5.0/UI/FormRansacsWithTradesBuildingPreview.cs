@@ -47,7 +47,7 @@ namespace RansacBot
 			InvertedNDecider invertedNDecider = new();
 			higherLowerFilter.NewExtremum += invertedNDecider.OnNewExtremum;
 
-			RansacDirectionFilter ransacDirectionFilter = new(filterCascade, 0);
+			RansacDirectionTradeFilter ransacDirectionFilter = new(filterCascade, 0);
 			invertedNDecider.NewTrade += ransacDirectionFilter.OnNewTrade;
 
 			MaximinStopPlacer maximinStopPlacer = new(stopCascade, 2);
@@ -134,7 +134,7 @@ namespace RansacBot
 			fileFeeder.FeedAllStandart();
 		}
 
-
+		private StopStorage stopStorage;
 		private void BuildPlotFromQuickTicks()
 		{
 			QuikTickProvider quikTickProvider = QuikTickProvider.GetInstance();
@@ -142,13 +142,13 @@ namespace RansacBot
 			LockNSetter();
 			//QuikTradeConnector quikTradeConnector = new(new Param("SPBFUT", "RIH2"), "SPBFUT005gx");
 			TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT005gx", "53023");
-			StopStorage stopStorage = new(QuikContainer.Quik, tradeParams);
+			stopStorage = new(QuikContainer.Quik, tradeParams);
 			TradeWithStopEnsurer ensurer = new(QuikContainer.Quik, tradeParams, stopStorage);
 			ObservingSession session = InitAndSetupSession(quikTickProvider, stopStorage, ensurer);
 
 			Quik quik = QuikContainer.Quik;
-			listBox1.Items.Add(quik.Trading.GetParamEx("SPBFUT", "RIH2", ParamNames.HIGH).Result.ParamValue.ToString());
-			listBox1.Items.Add(quik.StopOrders.GetStopOrders().Result[^1].TransId);
+			//listBox1.Items.Add(quik.Trading.GetParamEx("SPBFUT", "RIH2", ParamNames.HIGH).Result.ParamValue.ToString());
+			//listBox1.Items.Add(quik.StopOrders.GetStopOrders().Result[^1].TransId);
 
 			void OnStopClick(object sender, EventArgs e)
 			{
@@ -158,6 +158,7 @@ namespace RansacBot
 				UnlockNSetter();
 			}
 			this.stop.Click += OnStopClick;
+			timer1.Start();
 		}
 
 
@@ -255,6 +256,14 @@ namespace RansacBot
 		private void reloadQuik_Click(object sender, EventArgs e)
 		{
 			QuikContainer.ReloadQuik();
+		}
+
+		private void timer1_Tick(object sender, EventArgs e)
+		{
+			listBox1.Items.Clear();
+			listBox1.Items.AddRange(stopStorage.GetLongs().ToArray());
+			listBox1.Items.Add("");
+			listBox1.Items.AddRange(stopStorage.GetShorts().ToArray());
 		}
 	}
 }

@@ -188,6 +188,7 @@ namespace RansacBot
 		}
 		void AddLastStopToActiveStops()
 		{
+			if(!lastStopConfirmer.Wait(1000)) throw new Exception();
 			if ((lastStop ?? throw new Exception("tried to save last stop when it was null")).IsLong())
 			{
 				longStops.Add(lastStop);

@@ -40,10 +40,10 @@ namespace RansacsRealTime
 			int firstBuildTick, 
 			int lastRebuildTick, 
 			int length, 
-			float slope, 
-			float intercept, 
-			float sigma, 
-			float errorTreshold)
+			double slope, 
+			double intercept, 
+			double sigma, 
+			double errorTreshold)
 		{
             Slope = slope;
 			Intercept = intercept;

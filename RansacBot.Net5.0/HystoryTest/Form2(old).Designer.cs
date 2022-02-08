@@ -1,7 +1,7 @@
 ﻿
 namespace RansacBot.HystoryTest
 {
-	partial class Form1
+	partial class Form2
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -29,7 +29,6 @@ namespace RansacBot.HystoryTest
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
 			this.textBox1 = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.textBox2 = new System.Windows.Forms.TextBox();
@@ -38,7 +37,6 @@ namespace RansacBot.HystoryTest
 			this.progressBar1 = new System.Windows.Forms.ProgressBar();
 			this.label3 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
-			this.button1 = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// textBox1
@@ -47,7 +45,6 @@ namespace RansacBot.HystoryTest
 			this.textBox1.Name = "textBox1";
 			this.textBox1.Size = new System.Drawing.Size(776, 23);
 			this.textBox1.TabIndex = 0;
-			this.textBox1.Text = "C:\\Users\\ir2\\Desktop\\1.txt";
 			// 
 			// label1
 			// 
@@ -64,7 +61,6 @@ namespace RansacBot.HystoryTest
 			this.textBox2.Name = "textBox2";
 			this.textBox2.Size = new System.Drawing.Size(776, 23);
 			this.textBox2.TabIndex = 0;
-			this.textBox2.Text = "C:\\Users\\ir2\\Desktop";
 			// 
 			// label2
 			// 
@@ -83,7 +79,7 @@ namespace RansacBot.HystoryTest
 			this.goButton.Location = new System.Drawing.Point(13, 143);
 			this.goButton.Name = "goButton";
 			this.goButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
-			this.goButton.Size = new System.Drawing.Size(356, 295);
+			this.goButton.Size = new System.Drawing.Size(470, 295);
 			this.goButton.TabIndex = 2;
 			this.goButton.Text = "Go";
 			this.goButton.UseVisualStyleBackColor = true;
@@ -115,29 +111,14 @@ namespace RansacBot.HystoryTest
 			this.label4.Size = new System.Drawing.Size(0, 89);
 			this.label4.TabIndex = 4;
 			// 
-			// button1
-			// 
-			this.button1.Font = new System.Drawing.Font("Segoe UI", 90F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-			this.button1.Image = ((System.Drawing.Image)(resources.GetObject("button1.Image")));
-			this.button1.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-			this.button1.Location = new System.Drawing.Point(439, 143);
-			this.button1.Name = "button1";
-			this.button1.RightToLeft = System.Windows.Forms.RightToLeft.No;
-			this.button1.Size = new System.Drawing.Size(349, 295);
-			this.button1.TabIndex = 2;
-			this.button1.Text = "MD";
-			this.button1.UseVisualStyleBackColor = true;
-			this.button1.Click += new System.EventHandler(this.MorphData_Click);
-			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(800, 651);
+			this.ClientSize = new System.Drawing.Size(800, 450);
 			this.Controls.Add(this.label4);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.progressBar1);
-			this.Controls.Add(this.button1);
 			this.Controls.Add(this.goButton);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
@@ -160,6 +141,5 @@ namespace RansacBot.HystoryTest
 		private System.Windows.Forms.ProgressBar progressBar1;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.Button button1;
 	}
 }

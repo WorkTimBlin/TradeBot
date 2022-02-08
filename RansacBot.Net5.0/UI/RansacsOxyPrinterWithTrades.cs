@@ -110,6 +110,7 @@ namespace RansacBot.UI
 					return;
 				}
 			}
+			throw new Exception("couldn't find corresponding stop");
 		}
 
 	}

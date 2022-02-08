@@ -14,10 +14,9 @@ using RansacBot.Trading;
 
 namespace RansacBot.HystoryTest
 {
-	public partial class Form1 : Form
+	public partial class Form2 : Form
 	{
-
-		public Form1()
+		public Form2()
 		{
 			InitializeComponent();
 		}
@@ -31,34 +30,39 @@ namespace RansacBot.HystoryTest
 			feeder.Subscribe(new("", ""), (tick) => { lastTick = tick; });
 			ObservingSession session = new(new Param("SPBFUT", "RIZ1"), feeder, 100);
 			session.SubscribeToProvider();
-
-			RansacsCascade SCascade = session.AddNewRansacsCascade(SigmaType.Sigma, 1, 90);
-			RansacsCascade ETCascade = session.AddNewRansacsCascade(SigmaType.ErrorThreshold, 3, 90);
-
+			RansacsCascade SICascade = session.AddNewRansacsCascade(SigmaType.SigmaInliers, 4, 90);
+			RansacsCascade CICascade = session.AddNewRansacsCascade(
+				SigmaType.СonfidenceInterval, 1, 90
+				);
 			MonkeyNFinder monkeyNFinder = session.ransacs.monkeyNFilter;
+			HigherLowerFilter higherLowerFilter = new();
 			InvertedNDecider decider = new();
-			HigherLowerFilterOnRansac higherLowerFilter = new(ETCascade, 2);
-			MaximinStopPlacer stopPlacer = new(SCascade, 0);
+			RansacDirectionExtremumFilter directionFilter = new(CICascade, 0);
+			MaximinStopPlacer stopPlacer = new(SICascade, 3);
 			TradesHystory tradesHystory = new();
-			CloserOnRansacStops closer100 = new(tradesHystory, SCascade, 0, 100);
+			CloserOnRansacStops closer50 = new(tradesHystory, SICascade, 1, 50);
+			CloserOnRansacStops closer100 = new(tradesHystory, CICascade, 0, 100);
 
-			feeder.Subscribe(
-				new("", ""),
+			feeder.Subscribe(new("", ""), 
 				(tick) =>
-				{
-					tradesHystory.CheckForStops((decimal)tick.PRICE);
-				});
+					{
+						tradesHystory.CheckForStops((decimal)tick.PRICE);
+					});
 
-			monkeyNFinder.NewExtremum += decider.OnNewExtremum;
-			decider.NewTrade += higherLowerFilter.OnNewTrade;
-			higherLowerFilter.NewTrade += stopPlacer.OnNewTrade;
+			monkeyNFinder.NewExtremum += higherLowerFilter.OnNewExtremum;
+			higherLowerFilter.NewExtremum += directionFilter.OnNewExtremum;
+			directionFilter.NewExtremum += decider.OnNewExtremum;
+			decider.NewTrade += stopPlacer.OnNewTrade;
 
 			stopPlacer.NewTradeWithStop += (tradeWithStop) =>
 			{
-				(tradeWithStop.direction == TradeDirection.buy ? longs : shorts).Add(new(tradeWithStop, lastTick));
+				Action<TradeWithStopWithTick> act =
+					(tradeWithStop.direction == TradeDirection.buy ? longs.Add : shorts.Add);
+				act(new(tradeWithStop, lastTick));
 			};
 			stopPlacer.NewTradeWithStop += tradesHystory.OnNewTradeWithStop;
-			StreamWriter dealsWriter = new(textBox2.Text + @"\deals.txt");
+			StreamWriter dealsWriter = new(textBox2.Text + @"\deals.txt", true);
+			StreamWriter CI2Writer = new(textBox2.Text + @"\ransacs for dir filter.csv");
 
 			tradesHystory.ExecutedLongStop += (price) =>
 			{
@@ -121,28 +125,69 @@ namespace RansacBot.HystoryTest
 					);
 			};
 
-			progressBar1.Value = 0;
+			string StringFromRansac(Ransac ransac) => ransac.firstTickIndex.ToString() + ';'
+					+ ransac.firstBuildTickIndex.ToString() + ';'
+					+ ransac.LastRebuildTickIndex.ToString() + ';'
+					+ (ransac.EndTickIndex - 1).ToString() + ';' +
+					((decimal)ransac.Slope).ToString() + ';' +
+					((decimal)ransac.Intercept).ToString() + ';' +
+					((decimal)ransac.Sigma).ToString() + ';' +
+					((decimal)ransac.ErrorTreshold).ToString();
+			Ransac currentRansac = new(0, 0, 0, 0, 0, 0, 0, 0);
+			CICascade.NewRansac += (ransac, level) =>
+			{
+				if (level != 0) return;
+				currentRansac = new(
+					ransac.firstTickIndex,
+					ransac.firstBuildTickIndex,
+					ransac.LastRebuildTickIndex,
+					ransac.Length,
+					ransac.Slope,
+					ransac.Intercept,
+					ransac.Sigma,
+					ransac.ErrorTreshold);
+			};
+			CICascade.RebuildRansac += (ransac, level) =>
+			{
+				if (level != 0) return;
+				currentRansac = new(
+					currentRansac.firstTickIndex,
+					currentRansac.firstBuildTickIndex,
+					currentRansac.LastRebuildTickIndex,
+					ransac.EndTickIndex - currentRansac.firstTickIndex,
+					currentRansac.Slope,
+					currentRansac.Intercept,
+					currentRansac.Sigma,
+					currentRansac.ErrorTreshold);
+				CI2Writer.WriteLine(StringFromRansac(currentRansac));
+				currentRansac = new(currentRansac.LastTickIndex,
+					currentRansac.LastTickIndex,
+					ransac.LastRebuildTickIndex,
+					0,
+					ransac.Slope,
+					ransac.Intercept,
+					ransac.Sigma,
+					ransac.ErrorTreshold
+					);
+			};
 			feeder.FeedAllStandart(AddOneToProgress);
 			PrintFeeding();
+			SICascade.SaveStandart(textBox2.Text);
+			CICascade.SaveStandart(textBox2.Text);
 			PrintSaving();
-			dealsWriter.Dispose();
 		}
 
 		void AddOneToProgress() 
 		{
-			//Task.Run(() => progressBar1.Invoke(new Action(() => progressBar1.Value++)));
-			//progressBar1.Invoke(new Action(() => progressBar1.Value++));
-			progressBar1.Value++;
+			progressBar1.Invoke(new Action(() => progressBar1.Value++));
 		}
 		void PrintFeeding()
 		{
-			//label3.Invoke(new Action(() => { label3.Text = "Feeding Completed!"; }));
-			label3.Text = "Feeding Completed!";
+			label3.Invoke(new Action(() => { label3.Text = "Feeding Completed!"; }));
 		}
 		void PrintSaving()
 		{
-			//label4.Invoke(new Action(() => { label4.Text = "Saving Completed!"; }));
-			label4.Text = "Saving Completed!";
+			label4.Invoke(new Action(() => { label4.Text = "Saving Completed!"; }));
 		}
 
 		struct TradeWithStopWithTick
@@ -168,7 +213,7 @@ namespace RansacBot.HystoryTest
 
 			IEnumerable<string> StringsFromFile(string filePath)
 			{
-				using StreamReader stream = new(filePath);
+				StreamReader stream = new(filePath);
 				while (!stream.EndOfStream)
 				{
 					yield return stream.ReadLine() ?? throw new DataException("string was null");
@@ -197,35 +242,6 @@ namespace RansacBot.HystoryTest
 			public void Unsubscribe(Param instrument, TickHandler handler)
 			{
 				NewTick -= handler;
-			}
-		}
-
-		private void MorphData_Click(object sender, EventArgs e)
-		{
-			using StreamReader streamReader = new(textBox1.Text);
-			using StreamWriter streamWriter = new(textBox2.Text + @"\2.txt");
-			string[] readedTick;
-			string dateTime;
-			progressBar1.Value = 0;
-			int count = 0;
-			while (!streamReader.EndOfStream)
-			{
-				readedTick = streamReader.ReadLine().Split(';', StringSplitOptions.RemoveEmptyEntries);
-				dateTime = new DateTime(
-					Convert.ToInt32(readedTick[0].Substring(0, 4)),
-					Convert.ToInt32(readedTick[0].Substring(4, 2)),
-					Convert.ToInt32(readedTick[0].Substring(6, 2)),
-					Convert.ToInt32(readedTick[1].Substring(0, 2)),
-					Convert.ToInt32(readedTick[1].Substring(2, 2)),
-					Convert.ToInt32(readedTick[1].Substring(4, 2))
-					).Ticks.ToString();
-				streamWriter.WriteLine(readedTick[4] + ';' + dateTime.ToString().Substring(0, dateTime.Length - 7) + ';' + ((int)Convert.ToDecimal(readedTick[2].Replace('.', ','))).ToString());
-				if (count == 10000)
-				{
-					count = 0;
-					progressBar1.Value++;
-				}
-				count++;
 			}
 		}
 	}

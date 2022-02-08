@@ -16,7 +16,7 @@ namespace RansacBot
 			Application.SetHighDpiMode(HighDpiMode.SystemAware);
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new HystoryTest.Form1());
+			Application.Run(new FormRansacsWithTradesBuildingPreview());
 		}
 	}
 }

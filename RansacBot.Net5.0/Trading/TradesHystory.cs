@@ -46,6 +46,7 @@ namespace RansacBot.Trading
 			{
 				shortStops.Add((decimal)trade.stop.price);
 			}
+			NewTradeWithStop.Invoke(trade);
 		}
 
 		public void ClosePercentOfLongs(double percent)

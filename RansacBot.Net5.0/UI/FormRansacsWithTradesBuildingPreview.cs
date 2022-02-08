@@ -91,12 +91,53 @@ namespace RansacBot
 			return session;
 		}
 		
+		private ObservingSession InitAndSetupSession_2_0(ITickByInstrumentProvider provider, ITradesHystory tradesHystory, ITradeWithStopFilter tradeWithStopEnsurer)
+		{
+			ObservingSession session = new(new Param("SPBFUT", "RIH2"), provider, (int)numericUpDown_NSetter.Value);
+
+			RansacsCascade SCascade = session.AddNewRansacsCascade(SigmaType.Sigma, 1, 90);
+			RansacsCascade ETCascade = session.AddNewRansacsCascade(SigmaType.ErrorThreshold, 3, 90);
+
+			stopPrinter = new RansacsOxyPrinterWithTradesDemo(0, SCascade, firstOnly.Checked);
+			plotView1.Model = stopPrinter.plotModel;
+
+			filterPrinter = new RansacsOxyPrinterWithTradesDemo(2, ETCascade, firstOnly.Checked);
+			plotView2.Model = filterPrinter.plotModel;
+
+			session.ransacs.monkeyNFilter.NewExtremum += stopPrinter.OnNewExtremum;
+
+			InvertedNDecider invertedNDecider = new();
+			HigherLowerFilterOnRansac higherLowerFilter = new(ETCascade, 2);
+			MaximinStopPlacer maximinStopPlacer = new(SCascade, 0);
+
+			CloserOnRansacStops closerOnRansacStops1 = new(tradesHystory, SCascade, 0, 100);
+
+			session.ransacs.monkeyNFilter.NewExtremum += invertedNDecider.OnNewExtremum;
+
+			invertedNDecider.NewTrade += higherLowerFilter.OnNewTrade;
+
+			higherLowerFilter.NewTrade += maximinStopPlacer.OnNewTrade;
+
+			maximinStopPlacer.NewTradeWithStop += tradeWithStopEnsurer.OnNewTradeWithStop;
+			tradeWithStopEnsurer.NewTradeWithStop += stopPrinter.OnNewTradeWithStop;
+
+			tradesHystory.KilledLongStop += stopPrinter.OnClosePos;
+			tradesHystory.KilledShortStop += stopPrinter.OnClosePos;
+			tradesHystory.ExecutedLongStop += stopPrinter.OnClosePos;
+			tradesHystory.ExecutedShortStop += stopPrinter.OnClosePos;
+			tradesHystory.ExecutedLongStop += (decimal list) => { Console.WriteLine("long stops executed"); };
+			tradesHystory.ExecutedShortStop += (decimal list) => { Console.WriteLine("short stops executed"); };
+
+			session.SubscribeToProvider();
+			return session;
+		}
+
 		private void InitialiseTestPlotOneByOneInTime()
 		{
 			FileFeeder fileFeeder = new();
 			TradesHystory tradesHystory = new();
 
-			InitAndSetupSession(fileFeeder, tradesHystory, tradesHystory);
+			InitAndSetupSession_2_0(fileFeeder, tradesHystory, tradesHystory);
 				//ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
 
 			LockSigmaType();
@@ -128,7 +169,7 @@ namespace RansacBot
 		{
 			FileFeeder fileFeeder = new();
 			TradesHystory tradesHystory = new();
-			InitAndSetupSession(fileFeeder, tradesHystory, tradesHystory).
+			InitAndSetupSession_2_0(fileFeeder, tradesHystory, tradesHystory).
 				ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
 
 			fileFeeder.FeedAllStandart();
@@ -144,7 +185,7 @@ namespace RansacBot
 			TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT005gx", "53023");
 			stopStorage = new(QuikContainer.Quik, tradeParams);
 			TradeWithStopEnsurer ensurer = new(QuikContainer.Quik, tradeParams, stopStorage);
-			ObservingSession session = InitAndSetupSession(quikTickProvider, stopStorage, ensurer);
+			ObservingSession session = InitAndSetupSession_2_0(quikTickProvider, stopStorage, ensurer);
 
 			Quik quik = QuikContainer.Quik;
 			//listBox1.Items.Add(quik.Trading.GetParamEx("SPBFUT", "RIH2", ParamNames.HIGH).Result.ParamValue.ToString());

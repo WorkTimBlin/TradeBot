@@ -80,14 +80,14 @@ namespace RansacBot
 				ticks.SkipWhile((Tick tick) => tick.ID <= ransacs.vertexes.vertexList.Last().ID));
 			isUpdated = true;
 		}
-		public RansacsCascade AddNewRansacsCascade(SigmaType typeSigma, double percentile = 90)
+		public RansacsCascade AddNewRansacsCascade(SigmaType sigmaType, double percentile = 90)
 		{
-			return new RansacsCascade(this.ransacs.vertexes, typeSigma, percentile);
+			return new RansacsCascade(this.ransacs.vertexes, sigmaType, percentile);
 		}
 
-		public RansacsCascade AddNewRansacsCascade(SigmaType typeSigma, int maxLevel, double percentile = 90)
+		public RansacsCascade AddNewRansacsCascade(SigmaType sigmaType, int maxLevel, double percentile = 90)
         {
-			return new RansacsCascade(this.ransacs.vertexes, typeSigma, maxLevel, percentile);
+			return new RansacsCascade(this.ransacs.vertexes, sigmaType, maxLevel, percentile);
         }
 		//public void UpdateFromFinamAndLaunchUsingQuik()
 		//{

@@ -13,7 +13,7 @@ namespace RansacBot.QuikRelated
 	class TradeWithStopEnsurer : ITradeWithStopFilter
 	{
 		public event TradeWithStopHandler NewTradeWithStop;
-		public event StopOrderHandler NewStopOrder;
+		//public event StopOrderHandler NewStopOrder;
 
 		public Order Order { get; private set; }
 		public StopOrder StopOrder { get; private set; }
@@ -35,8 +35,8 @@ namespace RansacBot.QuikRelated
 
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
 		{
-			TradeWithStop = tradeWithStop;
 			if (!CanDoNext()) KillCurrent();
+			TradeWithStop = tradeWithStop;
 			StateOrder = OrganisedState.Local;
 			StateStopOrder = OrganisedState.Local;
 			Order = BuildOrder(tradeWithStop);
@@ -44,7 +44,6 @@ namespace RansacBot.QuikRelated
 			if (CanOpenTradeWithStop(tradeWithStop))
 			{
 				SendOrder();
-				SendStopOrder();
 			}
 		}
 
@@ -63,21 +62,10 @@ namespace RansacBot.QuikRelated
 					throw new Exception("couldn't kill last order");
 				Console.WriteLine("Killed order " + Order.TransID);
 			}
-			while (StateStopOrder == OrganisedState.Sent) ;
-			if (StateStopOrder == OrganisedState.Delivered)
-			{
-				if (quik.StopOrders.KillStopOrder(StopOrder).Result < 0)
-					throw new Exception("couldn't kill last stop order");
-				State stopState = StopOrder.State;
-				StopOrder.State = State.Canceled;
-				stopStorage.OnStopOrderChanged(StopOrder);
-				StopOrder.State = stopState;
-				Console.WriteLine("Killed stop order " + StopOrder.TransId);
-			}
 		}
 		bool CanDoNext()
 		{
-			return !(StateOrder == OrganisedState.Delivered && StateStopOrder == OrganisedState.Delivered);
+			return !(StateOrder == OrganisedState.Delivered || StateOrder == OrganisedState.Sent);
 		}
 		void SendOrder()
 		{
@@ -97,7 +85,8 @@ namespace RansacBot.QuikRelated
 		}
 		void OnOrderChanged(Order order)
 		{
-			if (order.TransID != (Order ?? new Order()).TransID) return;
+			if (Order == null) return;
+			if (order.TransID != Order.TransID) return;
 			StateOrder = OrganisedState.Delivered;
 			this.Order = order;
 			CheckForOrderCompletion();
@@ -108,19 +97,22 @@ namespace RansacBot.QuikRelated
 			if (StateStopOrder != OrganisedState.Delivered)
 			{
 				stopStorage.OnNewStopOrder(stopOrder);
+				InvokeTradeWithStopIfNeeded();
 			}
 			StateStopOrder = OrganisedState.Delivered;
 			this.StopOrder = stopOrder;
-			CheckForStopOrderCompletion();
 		}
 
 		void CheckForOrderCompletion()
 		{
 			Console.WriteLine("order " + Order.TransID.ToString() + " delivered" + ", State: " + Order.State.ToString());
-			if (Order.State.Equals(State.Completed))
+			if (Order.State == State.Completed)
 			{
-				StateOrder = OrganisedState.Executed;
-				InvokeTradeWithStopIfNeeded();
+				if(StateOrder != OrganisedState.Executed)
+				{
+					StateOrder = OrganisedState.Executed;
+					SendStopOrder();
+				}
 				Console.WriteLine("order " + Order.TransID.ToString() + " completed");
 			}
 			if (Order.State == QuikSharp.DataStructures.State.Canceled)
@@ -148,9 +140,10 @@ namespace RansacBot.QuikRelated
 		}
 		void InvokeTradeWithStopIfNeeded()
 		{
-			if (StateOrder == OrganisedState.Executed && StateStopOrder == OrganisedState.Delivered)
+			if (StateOrder == OrganisedState.Executed)
 			{
-				NewTradeWithStop?.Invoke(TradeWithStop ?? throw new Exception("tradeWithStop is null but order isn't"));
+				NewTradeWithStop?.Invoke(
+					TradeWithStop ?? throw new Exception("tradeWithStop is null but order isn't"));
 			}
 		}
 		bool CanOpenTradeWithStop(TradeWithStop tradeWithStop)
@@ -240,8 +233,14 @@ namespace RansacBot.QuikRelated
 		private readonly TradeParams tradeParams;
 		private readonly Quik quik;
 
-		SortedList<StopOrder> longStops = new(new StopOrderComparer((first, second) => first.ConditionPrice > second.ConditionPrice ? 1 : -1));
-		SortedList<StopOrder> shortStops = new(new StopOrderComparer((first, second) => first.ConditionPrice < second.ConditionPrice ? 1 : -1));
+		SortedList<StopOrder> longStops = 
+			new(
+				new StopOrderComparer(
+					(first, second) => first.ConditionPrice > second.ConditionPrice ? 1 : -1));
+		SortedList<StopOrder> shortStops = 
+			new(
+				new StopOrderComparer(
+					(first, second) => first.ConditionPrice < second.ConditionPrice ? 1 : -1));
 
 		public StopStorage(Quik quik, TradeParams tradeParams)
 		{
@@ -295,7 +294,7 @@ namespace RansacBot.QuikRelated
 		{
 			for (int i = stopOrders.Count - 1; i > (int)(stopOrders.Count * (100 - percent) / 100) - 1; i--)
 			{
-				quik.Orders.SendMarketOrder(tradeParams.classCode, tradeParams.secCode, tradeParams.accountId, stopOrders[i].Operation, 1).Start();
+				EnsureSendingMarketOrder(stopOrders[i].Operation);
 			}
 			KillLastPercent(percent, stopOrders);
 		}
@@ -313,6 +312,19 @@ namespace RansacBot.QuikRelated
 					(StopOrder match) => { return (match.TransId == stopOrder.TransId); }
 					)
 				);
+		}
+		void EnsureSendingMarketOrder(Operation operation)
+		{
+			if(
+				quik.Orders.SendMarketOrder(
+					tradeParams.classCode, 
+					tradeParams.secCode, 
+					tradeParams.accountId, 
+					operation, 
+					1).Result.TransID < 0)
+			{
+				throw new Exception("couldn't send market order for " + operation.ToString());
+			}
 		}
 		private class StopOrderComparer : IComparer<StopOrder>
 		{

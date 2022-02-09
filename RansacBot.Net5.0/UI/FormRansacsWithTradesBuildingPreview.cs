@@ -110,7 +110,7 @@ namespace RansacBot
 			HigherLowerFilterOnRansac higherLowerFilter = new(ETCascade, 2);
 			MaximinStopPlacer maximinStopPlacer = new(SCascade, 0);
 
-			CloserOnRansacStops closerOnRansacStops1 = new(tradesHystory, SCascade, 0, 100);
+			CloserOnRansacStops closerOnRansacStops = new(tradesHystory, SCascade, 0, 100);
 
 			session.ransacs.monkeyNFilter.NewExtremum += invertedNDecider.OnNewExtremum;
 

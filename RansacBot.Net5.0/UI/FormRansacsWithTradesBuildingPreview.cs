@@ -84,8 +84,8 @@ namespace RansacBot
 			tradesHystory.KilledShortStop += stopPrinter.OnClosePos;
 			tradesHystory.ExecutedLongStop += stopPrinter.OnClosePos;
 			tradesHystory.ExecutedShortStop += stopPrinter.OnClosePos;
-			tradesHystory.ExecutedLongStop += (decimal list) => { Console.WriteLine("long stops executed"); };
-			tradesHystory.ExecutedShortStop += (decimal list) => { Console.WriteLine("short stops executed"); };
+			tradesHystory.ExecutedLongStop += (decimal list) => { Console.WriteLine(DateTime.Now.ToString() + " " + "long stops executed"); };
+			tradesHystory.ExecutedShortStop += (decimal list) => { Console.WriteLine(DateTime.Now.ToString() + " " + "short stops executed"); };
 
 			session.SubscribeToProvider();
 			return session;
@@ -114,9 +114,10 @@ namespace RansacBot
 
 			session.ransacs.monkeyNFilter.NewExtremum += invertedNDecider.OnNewExtremum;
 
-			invertedNDecider.NewTrade += higherLowerFilter.OnNewTrade;
+			//invertedNDecider.NewTrade += higherLowerFilter.OnNewTrade;
+			//higherLowerFilter.NewTrade += maximinStopPlacer.OnNewTrade;
 
-			higherLowerFilter.NewTrade += maximinStopPlacer.OnNewTrade;
+			invertedNDecider.NewTrade += maximinStopPlacer.OnNewTrade;
 
 			maximinStopPlacer.NewTradeWithStop += tradeWithStopEnsurer.OnNewTradeWithStop;
 			tradeWithStopEnsurer.NewTradeWithStop += stopPrinter.OnNewTradeWithStop;
@@ -125,8 +126,8 @@ namespace RansacBot
 			tradesHystory.KilledShortStop += stopPrinter.OnClosePos;
 			tradesHystory.ExecutedLongStop += stopPrinter.OnClosePos;
 			tradesHystory.ExecutedShortStop += stopPrinter.OnClosePos;
-			tradesHystory.ExecutedLongStop += (decimal list) => { Console.WriteLine("long stops executed"); };
-			tradesHystory.ExecutedShortStop += (decimal list) => { Console.WriteLine("short stops executed"); };
+			tradesHystory.ExecutedLongStop += (decimal list) => { Console.WriteLine(DateTime.Now.ToString() + " " + "long stops executed"); };
+			tradesHystory.ExecutedShortStop += (decimal list) => { Console.WriteLine(DateTime.Now.ToString() + " " + "short stops executed"); };
 
 			session.SubscribeToProvider();
 			return session;
@@ -182,7 +183,7 @@ namespace RansacBot
 
 			LockNSetter();
 			//QuikTradeConnector quikTradeConnector = new(new Param("SPBFUT", "RIH2"), "SPBFUT005gx");
-			TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT005gx", "53023");
+			TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT0067Y", "50290");
 			stopStorage = new(QuikContainer.Quik, tradeParams);
 			TradeWithStopEnsurer ensurer = new(QuikContainer.Quik, tradeParams, stopStorage);
 			ObservingSession session = InitAndSetupSession_2_0(quikTickProvider, stopStorage, ensurer);
@@ -205,14 +206,16 @@ namespace RansacBot
 
 		class FileFeeder : ITickByInstrumentProvider
 		{
-			public TicksLazyParser ticks = new(
-					File.ReadAllText(Directory.GetCurrentDirectory().
+			static string standartLocation = Directory.GetCurrentDirectory().
 #if DEBUG
-						Replace(@"\RansacBot.Net5.0\bin\Debug\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt")).
+						Replace(@"\RansacBot.Net5.0\bin\Debug\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt");
 #endif
 #if RELEASE
-						Replace(@"\RansacBot.Net5.0\bin\Release\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt")).
+						Replace(@"\RansacBot.Net5.0\bin\Release\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt"));
 #endif
+			static string fullRiz1Loc = @"C:\Users\ir2\Desktop\1.txt";
+			public TicksLazyParser ticks = new(
+					File.ReadAllText(fullRiz1Loc).
 					Split("\r\n", StringSplitOptions.RemoveEmptyEntries));//used for feeding
 			private event TickHandler NewTick;
 

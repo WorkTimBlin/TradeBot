@@ -5,6 +5,7 @@ using System.Text;
 using RansacsRealTime;
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace RansacBot
 {
@@ -13,11 +14,14 @@ namespace RansacBot
 		readonly static Quik quik = QuikContainer.Quik;
 		private readonly Dictionary<string, TickHandler> recievers = new();
 		private static QuikTickProvider _instance;
+		private Task task;
+		Queue<AllTrade> allTradesToProcess = new();
 
 
 		private QuikTickProvider()
 		{
 			quik.Events.OnAllTrade += OnNewAllTrade;
+			task = Task.Run(() => { });
 		}
 		public static QuikTickProvider GetInstance()
 		{
@@ -29,7 +33,28 @@ namespace RansacBot
 		}
 
 		public void OnNewAllTrade(AllTrade trade)
-		
+		{
+			allTradesToProcess.Enqueue(trade);
+			EnsureQueueIsProcessing();
+		}
+
+		private void EnsureQueueIsProcessing()
+		{
+			if (task.IsCompleted)
+			{
+				task = Task.Run(() => ProcessAllTradesQueue());
+			}
+		}
+
+		private void ProcessAllTradesQueue()
+		{
+			while(allTradesToProcess.Count > 0)
+			{
+				ProcessOneAllTrade(allTradesToProcess.Dequeue());
+			}
+		}
+
+		private void ProcessOneAllTrade(AllTrade trade)
 		{
 			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out TickHandler handler))
 			{

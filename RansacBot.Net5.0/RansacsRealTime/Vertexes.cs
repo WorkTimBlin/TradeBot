@@ -57,10 +57,18 @@ namespace RansacsRealTime
 		}
 		public int GetFirstIndexForNew(Ransac lastRansac)
 		{
-			int startInd = lastRansac.EndTickIndex - 1;
+			int startInd = lastRansac.LastTickIndex;
 
-			if (vertexList[startInd - 1].PRICE > vertexList[startInd].PRICE)
-				startInd -= 1;
+			if(lastRansac.Slope > 0)
+			{
+				if (vertexList[startInd - 1].PRICE > vertexList[startInd].PRICE)
+					startInd -= 1;
+			}
+			else
+			{
+				if (vertexList[startInd - 1].PRICE < vertexList[startInd].PRICE)
+					startInd -= 1;
+			}
 			
 			return startInd;
 		}
@@ -117,7 +125,7 @@ namespace RansacsRealTime
 				Directory.CreateDirectory(path);
 			}
 			using StreamWriter writer = new(path + @"\" + fileName);
-			writer.WriteLine("localIndex; globalIndex; price");
+			writer.WriteLine("globalIndex; localIndex; price");
 			foreach (Tick vertex in vertexList)
 			{
 				writer.WriteLine(vertex.ToString());

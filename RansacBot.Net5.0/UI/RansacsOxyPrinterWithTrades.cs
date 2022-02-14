@@ -66,7 +66,7 @@ namespace RansacBot.UI
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
 		{
 			lastTradeWithStop = tradeWithStop;
-			Console.WriteLine("trade with stop " + tradeWithStop.price.ToString());
+			Console.WriteLine(DateTime.Now.ToString() + " " + "trade with stop " + tradeWithStop.price.ToString());
 			CheckIfTradeWithStopHappenedThenAddToPlot();
 		}
 
@@ -78,19 +78,21 @@ namespace RansacBot.UI
 			CheckIfTradeWithStopHappenedThenAddToPlot();
 		}
 
+		double tradeToVertexOffset = -1;
+
 		private void CheckIfTradeWithStopHappenedThenAddToPlot()
 		{
 			if (lastExtremumFound && lastTradeWithStop != null)
 			{
 				if (lastTradeWithStop.direction == TradeDirection.buy)
 				{
-					longs.Points.Add(new ScatterPoint(lastExtremumVertexIndex + 0.5, lastTradeWithStop.price));
-					stops.Points.Add(new ScatterPoint(lastExtremumVertexIndex + 0.5, lastTradeWithStop.stop.price));
+					longs.Points.Add(new ScatterPoint(lastExtremumVertexIndex + tradeToVertexOffset, lastTradeWithStop.price));
+					stops.Points.Add(new ScatterPoint(lastExtremumVertexIndex + tradeToVertexOffset, lastTradeWithStop.stop.price));
 				}
 				else
 				{
-					shorts.Points.Add(new ScatterPoint(lastExtremumVertexIndex + 0.5, lastTradeWithStop.price));
-					stops.Points.Add(new ScatterPoint(lastExtremumVertexIndex + 0.5, lastTradeWithStop.stop.price));
+					shorts.Points.Add(new ScatterPoint(lastExtremumVertexIndex + tradeToVertexOffset, lastTradeWithStop.price));
+					stops.Points.Add(new ScatterPoint(lastExtremumVertexIndex + tradeToVertexOffset, lastTradeWithStop.stop.price));
 				}
 
 				lastTradeWithStop = null;

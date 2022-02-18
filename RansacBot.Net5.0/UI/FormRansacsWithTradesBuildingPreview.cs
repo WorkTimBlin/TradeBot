@@ -55,7 +55,7 @@ namespace RansacBot
 			return (maximinStopPlacer, filterCascade, stopCascade);
 		}
 
-		private ObservingSession InitAndSetupSession(ITickByInstrumentProvider provider, ITradesHystory tradesHystory, ITradeWithStopFilter tradeWithStopProcessor)
+		private ObservingSession InitAndSetupSession(IProviderByParam<Tick> provider, ITradesHystory tradesHystory, ITradeWithStopFilter tradeWithStopProcessor)
 		{
 			ObservingSession session = new(new Param("SPBFUT", "RIH2"), provider, (int)numericUpDown_NSetter.Value);
 
@@ -84,19 +84,61 @@ namespace RansacBot
 			tradesHystory.KilledShortStop += stopPrinter.OnClosePos;
 			tradesHystory.ExecutedLongStop += stopPrinter.OnClosePos;
 			tradesHystory.ExecutedShortStop += stopPrinter.OnClosePos;
-			tradesHystory.ExecutedLongStop += (decimal list) => { Console.WriteLine("long stops executed"); };
-			tradesHystory.ExecutedShortStop += (decimal list) => { Console.WriteLine("short stops executed"); };
+			tradesHystory.ExecutedLongStop += (decimal list) => { Console.WriteLine(DateTime.Now.ToString() + " " + "long stops executed"); };
+			tradesHystory.ExecutedShortStop += (decimal list) => { Console.WriteLine(DateTime.Now.ToString() + " " + "short stops executed"); };
 
 			session.SubscribeToProvider();
 			return session;
 		}
 		
+		private ObservingSession InitAndSetupSession_2_0(IProviderByParam<Tick> provider, ITradesHystory tradesHystory, ITradeWithStopFilter tradeWithStopEnsurer)
+		{
+			ObservingSession session = new(new Param("SPBFUT", "RIH2"), provider, (int)numericUpDown_NSetter.Value);
+
+			RansacsCascade SCascade = session.AddNewRansacsCascade(SigmaType.Sigma, 1, 90);
+			RansacsCascade ETCascade = session.AddNewRansacsCascade(SigmaType.ErrorThreshold, 3, 90);
+
+			stopPrinter = new RansacsOxyPrinterWithTradesDemo(0, SCascade, firstOnly.Checked);
+			plotView1.Model = stopPrinter.plotModel;
+
+			filterPrinter = new RansacsOxyPrinterWithTradesDemo(2, ETCascade, firstOnly.Checked);
+			plotView2.Model = filterPrinter.plotModel;
+
+			session.ransacs.monkeyNFilter.NewExtremum += stopPrinter.OnNewExtremum;
+
+			InvertedNDecider invertedNDecider = new();
+			HigherLowerFilterOnRansac higherLowerFilter = new(ETCascade, 2);
+			MaximinStopPlacer maximinStopPlacer = new(SCascade, 0);
+
+			CloserOnRansacStops closerOnRansacStops = new(tradesHystory, SCascade, 0, 100);
+
+			session.ransacs.monkeyNFilter.NewExtremum += invertedNDecider.OnNewExtremum;
+
+			//invertedNDecider.NewTrade += higherLowerFilter.OnNewTrade;
+			//higherLowerFilter.NewTrade += maximinStopPlacer.OnNewTrade;
+
+			invertedNDecider.NewTrade += maximinStopPlacer.OnNewTrade;
+
+			maximinStopPlacer.NewTradeWithStop += tradeWithStopEnsurer.OnNewTradeWithStop;
+			tradeWithStopEnsurer.NewTradeWithStop += stopPrinter.OnNewTradeWithStop;
+
+			tradesHystory.KilledLongStop += stopPrinter.OnClosePos;
+			tradesHystory.KilledShortStop += stopPrinter.OnClosePos;
+			tradesHystory.ExecutedLongStop += stopPrinter.OnClosePos;
+			tradesHystory.ExecutedShortStop += stopPrinter.OnClosePos;
+			tradesHystory.ExecutedLongStop += (decimal list) => { Console.WriteLine(DateTime.Now.ToString() + " " + "long stops executed"); };
+			tradesHystory.ExecutedShortStop += (decimal list) => { Console.WriteLine(DateTime.Now.ToString() + " " + "short stops executed"); };
+
+			session.SubscribeToProvider();
+			return session;
+		}
+
 		private void InitialiseTestPlotOneByOneInTime()
 		{
 			FileFeeder fileFeeder = new();
 			TradesHystory tradesHystory = new();
 
-			InitAndSetupSession(fileFeeder, tradesHystory, tradesHystory);
+			InitAndSetupSession_2_0(fileFeeder, tradesHystory, tradesHystory);
 				//ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
 
 			LockSigmaType();
@@ -128,23 +170,23 @@ namespace RansacBot
 		{
 			FileFeeder fileFeeder = new();
 			TradesHystory tradesHystory = new();
-			InitAndSetupSession(fileFeeder, tradesHystory, tradesHystory).
+			InitAndSetupSession_2_0(fileFeeder, tradesHystory, tradesHystory).
 				ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
 
 			fileFeeder.FeedAllStandart();
 		}
 
-		private StopStorage stopStorage;
+		private StopStorageClassic stopStorage;
 		private void BuildPlotFromQuickTicks()
 		{
 			QuikTickProvider quikTickProvider = QuikTickProvider.GetInstance();
 
 			LockNSetter();
 			//QuikTradeConnector quikTradeConnector = new(new Param("SPBFUT", "RIH2"), "SPBFUT005gx");
-			TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT005gx", "53023");
-			stopStorage = new(QuikContainer.Quik, tradeParams);
-			TradeWithStopEnsurer ensurer = new(QuikContainer.Quik, tradeParams, stopStorage);
-			ObservingSession session = InitAndSetupSession(quikTickProvider, stopStorage, ensurer);
+			TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT0067Y", "50290");
+			stopStorage = new(tradeParams);
+			OneOrderAtATimeCheckpoint ensurer = new(tradeParams, stopStorage);
+			ObservingSession session = InitAndSetupSession_2_0(quikTickProvider, stopStorage, ensurer);
 
 			Quik quik = QuikContainer.Quik;
 			//listBox1.Items.Add(quik.Trading.GetParamEx("SPBFUT", "RIH2", ParamNames.HIGH).Result.ParamValue.ToString());
@@ -162,18 +204,20 @@ namespace RansacBot
 		}
 
 
-		class FileFeeder : ITickByInstrumentProvider
+		class FileFeeder : IProviderByParam<Tick>
 		{
-			public TicksLazyParser ticks = new(
-					File.ReadAllText(Directory.GetCurrentDirectory().
+			static string standartLocation = Directory.GetCurrentDirectory().
 #if DEBUG
-						Replace(@"\RansacBot.Net5.0\bin\Debug\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt")).
+						Replace(@"\RansacBot.Net5.0\bin\Debug\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt");
 #endif
 #if RELEASE
-						Replace(@"\RansacBot.Net5.0\bin\Release\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt")).
+						Replace(@"\RansacBot.Net5.0\bin\Release\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt"));
 #endif
+			static string fullRiz1Loc = @"C:\Users\ir2\Desktop\1.txt";
+			public TicksLazyParser ticks = new(
+					File.ReadAllText(fullRiz1Loc).
 					Split("\r\n", StringSplitOptions.RemoveEmptyEntries));//used for feeding
-			private event TickHandler NewTick;
+			private event Action<Tick> NewTick;
 
 			public void FeedAllStandart()
 			{
@@ -194,11 +238,11 @@ namespace RansacBot
 				NewTick.Invoke(ticks[index]);
 			}
 
-			public void Subscribe(Param instrument, TickHandler handler)
+			public void Subscribe(Param instrument, Action<Tick> handler)
 			{
 				NewTick += handler;
 			}
-			public void Unsubscribe(Param instrument, TickHandler handler)
+			public void Unsubscribe(Param instrument, Action<Tick> handler)
 			{
 				NewTick -= handler;
 			}

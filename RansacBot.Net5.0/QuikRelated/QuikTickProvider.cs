@@ -5,20 +5,15 @@ using System.Text;
 using RansacsRealTime;
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace RansacBot
 {
-	class QuikTickProvider : ITickByInstrumentProvider
+	class QuikTickProvider : AbstractProviderByParam<AllTrade, Tick>
 	{
 		readonly static Quik quik = QuikContainer.Quik;
-		private readonly Dictionary<string, TickHandler> recievers = new();
 		private static QuikTickProvider _instance;
 
-
-		private QuikTickProvider()
-		{
-			quik.Events.OnAllTrade += OnNewAllTrade;
-		}
 		public static QuikTickProvider GetInstance()
 		{
 			if(_instance == null)
@@ -27,41 +22,18 @@ namespace RansacBot
 			}
 			return _instance;
 		}
-
-		public void OnNewAllTrade(AllTrade trade)
-		
+		private QuikTickProvider():base()
 		{
-			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out TickHandler handler))
-			{
-				handler?.Invoke(new Tick(trade.TradeNum, 0, trade.Price));
-			}
+			quik.Events.OnAllTrade += sequentialProvider.OnNewT;
 		}
 
-		public void Subscribe(string classCode, string secCode, TickHandler handler)
+		protected override Tick GetTOut(AllTrade trade)
 		{
-			if (recievers.ContainsKey(classCode + secCode))
-			{
-				recievers[classCode + secCode] += handler;
-			}
-			else
-			{
-				recievers.Add(classCode + secCode, handler);
-			}
+			return new Tick(trade.TradeNum, 0, trade.Price);
 		}
-		public void Subscribe(Param instrument, TickHandler handler)
+		protected override string GetKey(AllTrade trade)
 		{
-			Subscribe(instrument.classCode, instrument.secCode, handler);
-		}
-		public void Unsubscribe(string classCode, string secCode, TickHandler handler)
-		{
-			if (recievers.ContainsKey(classCode + secCode))
-			{
-				recievers[classCode + secCode] -= handler ?? throw new Exception("tried to unsubscribe null");
-			}
-		}
-		public void Unsubscribe(Param instrument, TickHandler handler)
-		{
-			Unsubscribe(instrument.classCode, instrument.secCode, handler);
+			return trade.ClassCode + trade.SecCode;
 		}
 
 		/*

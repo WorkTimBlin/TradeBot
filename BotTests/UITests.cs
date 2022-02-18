@@ -8,6 +8,9 @@ using RansacBot.UI;
 using RansacsRealTime;
 using RansacBot.Trading;
 using OxyPlot.Series;
+using Accord.Math;
+using Accord.Statistics.Distributions.Univariate;
+using Accord.Statistics.Models.Regression.Linear;
 
 namespace BotTests
 {
@@ -135,6 +138,20 @@ namespace BotTests
 			{
 				SortedSet<dd> set = new(new comparer()) { new(1, 2), new(1, 5) };
 				set.Add(new(1, 3));
+			}
+			[TestMethod]
+			public void ResearchOfAccord()
+			{
+				double[] x = { 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6 };
+				double[] y = { 2, 1, 3, 5, 4, 6, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6 };
+				OrdinaryLeastSquares squares = new();
+				SimpleLinearRegression prev;
+				prev = squares.Learn(x, y);
+				int[] indexSamples = Vector.Sample(x.Length, x.Length);
+				x = x.Get(indexSamples);
+				y = y.Get(indexSamples);
+				//Assert.AreEqual(prev.Slope, squares.Learn(x, y).Slope);
+				squares = new();
 			}
         }
 	}

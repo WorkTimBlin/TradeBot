@@ -18,6 +18,7 @@ namespace RansacsRealTime
 		private static double[] x;
 		private static double[] y;
 		private static readonly object locker = new();
+		private static int maxEvaluations;
 
 
 		public static void Compute(List<Tick> ticks, SigmaType typeSigma, double percentile,
@@ -26,16 +27,21 @@ namespace RansacsRealTime
 			x = ticks.Select(n => (double)n.VERTEXINDEX).ToArray();
 			y = ticks.Select(n => (double)n.PRICE).ToArray();
 
-			int MaxEvaluations = ticks.Count > 100 ? 100 : ticks.Count;
+			maxEvaluations = ticks.Count > 100 ? 100 : ticks.Count;
 			MinSamples = (int)(0.3 * ticks.Count) > 2 ? (int)(0.3 * ticks.Count) : 2;
-			Best = new (int count, SimpleLinearRegression reg)[MaxEvaluations];
+
+			UseAntiRandomMode(ticks.Count);
+
+			Best = new (int count, SimpleLinearRegression reg)[maxEvaluations];
 
 			double median = GetMedian(y);
 			double error = GetErrorThreshold(y, median);
 			errorThreshold = error;
 
-			ParallelLoopResult result = Parallel.For(0, MaxEvaluations, new ParallelOptions { MaxDegreeOfParallelism = 4 }, Iteration);
+			ParallelLoopResult result = Parallel.For(0, maxEvaluations, new ParallelOptions { MaxDegreeOfParallelism = 4 }, Iteration);
+			
 
+			//Task.Run(() => { while (!result.IsCompleted) ; }).Wait();
 			if (result.LowestBreakIteration == null)
 			{
 				bestReg = Array.Find(Best, x => x.count == Best.Max(x => x.count)).reg;
@@ -44,6 +50,8 @@ namespace RansacsRealTime
 			{
 				bestReg = Best[Convert.ToInt32(result.LowestBreakIteration.ToString())].reg;
 			}
+			SingleIteration();
+			bestReg = Best[0].reg;
 
 			double slope = bestReg.Slope;
 			double intercept = bestReg.Intercept;
@@ -51,12 +59,22 @@ namespace RansacsRealTime
 			sigma = typeSigma switch
 			{
 				SigmaType.Sigma => Math.Sqrt(y.Zip(x.Select(x => x * slope + intercept), (a, b) => Math.Pow(a - b, 2)).Sum() / ticks.Count),
+
 				SigmaType.SigmaInliers => Math.Sqrt(
-					y.Select(y => Math.Abs(y - median) <= error ? y : 0).Zip(x.Select(x => x * slope + intercept),
-					(a, b) => a == 0 ? 0 : Math.Pow(a - b, 2)).Sum() / y.Count(y => Math.Abs(y - median) <= error)),
+					y.Select(
+						y => Math.Abs(y - median) <= error ? y : 0
+						).Zip(x.Select(x => x * slope + intercept),
+							(a, b) => a == 0 ? 0 : Math.Pow(a - b, 2)).Sum() / y.Count(y => Math.Abs(y - median) <= error)),
+
 				SigmaType.СonfidenceInterval => GetPercentileSigma(ticks, bestReg.Slope, bestReg.Intercept, error, percentile / 100.0),
 				_ => error,
 			};
+		}
+
+		static void UseAntiRandomMode(int count)
+		{
+			maxEvaluations = 1;
+			MinSamples = count;
 		}
 
 		/// <summary>
@@ -88,6 +106,24 @@ namespace RansacsRealTime
 						pls.Break();
 				}
 			}
+		}
+
+		private static void SingleIteration()
+		{
+			int[] indexSamples = Vector.Sample(MinSamples, x.Length);
+
+			//double[] localx = x.Get(indexSamples);
+			//double[] localy = y.Get(indexSamples);
+			double[] localx = (double[])x.Clone();
+			double[] localy = (double[])y.Clone();
+
+			SimpleLinearRegression reg = new OrdinaryLeastSquares().Learn(localx, localy);
+			double[] outY = reg.Transform(localx);
+
+			double localMedian = GetMedian(outY);
+			double localError = GetErrorThreshold(outY, localMedian);
+			int localInliers = outY.Count(a => Math.Abs(a - localMedian) <= localError);
+			Best[0] = (localInliers, reg);
 		}
 		/// <summary>
 		/// Вычисляет доверительный интервал.

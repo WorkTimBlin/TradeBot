@@ -70,7 +70,7 @@ namespace RansacBot
 			//session.SaveStandart("");
 		}
 
-		class FileFeeder : ITickByInstrumentProvider
+		class FileFeeder : ITickByParamProvider
 		{
 			public TicksLazyParser ticks = new(
 					File.ReadAllText(Directory.GetCurrentDirectory().
@@ -81,7 +81,7 @@ namespace RansacBot
 						Replace(@"\RansacBot.Net5.0\bin\Release\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt")).
 #endif
 					Split("\r\n", StringSplitOptions.RemoveEmptyEntries));//used for feeding
-			private event TickHandler NewTick;
+			private event Action<Tick> NewTick;
 
 			public void FeedAllStandart()
 			{
@@ -102,11 +102,11 @@ namespace RansacBot
 				NewTick.Invoke(ticks[index]);
 			}
 
-			public void Subscribe(Param instrument, TickHandler handler)
+			public void Subscribe(Param instrument, Action<Tick> handler)
 			{
 				NewTick += handler;
 			}
-			public void Unsubscribe(Param instrument, TickHandler handler)
+			public void Unsubscribe(Param instrument, Action<Tick> handler)
 			{
 				NewTick -= handler;
 			}

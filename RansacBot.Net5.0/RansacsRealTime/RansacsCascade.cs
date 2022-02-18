@@ -83,7 +83,9 @@ namespace RansacsRealTime
 			if (Directory.Exists(path))
 				Directory.Delete(path, true);
 
-			Directory.CreateDirectory(path);
+			path = Directory.CreateDirectory(path).FullName;
+			while (!Directory.Exists(path)) ;
+			System.Threading.Tasks.Task.Delay(1000).Wait();
 			SaveLevels(path);
 			SaveMetadata(path);
 		}

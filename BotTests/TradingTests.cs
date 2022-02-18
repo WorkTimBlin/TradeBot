@@ -151,26 +151,26 @@ namespace BotTests
 			if (!tradeConnector.IsLastOrderExecuted) throw new Exception("unexecuted order");
 			//while (true) ;
 		}
-		[TestMethod]
-		public void SendUnrealisticTradeAndAnotherAndClose()
-		{
-			bool recieved = false;
-			Task.Run(() =>
-			{
-				TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT005gx", null);
-				StopStorage stopStorage = new(QuikContainer.Quik, tradeParams);
-				TradeWithStopEnsurer ensurer = new(QuikContainer.Quik, tradeParams, stopStorage);
-				QuikContainer.Quik.Events.OnOrder += (QuikSharp.DataStructures.Transaction.Order order) => { recieved = true; };
-				//ensurer.OnNewTradeWithStop(new(new(150000, TradeDirection.buy), 130000));
-				ensurer.OnNewTradeWithStop(new(new(154000, TradeDirection.buy), 130000));
-				Task.Run(() =>
-				{
-					Task.Delay(500).Wait();
-					stopStorage.ClosePercentOfLongs(100);
-				}).Start();
-			});
-			Task.Delay(700).Wait();
-			Console.WriteLine(recieved.ToString());
-		}
+		//[TestMethod]
+		//public void SendUnrealisticTradeAndAnotherAndClose()
+		//{
+		//	bool recieved = false;
+		//	Task.Run(() =>
+		//	{
+		//		TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT005gx", null);
+		//		StopStorage stopStorage = new(QuikContainer.Quik, tradeParams);
+		//		TradeWithStopEnsurer ensurer = new(QuikContainer.Quik, tradeParams, stopStorage);
+		//		QuikContainer.Quik.Events.OnOrder += (QuikSharp.DataStructures.Transaction.Order order) => { recieved = true; };
+		//		//ensurer.OnNewTradeWithStop(new(new(150000, TradeDirection.buy), 130000));
+		//		ensurer.OnNewTradeWithStop(new(new(154000, TradeDirection.buy), 130000));
+		//		Task.Run(() =>
+		//		{
+		//			Task.Delay(500).Wait();
+		//			stopStorage.ClosePercentOfLongs(100);
+		//		}).Start();
+		//	});
+		//	Task.Delay(700).Wait();
+		//	Console.WriteLine(recieved.ToString());
+		//}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using QuikSharp;
 using QuikSharp.DataStructures;
+using RansacBot.Trading;
 using System;
 using System.Collections.Generic;
 using System.Linq;

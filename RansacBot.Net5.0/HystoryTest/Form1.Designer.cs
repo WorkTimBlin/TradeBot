@@ -39,6 +39,7 @@ namespace RansacBot.HystoryTest
 			this.label3 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
 			this.button1 = new System.Windows.Forms.Button();
+			this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
 			this.SuspendLayout();
 			// 
 			// textBox1
@@ -129,6 +130,10 @@ namespace RansacBot.HystoryTest
 			this.button1.UseVisualStyleBackColor = true;
 			this.button1.Click += new System.EventHandler(this.MorphData_Click);
 			// 
+			// openFileDialog1
+			// 
+			this.openFileDialog1.FileName = "openFileDialog1";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -161,5 +166,6 @@ namespace RansacBot.HystoryTest
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.OpenFileDialog openFileDialog1;
 	}
 }

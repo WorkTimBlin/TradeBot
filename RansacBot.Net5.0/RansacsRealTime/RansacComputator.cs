@@ -13,7 +13,7 @@ namespace RansacsRealTime
 	/// </summary>
 	public static class RansacComputator
 	{
-		private static (int count, SimpleLinearRegression reg)[] Best;
+		private static (int count, LeastSquaresRegression reg)[] Best;
 		private static int MinSamples;
 		private static double[] x;
 		private static double[] y;
@@ -22,7 +22,7 @@ namespace RansacsRealTime
 
 
 		public static void Compute(List<Tick> ticks, SigmaType typeSigma, double percentile,
-			out SimpleLinearRegression bestReg, out double errorThreshold, out double sigma)
+			out LeastSquaresRegression bestReg, out double errorThreshold, out double sigma)
 		{
 			x = ticks.Select(n => (double)n.VERTEXINDEX).ToArray();
 			y = ticks.Select(n => (double)n.PRICE).ToArray();
@@ -30,9 +30,9 @@ namespace RansacsRealTime
 			maxEvaluations = ticks.Count > 100 ? 100 : ticks.Count;
 			MinSamples = (int)(0.3 * ticks.Count) > 2 ? (int)(0.3 * ticks.Count) : 2;
 
-			UseAntiRandomMode(ticks.Count);
+			//UseAntiRandomMode(ticks.Count);
 
-			Best = new (int count, SimpleLinearRegression reg)[maxEvaluations];
+			Best = new (int count, LeastSquaresRegression reg)[maxEvaluations];
 
 			double median = GetMedian(y);
 			double error = GetErrorThreshold(y, median);
@@ -50,8 +50,9 @@ namespace RansacsRealTime
 			{
 				bestReg = Best[Convert.ToInt32(result.LowestBreakIteration.ToString())].reg;
 			}
-			SingleIteration();
-			bestReg = Best[0].reg;
+
+			//SingleIteration();
+			//bestReg = Best[0].reg;
 
 			double slope = bestReg.Slope;
 			double intercept = bestReg.Intercept;
@@ -89,7 +90,8 @@ namespace RansacsRealTime
 			double[] localx = x.Get(indexSamples);
 			double[] localy = y.Get(indexSamples);
 
-			SimpleLinearRegression reg = new OrdinaryLeastSquares().Learn(localx, localy);
+			//LeastSquaresRegression reg = new OrdinaryLeastSquares().Learn(localx, localy);
+			LeastSquaresRegression reg = LeastSquaresRegression.FromData(localx, localy);
 			double[] outY = reg.Transform(localx);
 
 			double localMedian = GetMedian(outY);
@@ -117,7 +119,8 @@ namespace RansacsRealTime
 			double[] localx = (double[])x.Clone();
 			double[] localy = (double[])y.Clone();
 
-			SimpleLinearRegression reg = new OrdinaryLeastSquares().Learn(localx, localy);
+			//LeastSquaresRegression reg = new OrdinaryLeastSquares().Learn(localx, localy);
+			LeastSquaresRegression reg = LeastSquaresRegression.FromData(x, y);
 			double[] outY = reg.Transform(localx);
 
 			double localMedian = GetMedian(outY);
@@ -167,4 +170,42 @@ namespace RansacsRealTime
 			return (y.Length % 2 == 0 ? (y[y.Length / 2 - 1] + y[y.Length / 2]) / 2.0 : y[y.Length / 2]) / 0.6744897501960817;
 		}
 	}
+
+	public class LeastSquaresRegression
+	{
+		public double Slope { get; set; }
+		public double Intercept { get; set; }
+		public double Transform(double x) => Slope * x + Intercept;
+		public double[] Transform(double[] x) => x.Select(Transform).ToArray();
+		public static LeastSquaresRegression FromData(in double[] x, in double[] y)
+		{
+			double slope = GetSlope(x, y);
+			return new() { Slope = slope, Intercept = GetIntercept(x, y, slope)};
+		}
+
+		public static double GetSlope(in double[] x, in double[] y)
+		{
+			double localxSum = x.Sum();
+			return (x.Length * ByPairs(x, y, (a, b) => a * b).Sum() - localxSum * y.Sum())
+				/
+				(x.Length * x.Select((a) => a * a).Sum() - localxSum * localxSum);
+		}
+
+		public static double GetIntercept(in double[] x, in double[] y, in double slope)
+		{
+			return (y.Sum() - slope * x.Sum()) / x.Length;
+		}
+
+		static IEnumerable<T> ByPairs<T>(IEnumerable<T> ain, IEnumerable<T> bin, Func<T, T, T> func)
+		{
+			IEnumerator<T> a = ain.GetEnumerator();
+			IEnumerator<T> b = bin.GetEnumerator();
+
+			while (a.MoveNext() && b.MoveNext())
+			{
+				yield return func(a.Current, b.Current);
+			}
+		}
+	}
+
 }

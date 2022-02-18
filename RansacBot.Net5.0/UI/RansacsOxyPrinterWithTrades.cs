@@ -66,7 +66,6 @@ namespace RansacBot.UI
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
 		{
 			lastTradeWithStop = tradeWithStop;
-			Console.WriteLine(DateTime.Now.ToString() + " " + "trade with stop " + tradeWithStop.price.ToString());
 			CheckIfTradeWithStopHappenedThenAddToPlot();
 		}
 

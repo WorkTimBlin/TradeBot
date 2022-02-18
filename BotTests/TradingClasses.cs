@@ -22,6 +22,7 @@ namespace BotTests
 		{
 			StopStorageClassic stopStorage = new(tradeParamsDemo);
 			stopStorage.OnNewTradeWithStop(new(new(0, TradeDirection.buy), 0));
+			Task.Delay(100).Wait();
 			stopStorage.ClosePercentOfLongs(100);
 		}
 		[TestMethod]
@@ -29,26 +30,30 @@ namespace BotTests
 		{
 			TradeWithStop? trade = null;
 			StopStorageClassic stopStorage = new(tradeParamsDemo);
-			OneOrderAtATimeCheckpoint checkpoint = new(tradeParamsDemo, stopStorage);
-			checkpoint.NewTradeWithStop += (tradeW) => { trade = tradeW; };
+			OneOrderAtATimeCheckpoint checkpoint = new(tradeParamsDemo);
+			checkpoint.NewTradeWithStop += (tradeW) => 
+			{ 
+				trade = tradeW;
+			};
 			checkpoint.OnNewTradeWithStop(new(new(157600, RansacBot.Trading.TradeDirection.buy), 156000));
-			Assert.IsFalse(Task.Run(() => { while (trade == null) ; }).Wait(500));
+			Assert.IsTrue(Task.Run(() => { while (trade == null) ; }).Wait(500));
 		}
 		[TestMethod]
 		public void TestCheckpointKill()
 		{
-			TradeParams tradeParams = tradeParamsReal;
+			TradeParams tradeParams = tradeParamsDemo;
 			TradeWithStop? trade = null;
 			StopStorageClassic stopStorage = new(tradeParams);
-			OneOrderAtATimeCheckpoint checkpoint = new(tradeParams, stopStorage);
+			OneOrderAtATimeCheckpoint checkpoint = new(tradeParams);
 			checkpoint.NewTradeWithStop += (tradeW) => { trade = tradeW; };
-			checkpoint.OnNewTradeWithStop(new(new(152000, RansacBot.Trading.TradeDirection.buy), 150000));
+			checkpoint.OnNewTradeWithStop(new(new(152000, TradeDirection.buy), 150000));
 			Task.Delay(1500).Wait();
-			checkpoint.OnNewTradeWithStop(new(new(152000, RansacBot.Trading.TradeDirection.buy), 150000));
+			checkpoint.OnNewTradeWithStop(new(new(152000, TradeDirection.buy), 150000));
 			Task.Delay(5000).Wait();
-			checkpoint.OnNewTradeWithStop(new(new(156000, RansacBot.Trading.TradeDirection.buy), 150000));
+			checkpoint.OnNewTradeWithStop(new(new(156000, TradeDirection.buy), 150000));
 			Task.Delay(1500).Wait();
-			Assert.IsTrue(Task.Run(() => { while (trade == null) ; }).Wait(1000));
+			//Assert.IsTrue(Task.Run(() => { while (trade == null) ; }).Wait(1000));
+			//debil
 		}
 		[TestMethod]
 		public void TestQuikFunctions()

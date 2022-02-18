@@ -120,6 +120,7 @@ namespace RansacBot
 			invertedNDecider.NewTrade += maximinStopPlacer.OnNewTrade;
 
 			maximinStopPlacer.NewTradeWithStop += tradeWithStopEnsurer.OnNewTradeWithStop;
+			tradeWithStopEnsurer.NewTradeWithStop += tradesHystory.OnNewTradeWithStop;
 			tradeWithStopEnsurer.NewTradeWithStop += stopPrinter.OnNewTradeWithStop;
 
 			tradesHystory.KilledLongStop += stopPrinter.OnClosePos;
@@ -139,7 +140,9 @@ namespace RansacBot
 			TradesHystory tradesHystory = new();
 
 			InitAndSetupSession_2_0(fileFeeder, tradesHystory, tradesHystory);
-				//ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
+			//ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
+
+			tradesHystory.NewTradeWithStop -= tradesHystory.OnNewTradeWithStop;
 
 			LockSigmaType();
 			Task feeding = Task.Run(() =>
@@ -173,6 +176,8 @@ namespace RansacBot
 			InitAndSetupSession_2_0(fileFeeder, tradesHystory, tradesHystory).
 				ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
 
+			tradesHystory.NewTradeWithStop -= tradesHystory.OnNewTradeWithStop;
+
 			fileFeeder.FeedAllStandart();
 		}
 
@@ -185,7 +190,7 @@ namespace RansacBot
 			//QuikTradeConnector quikTradeConnector = new(new Param("SPBFUT", "RIH2"), "SPBFUT005gx");
 			TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT0067Y", "50290");
 			stopStorage = new(tradeParams);
-			OneOrderAtATimeCheckpoint ensurer = new(tradeParams, stopStorage);
+			OneOrderAtATimeCheckpoint ensurer = new(tradeParams);
 			ObservingSession session = InitAndSetupSession_2_0(quikTickProvider, stopStorage, ensurer);
 
 			Quik quik = QuikContainer.Quik;
@@ -195,6 +200,8 @@ namespace RansacBot
 			void OnStopClick(object sender, EventArgs e)
 			{
 				this.stop.Click -= OnStopClick;
+				stopStorage.ClosePercentOfLongs(100);
+				stopStorage.ClosePercentOfShorts(100);
 				session.UnsubscribeOfProvider();
 				stopRequired = false;
 				UnlockNSetter();

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using QuikSharp.DataStructures.Transaction;
 
-namespace RansacBot.QuikRelated
+namespace RansacBot.Trading
 {
 	abstract class AbstractOrderEnsurer<TOrder>
 	{
@@ -22,7 +22,7 @@ namespace RansacBot.QuikRelated
 		{
 			functions = orderFunctions;
 		}
-		public AbstractOrderEnsurer(TOrder order)
+		private AbstractOrderEnsurer(TOrder order)
 		{
 			this.Order = order;
 		}

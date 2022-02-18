@@ -40,10 +40,10 @@ namespace RansacsRealTime
 			int firstBuildTick, 
 			int lastRebuildTick, 
 			int length, 
-			float slope, 
-			float intercept, 
-			float sigma, 
-			float errorTreshold)
+			double slope, 
+			double intercept, 
+			double sigma, 
+			double errorTreshold)
 		{
             Slope = slope;
 			Intercept = intercept;
@@ -101,11 +101,18 @@ namespace RansacsRealTime
 
 			if (difference > Sigma)
 			{
+				Ransac prevVersion = new(firstTickIndex, firstBuildTickIndex, LastRebuildTickIndex, Length, Slope, Intercept, Sigma, ErrorTreshold);
+				
 				NeedRebuilding?.Invoke(this);
+				
 				difference = (tick.PRICE - GetValueAtPoint(tick.VERTEXINDEX)) * (Slope > 0 ? -1 : 1);
 
 				if (difference > Sigma)
+				{
+					Rebuild(prevVersion);
+					LastRebuildTickIndex = prevVersion.LastRebuildTickIndex;
 					return Action.Stop;
+				}
 				else
 					return Action.Nothing;
 			}
@@ -133,18 +140,9 @@ namespace RansacsRealTime
 		/// </summary>
 		/// <param name="index">X - индекс тика по MonkeyN</param>
 		/// <returns>Y = Slope*X + Intercept</returns>
-		public double GetValueAtPoint(int index)
+		public double GetValueAtPoint(double index)
 		{
 			return Intercept + Slope * index;
-		}
-		/// <summary>
-		/// Вычисляет значение ранзака в указанных точках.
-		/// </summary>
-		/// <param name="indexes">Список индексов.</param>
-		/// <returns>array of results</returns>
-		public double[] GetValuesAtPoints(int[] indexes)
-		{
-			return indexes.Select(GetValueAtPoint).ToArray();
 		}
 
 		public enum Action : byte

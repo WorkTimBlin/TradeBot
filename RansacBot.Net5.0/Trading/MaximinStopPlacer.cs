@@ -46,7 +46,7 @@ namespace RansacBot.Trading
 			}
 		}
 
-		public void OnNewVertex(Tick tick, VertexType type)
+		void OnNewVertex(Tick tick, VertexType type)
 		{
 			if(currentRansac != null)
 			{
@@ -60,7 +60,7 @@ namespace RansacBot.Trading
 				}
 			}
 		}
-		public void OnNewRansac(Ransac ransac, int level)
+		void OnNewRansac(Ransac ransac, int level)
 		{
 			if (level != this.level) return;
 			currentRansac = ransac;
@@ -75,7 +75,7 @@ namespace RansacBot.Trading
 				wasCurrentRansacRaising = false;
 			}
 		}
-		public void OnRebuildRansac(Ransac ransac, int level)
+		void OnRebuildRansac(Ransac ransac, int level)
 		{
 			if (level != this.level) return;
 			if (wasCurrentRansacRaising)
@@ -93,7 +93,7 @@ namespace RansacBot.Trading
 				wasCurrentRansacRaising = true;
 			}
 		}
-		public void OnStopRansac(Ransac ransac, int level)
+		void OnStopRansac(Ransac ransac, int level)
 		{
 			if (level != this.level) return;
 			previousRansac = ransac;

@@ -8,6 +8,9 @@ using RansacBot.UI;
 using RansacsRealTime;
 using RansacBot.Trading;
 using OxyPlot.Series;
+using Accord.Math;
+using Accord.Statistics.Distributions.Univariate;
+using Accord.Statistics.Models.Regression.Linear;
 
 namespace BotTests
 {
@@ -111,11 +114,44 @@ namespace BotTests
 					Assert.AreEqual(ransacPrinterWithTrades.stops.Points[^1].Y, testTradeWithStop.price + 500);
 				}
 			}
-			[TestMethod]
-			public void ResearchOfSearch()
+			struct dd
 			{
-				List<double> list = new() { 1, 3, 5, 6, 8 };
-				throw new Exception(list.BinarySearch(2).ToString());
+				public double d;
+				public double c;
+				public dd(double d, double c)
+				{
+					this.d = d;
+					this.c = c;
+				}
+			}
+			class comparer:IComparer<dd>
+			{
+				public int Compare(dd first, dd second)
+				{
+					if (first.d > second.d) return 1;
+					else if (first.d == second.d) return 0;
+					else return -1;
+				}
+			}
+			[TestMethod]
+			public void ResearchOfSortedSet()
+			{
+				SortedSet<dd> set = new(new comparer()) { new(1, 2), new(1, 5) };
+				set.Add(new(1, 3));
+			}
+			[TestMethod]
+			public void ResearchOfAccord()
+			{
+				double[] x = { 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6 };
+				double[] y = { 2, 1, 3, 5, 4, 6, 1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6 };
+				OrdinaryLeastSquares squares = new();
+				SimpleLinearRegression prev;
+				prev = squares.Learn(x, y);
+				int[] indexSamples = Vector.Sample(x.Length, x.Length);
+				x = x.Get(indexSamples);
+				y = y.Get(indexSamples);
+				//Assert.AreEqual(prev.Slope, squares.Learn(x, y).Slope);
+				squares = new();
 			}
         }
 	}

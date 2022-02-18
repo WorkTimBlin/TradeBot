@@ -66,6 +66,7 @@ namespace RansacBot.UI
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
 		{
 			lastTradeWithStop = tradeWithStop;
+			Console.WriteLine(DateTime.Now.ToString() + " " + "trade with stop " + tradeWithStop.price.ToString());
 			CheckIfTradeWithStopHappenedThenAddToPlot();
 		}
 
@@ -77,19 +78,21 @@ namespace RansacBot.UI
 			CheckIfTradeWithStopHappenedThenAddToPlot();
 		}
 
+		double tradeToVertexOffset = -1;
+
 		private void CheckIfTradeWithStopHappenedThenAddToPlot()
 		{
-			if (lastExtremumFound && lastTradeWithStop != null && lastTradeWithStop.price == priceWhereLastExtremumFound)
+			if (lastExtremumFound && lastTradeWithStop != null)
 			{
 				if (lastTradeWithStop.direction == TradeDirection.buy)
 				{
-					longs.Points.Add(new ScatterPoint(lastExtremumVertexIndex + 0.5, lastTradeWithStop.price));
-					stops.Points.Add(new ScatterPoint(lastExtremumVertexIndex + 0.5, lastTradeWithStop.stop.price));
+					longs.Points.Add(new ScatterPoint(lastExtremumVertexIndex + tradeToVertexOffset, lastTradeWithStop.price));
+					stops.Points.Add(new ScatterPoint(lastExtremumVertexIndex + tradeToVertexOffset, lastTradeWithStop.stop.price));
 				}
 				else
 				{
-					shorts.Points.Add(new ScatterPoint(lastExtremumVertexIndex + 0.5, lastTradeWithStop.price));
-					stops.Points.Add(new ScatterPoint(lastExtremumVertexIndex + 0.5, lastTradeWithStop.stop.price));
+					shorts.Points.Add(new ScatterPoint(lastExtremumVertexIndex + tradeToVertexOffset, lastTradeWithStop.price));
+					stops.Points.Add(new ScatterPoint(lastExtremumVertexIndex + tradeToVertexOffset, lastTradeWithStop.stop.price));
 				}
 
 				lastTradeWithStop = null;
@@ -99,21 +102,18 @@ namespace RansacBot.UI
 			}
 		}
 
-		public void OnClosePos(List<double> closedStops)
+		public void OnClosePos(decimal stopPrice)
 		{
-			foreach (double stopPrice in closedStops)
+			for(int i = 0; i < stops.Points.Count; i++)
 			{
-				foreach (ScatterPoint stopPoint in stops.Points)
+				if(stops.Points[i].Y == (double)stopPrice)
 				{
-					if (stopPoint.Y == stopPrice)
-					{
-						stops.Points.Remove(stopPoint);
-						break;
-					}
+					stops.Points.RemoveAt(i);
+					return;
 				}
 			}
+			throw new Exception("couldn't find corresponding stop");
 		}
-
 
 	}
 }

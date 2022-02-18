@@ -111,4 +111,41 @@ namespace RansacBot
 			return ParseTick(line.Split(';', StringSplitOptions.RemoveEmptyEntries));
 		}
 	}
+
+	public class TicksLazySequentialParser: IEnumerable<Tick>
+	{
+		private readonly IEnumerable<string> rawStrings;
+		public TicksLazySequentialParser(IEnumerable<string> rawStrings)
+		{
+			this.rawStrings = rawStrings;
+		}
+		#region IEnumerable
+		public IEnumerator<Tick> GetEnumerator()
+		{
+			foreach (string line in rawStrings)
+			{
+				yield return ParseTick(line);
+			}
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			foreach (string line in rawStrings)
+			{
+				yield return ParseTick(line);
+			}
+		}
+		#endregion
+		static public Tick ParseTick(string[] data)
+		{
+			return new Tick(
+				Convert.ToInt64(data[4]),
+				0,
+				(double)Convert.ToDouble(data[2], System.Globalization.CultureInfo.InvariantCulture));
+		}
+		static public Tick ParseTick(string line)
+		{
+			return ParseTick(line.Split(';', StringSplitOptions.RemoveEmptyEntries));
+		}
+	}
 }

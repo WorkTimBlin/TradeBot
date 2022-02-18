@@ -31,7 +31,7 @@ namespace RansacBot
 		private void InitialiseTestPlotOneByOneInTime()
 		{
 			FileFeeder fileFeeder = new();
-			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
+			ObservingSession session = new(new Param("RIZ1", "SPBFUT"), fileFeeder, 100);
 			session.AddNewRansacsCascade((SigmaType)sigmaType.SelectedItem);
 			session.SubscribeToProvider();
 			ransacsPrinter = new RansacsOxyPrinterDemo(0, session.ransacsCascades[0], firstOnly.Checked);
@@ -61,7 +61,7 @@ namespace RansacBot
 		private void InitialiseTestPlotAllAtOnce()
 		{
 			FileFeeder fileFeeder = new();
-			ObservingSession session = new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
+			ObservingSession session = new(new Param("RIZ1", "SPBFUT"), fileFeeder, 100);
 			session.SubscribeToProvider();
 			session.AddNewRansacsCascade(RansacsRealTime.SigmaType.ErrorThreshold);
 			ransacsPrinter = new RansacsOxyPrinterDemo(0, session.ransacsCascades[0], firstOnly.Checked);
@@ -70,7 +70,7 @@ namespace RansacBot
 			//session.SaveStandart("");
 		}
 
-		class FileFeeder : ITickByInstrumentProvider
+		class FileFeeder : ITickByParamProvider
 		{
 			public TicksLazyParser ticks = new(
 					File.ReadAllText(Directory.GetCurrentDirectory().
@@ -81,7 +81,7 @@ namespace RansacBot
 						Replace(@"\RansacBot.Net5.0\bin\Release\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt")).
 #endif
 					Split("\r\n", StringSplitOptions.RemoveEmptyEntries));//used for feeding
-			private event TickHandler NewTick;
+			private event Action<Tick> NewTick;
 
 			public void FeedAllStandart()
 			{
@@ -102,11 +102,11 @@ namespace RansacBot
 				NewTick.Invoke(ticks[index]);
 			}
 
-			public void Subscribe(Instrument instrument, TickHandler handler)
+			public void Subscribe(Param instrument, Action<Tick> handler)
 			{
 				NewTick += handler;
 			}
-			public void Unsubscribe(Instrument instrument, TickHandler handler)
+			public void Unsubscribe(Param instrument, Action<Tick> handler)
 			{
 				NewTick -= handler;
 			}

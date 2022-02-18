@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using RansacBot;
 using RansacsRealTime;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -10,9 +11,9 @@ namespace BotTests
 	[TestClass]
 	public class ObservingSessionTests
 	{
-		class FileFeeder : ITickByInstrumentProvider
+		class FileFeeder : IProviderByParam<Tick>
 		{
-			private event TickHandler NewTick;
+			private event Action<Tick> NewTick;
 
 			public void FeedAllStandart()
 			{
@@ -29,19 +30,19 @@ namespace BotTests
 				}
 			}
 
-			public void Subscribe(Instrument instrument, TickHandler handler)
+			public void Subscribe(Param param, Action<Tick> handler)
 			{
 				NewTick += handler;
 			}
-			public void Unsubscribe(Instrument instrument, TickHandler handler)
+			public void Unsubscribe(Param param, Action<Tick> handler)
 			{
 				NewTick -= handler;
 			}
 		}
 
-		ObservingSession InstantiateStandartSession(ITickByInstrumentProvider fileFeeder)
+		ObservingSession InstantiateStandartSession(IProviderByParam<Tick> fileFeeder)
 		{
-			return new(new Instrument("RIZ1", "SPBFUT", "", "", ""), fileFeeder, 100);
+			return new(new Param("RIZ1", "SPBFUT"), fileFeeder, 100);
 		}
 
 		[TestMethod]

@@ -8,7 +8,7 @@ namespace RansacBot
 	/// <summary>
 	/// Торговый инструмент (бумага). Адаптирован строго под фьючерсы.
 	/// </summary>
-	class Instrument
+	class Param
 	{
 		/// <summary>
 		/// Код класса инструмента (бумаги)
@@ -17,45 +17,26 @@ namespace RansacBot
 		/// <summary>
 		/// Код инструмента (бумаги)
 		/// </summary>
-		public readonly string securityCode;
-		/// <summary>
-		/// Код клиента (номер счета)
-		/// </summary>
-		public readonly string clientCode;
-		/// <summary>
-		/// Счет клиента
-		/// </summary>
-		public readonly string accountID;
-		/// <summary>
-		/// Код фирмы
-		/// </summary>
-		public readonly string firmID;
+		public readonly string secCode;
 
-		private const string stdFileName = "instrument.csv";
+		private const string stdFileName = "param.csv";
 
-		public Instrument(string classCode, string securityCode, string clientCode, string accountID, string firmID)
+		public Param(string classCode, string securityCode)
 		{
 			this.classCode = classCode;
-			this.securityCode = securityCode;
-			this.clientCode = clientCode;
-			this.accountID = accountID;
-			this.firmID = firmID;
+			this.secCode = securityCode;
 		}
 
 		/// <summary>
 		/// загружает из файла сохраняемые параметры инструмента
 		/// </summary>
 		/// <param name="path"></param>
-		public Instrument(string path, string filename = stdFileName)
+		public static Param GetParamFromFile(string path, string filename = stdFileName)
 		{
-			using (StreamReader reader = new(path + @"\" + filename))
-			{
-				classCode = reader.ReadLine().Split(';')[1];
-				securityCode = reader.ReadLine().Split(';')[1];
-				clientCode = reader.ReadLine().Split(';')[1];
-				accountID = reader.ReadLine().Split(';')[1];
-				firmID = reader.ReadLine().Split(';')[1];
-			}
+			using StreamReader reader = new(path + @"\" + filename);
+			string classCode = (reader.ReadLine() ?? throw new Exception("can't read class code")).Split(';')[1];
+			string securityCode = (reader.ReadLine() ?? throw new Exception("can't read sec code")).Split(';')[1];
+			return new(classCode, securityCode);
 		}
 
 		public void SaveStandart(string path, string fileName = stdFileName)
@@ -63,11 +44,13 @@ namespace RansacBot
 			using(StreamWriter writer = new(path + @"\" + fileName))
 			{
 				writer.WriteLine("classCode;" + classCode);
-				writer.WriteLine("securityCode;" + securityCode);
-				writer.WriteLine("clientCode;" + clientCode);
-				writer.WriteLine("accountID;" + accountID);
-				writer.WriteLine("firmID;" + firmID);
+				writer.WriteLine("securityCode;" + secCode);
 			}
+		}
+
+		public static implicit operator Param(TradeParams tradeParams)
+		{
+			return new(tradeParams.classCode, tradeParams.secCode);
 		}
 
 		/* конструкторы Дамира

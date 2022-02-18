@@ -5,23 +5,15 @@ using System.Text;
 using RansacsRealTime;
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace RansacBot
 {
-	class QuikTickProvider : ITickByInstrumentProvider
+	class QuikTickProvider : AbstractProviderByParam<AllTrade, Tick>
 	{
-		public readonly Quik quik;
-		public delegate void NewPriceHandler(double price);
-		private readonly Dictionary<string, TickHandler> recievers = new();
+		readonly static Quik quik = QuikContainer.Quik;
 		private static QuikTickProvider _instance;
 
-
-		private QuikTickProvider()
-		{
-			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-			quik = new Quik();
-			quik.Events.OnAllTrade += OnNewAllTrade;
-		}
 		public static QuikTickProvider GetInstance()
 		{
 			if(_instance == null)
@@ -30,41 +22,18 @@ namespace RansacBot
 			}
 			return _instance;
 		}
-
-		public void OnNewAllTrade(AllTrade trade)
-		
+		private QuikTickProvider():base()
 		{
-			if (recievers.TryGetValue(trade.ClassCode + trade.SecCode, out TickHandler handler))
-			{
-				handler?.Invoke(new Tick(trade.TradeNum, 0, trade.Price));
-			}
+			quik.Events.OnAllTrade += sequentialProvider.OnNewT;
 		}
 
-		public void Subscribe(string classCode, string secCode, TickHandler handler)
+		protected override Tick GetTOut(AllTrade trade)
 		{
-			if (recievers.ContainsKey(classCode + secCode))
-			{
-				recievers[classCode + secCode] += handler;
-			}
-			else
-			{
-				recievers.Add(classCode + secCode, handler);
-			}
+			return new Tick(trade.TradeNum, 0, trade.Price);
 		}
-		public void Subscribe(Instrument instrument, TickHandler handler)
+		protected override string GetKey(AllTrade trade)
 		{
-			Subscribe(instrument.classCode, instrument.securityCode, handler);
-		}
-		public void Unsubscribe(string classCode, string secCode, TickHandler handler)
-		{
-			if (recievers.ContainsKey(classCode + secCode))
-			{
-				recievers[classCode + secCode] -= handler ?? throw new Exception("tried to unsubscribe null");
-			}
-		}
-		public void Unsubscribe(Instrument instrument, TickHandler handler)
-		{
-			Unsubscribe(instrument.classCode, instrument.securityCode, handler);
+			return trade.ClassCode + trade.SecCode;
 		}
 
 		/*

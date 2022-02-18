@@ -1,5 +1,7 @@
+using RansacBot.Trading;
 using RansacsRealTime;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace RansacBot
@@ -15,7 +17,9 @@ namespace RansacBot
 			Application.SetHighDpiMode(HighDpiMode.SystemAware);
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new FormRansacsWithTradesBuildingPreview());
+
+			UI.FormBotOrHystoryTestChoice choiceForm = new();
+			Application.Run(choiceForm);
 		}
 	}
 }

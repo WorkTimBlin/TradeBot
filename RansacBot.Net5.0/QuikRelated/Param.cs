@@ -48,6 +48,11 @@ namespace RansacBot
 			}
 		}
 
+		public static implicit operator Param(TradeParams tradeParams)
+		{
+			return new(tradeParams.classCode, tradeParams.secCode);
+		}
+
 		/* конструкторы Дамира
 		/// <summary>
 		/// Базовый конструктор. Принимает код класса инструмента (Фьючерсы: "SPBFUT") и тикер(SecCode) инструмента. (RTS например имеет тикер - RIZ1). <br/>

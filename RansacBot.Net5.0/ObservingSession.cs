@@ -15,7 +15,7 @@ namespace RansacBot
 		public readonly List<RansacsCascade> ransacsCascades;
 		private bool isActive = false;
 		private bool isUpdated = false;
-		public readonly ITickByInstrumentProvider provider;
+		public readonly IProviderByParam<Tick> provider;
 		DateTime dateTimeOfLastSave;
 
 		/// <summary>
@@ -23,7 +23,7 @@ namespace RansacBot
 		/// </summary>
 		/// <param name="instrument"></param>
 		/// <param name="N">N from monkeyN</param>
-		public ObservingSession(Param instrument, ITickByInstrumentProvider provider, int N)
+		public ObservingSession(Param instrument, IProviderByParam<Tick> provider, int N)
 		{
 			this.param = instrument;
 			this.provider = provider;
@@ -35,7 +35,7 @@ namespace RansacBot
 		/// Initialises Instrument and ransacs session from file
 		/// </summary>
 		/// <param name="path"></param>
-		public ObservingSession(string path, ITickByInstrumentProvider provider)
+		public ObservingSession(string path, IProviderByParam<Tick> provider)
 		{
 			param = Param.GetParamFromFile(path);
 			this.provider = provider;

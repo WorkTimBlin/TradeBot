@@ -55,7 +55,7 @@ namespace RansacBot
 			return (maximinStopPlacer, filterCascade, stopCascade);
 		}
 
-		private ObservingSession InitAndSetupSession(ITickByInstrumentProvider provider, ITradesHystory tradesHystory, ITradeWithStopFilter tradeWithStopProcessor)
+		private ObservingSession InitAndSetupSession(IProviderByParam<Tick> provider, ITradesHystory tradesHystory, ITradeWithStopFilter tradeWithStopProcessor)
 		{
 			ObservingSession session = new(new Param("SPBFUT", "RIH2"), provider, (int)numericUpDown_NSetter.Value);
 
@@ -91,7 +91,7 @@ namespace RansacBot
 			return session;
 		}
 		
-		private ObservingSession InitAndSetupSession_2_0(ITickByInstrumentProvider provider, ITradesHystory tradesHystory, ITradeWithStopFilter tradeWithStopEnsurer)
+		private ObservingSession InitAndSetupSession_2_0(IProviderByParam<Tick> provider, ITradesHystory tradesHystory, ITradeWithStopFilter tradeWithStopEnsurer)
 		{
 			ObservingSession session = new(new Param("SPBFUT", "RIH2"), provider, (int)numericUpDown_NSetter.Value);
 
@@ -176,7 +176,7 @@ namespace RansacBot
 			fileFeeder.FeedAllStandart();
 		}
 
-		private StopStorage stopStorage;
+		private StopStorageClassic stopStorage;
 		private void BuildPlotFromQuickTicks()
 		{
 			QuikTickProvider quikTickProvider = QuikTickProvider.GetInstance();
@@ -184,8 +184,8 @@ namespace RansacBot
 			LockNSetter();
 			//QuikTradeConnector quikTradeConnector = new(new Param("SPBFUT", "RIH2"), "SPBFUT005gx");
 			TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT0067Y", "50290");
-			stopStorage = new(QuikContainer.Quik, tradeParams);
-			TradeWithStopEnsurer ensurer = new(QuikContainer.Quik, tradeParams, stopStorage);
+			stopStorage = new(tradeParams);
+			OneOrderAtATimeCheckpoint ensurer = new(tradeParams, stopStorage);
 			ObservingSession session = InitAndSetupSession_2_0(quikTickProvider, stopStorage, ensurer);
 
 			Quik quik = QuikContainer.Quik;
@@ -204,7 +204,7 @@ namespace RansacBot
 		}
 
 
-		class FileFeeder : ITickByInstrumentProvider
+		class FileFeeder : IProviderByParam<Tick>
 		{
 			static string standartLocation = Directory.GetCurrentDirectory().
 #if DEBUG
@@ -217,7 +217,7 @@ namespace RansacBot
 			public TicksLazyParser ticks = new(
 					File.ReadAllText(fullRiz1Loc).
 					Split("\r\n", StringSplitOptions.RemoveEmptyEntries));//used for feeding
-			private event TickHandler NewTick;
+			private event Action<Tick> NewTick;
 
 			public void FeedAllStandart()
 			{
@@ -238,11 +238,11 @@ namespace RansacBot
 				NewTick.Invoke(ticks[index]);
 			}
 
-			public void Subscribe(Param instrument, TickHandler handler)
+			public void Subscribe(Param instrument, Action<Tick> handler)
 			{
 				NewTick += handler;
 			}
-			public void Unsubscribe(Param instrument, TickHandler handler)
+			public void Unsubscribe(Param instrument, Action<Tick> handler)
 			{
 				NewTick -= handler;
 			}

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace RansacBot.QuikRelated
 {
+	//TODO finish
 	class StopStorageByOrderBook : ITradesHystory
 	{
 		public event ClosePosHandler ExecutedLongStop;

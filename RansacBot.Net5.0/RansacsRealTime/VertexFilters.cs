@@ -21,6 +21,12 @@ namespace RansacsRealTime
 		public event VertexHandler NewVertex;
 	}
 
+	public interface ITickFilter
+	{
+		void OnNewTick(Tick tick);
+		public event Action<Tick> NewTick;
+	}
+
 	public interface IExtremumFilter
 	{
 		void OnNewExtremum(Tick extremum, VertexType vertexType, Tick current);

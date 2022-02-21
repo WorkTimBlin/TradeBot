@@ -25,8 +25,6 @@ namespace RansacBot.HystoryTest
 		private void goButton_Click(object sender, EventArgs e)
 		{
 			Tick lastTick = new();
-			List<TradeWithStopWithTick> longs = new();
-			List<TradeWithStopWithTick> shorts = new();
 			FileFeeder feeder = new(textBox1.Text);
 			feeder.Subscribe(new("", ""), (tick) => { lastTick = tick; });
 			ObservingSession session = new(new Param("SPBFUT", "RIZ1"), feeder, 100);
@@ -52,12 +50,15 @@ namespace RansacBot.HystoryTest
 			monkeyNFinder.NewExtremum += decider.OnNewExtremum;
 
 			// plug decider to stop placer through te filter
-			//decider.NewTrade += higherLowerFilter.OnNewTrade;
-			//higherLowerFilter.NewTrade += stopPlacer.OnNewTrade;
+			decider.NewTrade += higherLowerFilter.OnNewTrade;
+			higherLowerFilter.NewTrade += stopPlacer.OnNewTrade;
 
 			//plug decider to stop placer without filters
-			decider.NewTrade += stopPlacer.OnNewTrade;
+			//decider.NewTrade += stopPlacer.OnNewTrade;
 
+			List<TradeWithStopWithTick> longs = new();
+			List<TradeWithStopWithTick> shorts = new();
+			
 			stopPlacer.NewTradeWithStop += (tradeWithStop) =>
 			{
 				(tradeWithStop.direction == TradeDirection.buy ? longs : shorts).Add(new(tradeWithStop, lastTick));

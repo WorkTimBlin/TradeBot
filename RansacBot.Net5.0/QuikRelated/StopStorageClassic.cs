@@ -53,7 +53,10 @@ namespace RansacBot.QuikRelated
 		{
 			for (int i = (int)(orders.Count * (100 - percent) / 100); i < orders.Count; i++)
 			{
-				orders[i].Kill();
+				if(orders[i].State == EnsuranceState.Active)
+				{
+					orders[i].Kill();
+				}
 			}
 		}
 

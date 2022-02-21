@@ -60,10 +60,10 @@ namespace RansacBot.Trading
 
 		private void WaitForCurrentToCompleteAndInvoke()
 		{
-			//WaitForArrival();
+			//WaitForArrival(); // - can be used for awaiting order arrival to quik, not necessary now
 			Task observingTimer = Task.Run(() => 
 			{ 
-				while (!orderEnsurer.IsComplete) Task.Delay(5).Wait(); 
+				while (!orderEnsurer.IsComplete) ; 
 			});
 			while (!observingTimer.Wait(30))
 			{

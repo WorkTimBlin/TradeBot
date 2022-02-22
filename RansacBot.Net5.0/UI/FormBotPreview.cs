@@ -20,20 +20,15 @@ using QuikSharp.DataStructures;
 
 namespace RansacBot
 {
-	public partial class FormRansacsWithTradesBuildingPreview : Form
+	public partial class FormBotPreview : Form
 	{
 		private bool stopRequired = false;
 		private bool isRunning = false;
 		RansacsOxyPrinterWithTrades stopPrinter;
 		RansacsOxyPrinterWithTrades filterPrinter;
-		public FormRansacsWithTradesBuildingPreview()
+		public FormBotPreview()
 		{
 			InitializeComponent();
-			sigmaType.Items.Add(SigmaType.СonfidenceInterval);
-			sigmaType.Items.Add(SigmaType.ErrorThreshold);
-			sigmaType.Items.Add(SigmaType.Sigma);
-			sigmaType.Items.Add(SigmaType.SigmaInliers);
-			sigmaType.SelectedIndex = 0;
 		}
 
 		private (MaximinStopPlacer stopPlacer, RansacsCascade filterCascade, RansacsCascade stopCascade) SetupTradeFilters(ObservingSession session)
@@ -144,7 +139,6 @@ namespace RansacBot
 
 			tradesHystory.NewTradeWithStop -= tradesHystory.OnNewTradeWithStop;
 
-			LockSigmaType();
 			Task feeding = Task.Run(() =>
 			{
 				isRunning = true;
@@ -166,7 +160,6 @@ namespace RansacBot
 				}
 				isRunning = false;
 			});
-			feeding.GetAwaiter().OnCompleted(UnlockSigmaType);
 		}
 
 		private void InitialiseTestPlotAllAtOnce()
@@ -279,15 +272,6 @@ namespace RansacBot
 		private void stop_Click(object sender, EventArgs e)
 		{
 			if (isRunning) stopRequired = true;
-		}
-
-		private void LockSigmaType()
-		{
-			sigmaType.Enabled = false;
-		}
-		private void UnlockSigmaType()
-		{
-			sigmaType.Enabled = true;
 		}
 
 		private void buttonQuickWatch_Click(object sender, EventArgs e)

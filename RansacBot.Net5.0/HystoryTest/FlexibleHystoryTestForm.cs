@@ -94,7 +94,6 @@ namespace RansacBot.HystoryTest
 			filter.NewTrade += stopPlacer.OnNewTrade;
 			OneAtATimeHystoryCheckpoint checkpoint = new();
 			stopPlacer.NewTradeWithStop += checkpoint.OnNewTradeWithStop;
-			checkpoint.NewTradeWithStop += hystoryStops.OnNewTradeWithStop;
 			session.SubscribeToProvider();
 
 
@@ -108,74 +107,6 @@ namespace RansacBot.HystoryTest
 			};
 			checkpoint.NewTradeWithStop += hystoryStops.OnNewTradeWithStop;
 			StreamWriter dealsWriter = new(outputDirectoryTextBox.Text + @"\deals.txt");
-
-			hystoryStops.ExecutedLongStop += (price) =>
-			{
-				int tradeIndex = longs.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
-				TradeWithStopWithTick trade = longs[tradeIndex];
-				longs.RemoveAt(tradeIndex);
-				dealsWriter.WriteLine(
-					"B" + ";" +
-					(trade.trade.price - trade.trade.stop.price).ToString() + ";" +
-					trade.tick.ID.ToString() + ";" +
-					lastTick.ID.ToString() + ";" +
-					trade.trade.price.ToString() + ";" +
-					trade.trade.stop.price.ToString() + ";" +
-					"1"
-					);
-			};
-			hystoryStops.ExecutedShortStop += (price) =>
-			{
-				int tradeIndex = shorts.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
-				TradeWithStopWithTick trade = shorts[tradeIndex];
-				shorts.RemoveAt(tradeIndex);
-				dealsWriter.WriteLine(
-					"S" + ";" +
-					(trade.trade.stop.price - trade.trade.price).ToString() + ";" +
-					trade.tick.ID.ToString() + ";" +
-					lastTick.ID.ToString() + ";" +
-					trade.trade.price.ToString() + ";" +
-					trade.trade.stop.price.ToString() + ";" +
-					"1"
-					);
-			};
-			hystoryStops.KilledLongStop += (price) =>
-			{
-				int tradeIndex = longs.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
-				TradeWithStopWithTick trade = longs[tradeIndex];
-				longs.RemoveAt(tradeIndex);
-				dealsWriter.WriteLine(
-					"B" + ";" +
-					(trade.trade.price - trade.trade.stop.price).ToString() + ";" +
-					trade.tick.ID.ToString() + ";" +
-					lastTick.ID.ToString() + ";" +
-					trade.trade.price.ToString() + ";" +
-					lastTick.PRICE.ToString() + ";" +
-					"1"
-					);
-			};
-			hystoryStops.KilledShortStop += (price) =>
-			{
-				int tradeIndex = shorts.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
-				TradeWithStopWithTick trade = shorts[tradeIndex];
-				shorts.RemoveAt(tradeIndex);
-				dealsWriter.WriteLine(
-					"S" + ";" +
-					(trade.trade.stop.price - trade.trade.price).ToString() + ";" +
-					trade.tick.ID.ToString() + ";" +
-					lastTick.ID.ToString() + ";" +
-					trade.trade.price.ToString() + ";" +
-					lastTick.PRICE.ToString() + ";" +
-					"1"
-					);
-			};
-
-			progressBar1.Value = 0;
-			Task.Run(() =>
-			{
-				fileFeeder.FeedAllStandart(AddOneToProgress);
-				dealsWriter.Dispose();
-			});
 		}
 
 		struct TradeWithStopWithTick
@@ -199,24 +130,6 @@ namespace RansacBot.HystoryTest
 			protected override AbstractOrderEnsurer<TradeOrder> GetNewOrderEnsurer(Trade trade)
 			{
 				return new OrderOnHystoryEnsurer(new(trade));
-			}
-		}
-
-		class ThroughProvider<T> : IProviderByParam<T>
-		{
-			public event Action<T> NewT;
-			public void Subscribe(Param param, Action<T> handler)
-			{
-				NewT += handler;
-			}
-
-			public void Unsubscribe(Param param, Action<T> handler)
-			{
-				NewT -= handler;
-			}
-			public void OnNewN(T t)
-			{
-				NewT?.Invoke(t);
 			}
 		}
 	}

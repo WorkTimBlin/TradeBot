@@ -19,4 +19,13 @@ namespace RansacBot.Trading
 		void OnNewTrade(Trade trade);
 		public event TradeHandler NewTrade;
 	}
+	public interface ITradeWithStopFilter : ITradeWithStopProvider
+	{
+		public void OnNewTradeWithStop(TradeWithStop trade);
+	}
+
+	public interface ITradeWithStopProvider
+	{
+		public event Action<TradeWithStop> NewTradeWithStop;
+	}
 }

@@ -119,58 +119,5 @@ namespace BotTests
 		//	stopPlacer.OnNewTrade(new(400, TradeDirection.sell));
 		//	Assert.AreEqual(JsonConvert.SerializeObject(new TradeWithStop(new(400, TradeDirection.sell), 600)), JsonConvert.SerializeObject(recievedTradeWithStop));
 		//}
-
-		[TestMethod]
-		public void ConnectionCheck()
-		{
-			QuikTradeConnector quikTradeConnector = new(new("SPBFUT", "RIH2"), "SPBFUT005gx");
-			quikTradeConnector.OnNewTradeWithStop(new(new(120, TradeDirection.sell), 0));
-		}
-
-		[TestMethod]
-		public void TradeCallbackCheck()
-		{
-			Quik quik = QuikContainer.Quik;
-			double price = quik.Trading.GetAllTrades().Result[^1].Price;
-			QuikTradeConnector quikTradeConnector = new(new("SPBFUT", "RIH2"), "SPBFUT005gx");
-			bool gotCallback = false;
-			quikTradeConnector.NewTradeWithStop += (TradeWithStop trade) => { gotCallback = true; };
-			quikTradeConnector.OnNewTradeWithStop(new(new(price, TradeDirection.buy), 0));
-			Task.Delay(5000).Wait();
-			while (!gotCallback) ;
-			if (!gotCallback) throw new Exception("didn't recieve callbeck!");
-		}
-
-		[TestMethod]
-		public void SendStopAndKillUsingTradeConnector()
-		{
-			QuikTradeConnector tradeConnector = new(new("SPBFUT", "RIH2"), "SPBFUT005gx");
-			tradeConnector.OnNewTradeWithStop(new(new(155000, TradeDirection.buy), 148260));
-			tradeConnector.OnNewTradeWithStop(new(new(156110, TradeDirection.buy), 148260));
-			tradeConnector.ClosePercentOfLongs(100);
-			if (!tradeConnector.IsLastOrderExecuted) throw new Exception("unexecuted order");
-			//while (true) ;
-		}
-		//[TestMethod]
-		//public void SendUnrealisticTradeAndAnotherAndClose()
-		//{
-		//	bool recieved = false;
-		//	Task.Run(() =>
-		//	{
-		//		TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT005gx", null);
-		//		StopStorage stopStorage = new(QuikContainer.Quik, tradeParams);
-		//		TradeWithStopEnsurer ensurer = new(QuikContainer.Quik, tradeParams, stopStorage);
-		//		QuikContainer.Quik.Events.OnOrder += (QuikSharp.DataStructures.Transaction.Order order) => { recieved = true; };
-		//		//ensurer.OnNewTradeWithStop(new(new(150000, TradeDirection.buy), 130000));
-		//		ensurer.OnNewTradeWithStop(new(new(154000, TradeDirection.buy), 130000));
-		//		Task.Run(() =>
-		//		{
-		//			Task.Delay(500).Wait();
-		//			stopStorage.ClosePercentOfLongs(100);
-		//		}).Start();
-		//	});
-		//	Task.Delay(700).Wait();
-		//	Console.WriteLine(recieved.ToString());
-		//}
 	}
 }

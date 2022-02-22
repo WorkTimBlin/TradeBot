@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Trading
 {
+	/// <summary>
+	/// let TradeWithStop through exactly and only when order ensurer gives a callback having non-zero execution price
+	/// </summary>
+	/// <typeparam name="TOrder"></typeparam>
 	abstract class AbstractOneAtATimeCheckpoint<TOrder> : ITradeWithStopFilter
 	{
-		public event TradeWithStopHandler NewTradeWithStop;
+		public event Action<TradeWithStop> NewTradeWithStop;
 
 		AbstractOrderEnsurer<TOrder> orderEnsurer;
 
@@ -26,7 +30,8 @@ namespace RansacBot.Trading
 				goodToGo = false;
 				currentTradeWithStop = trade;
 				orderEnsurer = GetNewOrderEnsurer(currentTradeWithStop);
-				Task.Run(WaitForCurrentToCompleteAndInvoke);
+				orderEnsurer.OrderEnsuranceStatusChanged += OnOrderEnsuranceStatusChanged;
+				orderEnsurer.SubscribeSelfAndSendOrder();
 			}
 			else
 			{
@@ -58,26 +63,48 @@ namespace RansacBot.Trading
 			while (!ArrivalAwaiter.Wait(10));
 		}
 
-		private void WaitForCurrentToCompleteAndInvoke()
+		private void OnOrderEnsuranceStatusChanged(AbstractOrderEnsurer<TOrder> orderEnsurer)
 		{
-			//WaitForArrival(); // - can be used for awaiting order arrival to quik, not necessary now
-			Task observingTimer = Task.Run(() => 
-			{ 
-				while (!orderEnsurer.IsComplete) ; 
-			});
-			while (!observingTimer.Wait(30))
+			if (orderEnsurer.IsComplete)
 			{
-				orderEnsurer.UpdateOrderFromQuikByTransID();
+				if(orderEnsurer.State == EnsuranceState.Executed)
+				{
+					if (orderEnsurer.ExecutionPrice == 0) return;
+					NewTradeWithStop?.Invoke(GetCurrentTradeWithStopWithRepalcedPrice(orderEnsurer.ExecutionPrice));
+				}
+				orderEnsurer.OrderEnsuranceStatusChanged -= OnOrderEnsuranceStatusChanged;
+				goodToGo = true;
 			}
-			if (orderEnsurer.State == EnsuranceState.Executed)
-			{
-				NewTradeWithStop?.Invoke(currentTradeWithStop);
-			}
-			goodToGo = true;
+		}
+
+		protected TradeWithStop GetCurrentTradeWithStopWithRepalcedPrice(double price)
+		{
+			return new(new(price, currentTradeWithStop.direction), currentTradeWithStop.stop.price);
 		}
 
 		//protected abstract TOrderEnsurer GetNewOrderEnsurer<TOrderEnsurer>(Trading.Trade trade)
 		//where TOrderEnsurer : AbstractOrderEnsurer<TOrder>;
 		protected abstract AbstractOrderEnsurer<TOrder> GetNewOrderEnsurer(Trading.Trade trade);
+	}
+
+	public class TimerUpdater : Task
+	{
+		public TimerUpdater(
+			Func<bool> awaitingCondition,
+			Func<bool> cancellationCondition,
+			Action Update,
+			int periodInMillisecons):
+			base(() =>
+			{
+				Task awaitingTimer = Task.Run(() =>
+				{
+					while (awaitingCondition()) ;
+				});
+				while (!cancellationCondition() && awaitingTimer.Wait(periodInMillisecons) && !cancellationCondition())
+				{
+					Update();
+				}
+			})
+		{ }
 	}
 }

@@ -91,58 +91,30 @@ namespace RansacBot.Trading
 		}
 	}
 
-	class HystoryStops : ITradesHystory, ITickFilter
+	class HystoryStops : ITickFilter, IStopsOperator
 	{
-		public event ClosePosHandler ExecutedLongStop;
-		public event ClosePosHandler ExecutedShortStop;
-		public event ClosePosHandler KilledLongStop;
-		public event ClosePosHandler KilledShortStop;
 		public event Action<Tick> NewTick;
-
-		TradesHystory tradesHystory = new();
-
-		HystoryInfra Infra = HystoryInfra.Instance;
-
-		public HystoryStops()
-		{
-			tradesHystory.ExecutedLongStop += OnLongStop;
-			tradesHystory.KilledLongStop += OnLongStop;
-			tradesHystory.ExecutedShortStop += OnShortStop;
-			tradesHystory.KilledShortStop += OnShortStop;
-			tradesHystory.ExecutedLongStop += (price) => ExecutedLongStop?.Invoke(price);
-			tradesHystory.KilledLongStop += (price) => KilledLongStop?.Invoke(price);
-			tradesHystory.ExecutedShortStop += (price) => ExecutedShortStop?.Invoke(price);
-			tradesHystory.KilledShortStop += (price) => KilledShortStop?.Invoke(price);
-		}
-
-		public void OnLongStop(decimal price)
-		{
-			Infra.CreateOrder(new(new(Double.MinValue, TradeDirection.sell))).ConfigureAwait(false);
-		}
-		public void OnShortStop(decimal price)
-		{
-			Infra.CreateOrder(new(new(Double.MaxValue, TradeDirection.buy))).ConfigureAwait(false);
-		}
+		public event Action<TradeWithStop, double> StopExecuted;
+		public event Action<TradeWithStop> UnexecutedStopRemoved;
 
 		public void ClosePercentOfLongs(double percent)
 		{
-			tradesHystory.ClosePercentOfLongs(percent);
+			throw new NotImplementedException();
 		}
 
 		public void ClosePercentOfShorts(double percent)
 		{
-			tradesHystory.ClosePercentOfShorts(percent);
-		}
-
-		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
-		{
-			tradesHystory.OnNewTradeWithStop(tradeWithStop);
+			throw new NotImplementedException();
 		}
 
 		public void OnNewTick(Tick tick)
 		{
-			tradesHystory.CheckForStops((decimal)tick.PRICE);
-			NewTick?.Invoke(tick);
+			throw new NotImplementedException();
+		}
+
+		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

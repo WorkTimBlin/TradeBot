@@ -10,12 +10,12 @@ using System.Windows.Forms;
 
 namespace RansacBot.UI
 {
-	public partial class FormBotOrHystoryTestChoice : Form
+	public partial class FormChoice : Form
 	{
 		public Button buttonBot;
 		public Button buttonTest;
 
-		public FormBotOrHystoryTestChoice()
+		public FormChoice()
 		{
 			InitializeComponent();
 			buttonBot = buttonBotDemo;
@@ -29,7 +29,7 @@ namespace RansacBot.UI
 
 		private void buttonBotDemo_Click(object sender, EventArgs e)
 		{
-			SwitchToForm(new FormRansacsWithTradesBuildingPreview());
+			SwitchToForm(new FormBotPreview());
 		}
 
 		void SwitchToForm(Form form)

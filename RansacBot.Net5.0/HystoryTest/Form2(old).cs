@@ -40,8 +40,8 @@ namespace RansacBot.HystoryTest
 			RansacDirectionExtremumFilter directionFilter = new(CICascade, 0);
 			MaximinStopPlacer stopPlacer = new(SICascade, 3);
 			TradesHystory tradesHystory = new();
-			CloserOnRansacStops closer50 = new(tradesHystory, SICascade, 1, 50);
-			CloserOnRansacStops closer100 = new(tradesHystory, CICascade, 0, 100);
+			OldCloserOnRansacStops closer50 = new(tradesHystory, SICascade, 1, 50);
+			OldCloserOnRansacStops closer100 = new(tradesHystory, CICascade, 0, 100);
 
 			feeder.Subscribe(new("", ""), 
 				(tick) =>
@@ -64,7 +64,7 @@ namespace RansacBot.HystoryTest
 			StreamWriter dealsWriter = new(textBox2.Text + @"\deals.txt", true);
 			StreamWriter CI2Writer = new(textBox2.Text + @"\ransacs for dir filter.csv");
 
-			tradesHystory.ExecutedLongStop += (price) =>
+			tradesHystory.ExecutedLongStop += (price, exPrice) =>
 			{
 				int tradeIndex = longs.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = longs[tradeIndex];
@@ -79,7 +79,7 @@ namespace RansacBot.HystoryTest
 					"1"
 					);
 			};
-			tradesHystory.ExecutedShortStop += (price) =>
+			tradesHystory.ExecutedShortStop += (price, exPrice) =>
 			{
 				int tradeIndex = shorts.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = shorts[tradeIndex];
@@ -94,7 +94,7 @@ namespace RansacBot.HystoryTest
 					"1"
 					);
 			};
-			tradesHystory.KilledLongStop += (price) =>
+			tradesHystory.KilledLongStop += (price, exPrice) =>
 			{
 				int tradeIndex = longs.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = longs[tradeIndex];
@@ -109,7 +109,7 @@ namespace RansacBot.HystoryTest
 					"1"
 					);
 			};
-			tradesHystory.KilledShortStop += (price) =>
+			tradesHystory.KilledShortStop += (price, exPrice) =>
 			{
 				int tradeIndex = shorts.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = shorts[tradeIndex];

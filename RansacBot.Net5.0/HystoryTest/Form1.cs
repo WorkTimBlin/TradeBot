@@ -38,7 +38,7 @@ namespace RansacBot.HystoryTest
 			HigherLowerFilterOnRansac higherLowerFilter = new(ETCascade, 2);
 			MaximinStopPlacer stopPlacer = new(SCascade, 0);
 			TradesHystory tradesHystory = new();
-			CloserOnRansacStops closer100 = new(tradesHystory, SCascade, 0, 100);
+			OldCloserOnRansacStops closer100 = new(tradesHystory, SCascade, 0, 100);
 
 			feeder.Subscribe(
 				new("", ""),
@@ -66,7 +66,7 @@ namespace RansacBot.HystoryTest
 			stopPlacer.NewTradeWithStop += tradesHystory.OnNewTradeWithStop;
 			StreamWriter dealsWriter = new(textBox2.Text + @"\deals.txt");
 
-			tradesHystory.ExecutedLongStop += (price) =>
+			tradesHystory.ExecutedLongStop += (price, exPrice) =>
 			{
 				int tradeIndex = longs.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = longs[tradeIndex];
@@ -81,7 +81,7 @@ namespace RansacBot.HystoryTest
 					"1"
 					);
 			};
-			tradesHystory.ExecutedShortStop += (price) =>
+			tradesHystory.ExecutedShortStop += (price, exPrice) =>
 			{
 				int tradeIndex = shorts.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = shorts[tradeIndex];
@@ -96,7 +96,7 @@ namespace RansacBot.HystoryTest
 					"1"
 					);
 			};
-			tradesHystory.KilledLongStop += (price) =>
+			tradesHystory.KilledLongStop += (price, exPrice) =>
 			{
 				int tradeIndex = longs.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = longs[tradeIndex];
@@ -111,7 +111,7 @@ namespace RansacBot.HystoryTest
 					"1"
 					);
 			};
-			tradesHystory.KilledShortStop += (price) =>
+			tradesHystory.KilledShortStop += (price, exPrice) =>
 			{
 				int tradeIndex = shorts.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = shorts[tradeIndex];

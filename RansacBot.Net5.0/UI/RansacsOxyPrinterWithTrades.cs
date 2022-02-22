@@ -101,7 +101,7 @@ namespace RansacBot.UI
 			}
 		}
 
-		public void OnClosePos(decimal stopPrice)
+		public void OnClosePos(decimal stopPrice, decimal executionPrice)
 		{
 			for(int i = 0; i < stops.Points.Count; i++)
 			{

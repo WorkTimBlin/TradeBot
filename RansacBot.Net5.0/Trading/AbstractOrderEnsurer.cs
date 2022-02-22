@@ -10,9 +10,11 @@ using QuikSharp.DataStructures.Transaction;
 
 namespace RansacBot.Trading
 {
-	abstract class AbstractOrderEnsurer<TOrder>
+	public abstract class AbstractOrderEnsurer<TOrder>
 	{
-		public TOrder Order { get; private set; }
+		public event Action<AbstractOrderEnsurer<TOrder>> OrderEnsuranceStatusChanged;
+		public TOrder Order { get; protected set; }
+		public double ExecutionPrice { get; protected set; }
 		public EnsuranceState State { get; private set; } = EnsuranceState.NotSentYet;
 		public bool IsComplete { get { return State == EnsuranceState.Executed || State == EnsuranceState.Killed; } }
 
@@ -27,7 +29,7 @@ namespace RansacBot.Trading
 			this.Order = order;
 		}
 
-		protected void SubscribeSelfAndSendOrder()
+		public void SubscribeSelfAndSendOrder()
 		{
 			if(State > EnsuranceState.Sent)
 			{
@@ -56,6 +58,7 @@ namespace RansacBot.Trading
 		void ChangeStateTo(EnsuranceState state)
 		{
 			this.State = state;
+			OrderEnsuranceStatusChanged?.Invoke(this);
 		}
 
 		protected void OnOrderChanged(TOrder order)
@@ -89,7 +92,7 @@ namespace RansacBot.Trading
 	{
 		public StateException(string message) : base(message) { }
 	}
-	enum EnsuranceState
+	public enum EnsuranceState
 	{
 		NotSentYet,
 		Sent,

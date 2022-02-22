@@ -9,6 +9,16 @@ using RansacBot.Trading;
 
 namespace RansacBot.Trading
 {
+	public interface IStopsOperator
+	{
+		public event Action<TradeWithStop, double> StopExecuted;
+		public event Action<TradeWithStop> UnexecutedStopRemoved;
+
+		public void ClosePercentOfLongs(double percent);
+		public void ClosePercentOfShorts(double percent);
+		public void OnNewTradeWithStop(TradeWithStop tradeWithStop);
+	}
+
 	public interface ITradesHystory
 	{
 		public event ClosePosHandler ExecutedLongStop;
@@ -20,17 +30,11 @@ namespace RansacBot.Trading
 
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop);
 	}
-
-	public interface ITradeWithStopFilter
-	{
-		public event TradeWithStopHandler NewTradeWithStop;
-		public void OnNewTradeWithStop(TradeWithStop trade);
-	}
 	
-	public delegate void ClosePosHandler(decimal closedStops);
+	public delegate void ClosePosHandler(decimal closedStop, decimal executionPrice);
 	class TradesHystory : ITradesHystory, ITradeWithStopFilter
 	{
-		public event TradeWithStopHandler NewTradeWithStop;
+		public event Action<TradeWithStop> NewTradeWithStop;
 		public event ClosePosHandler ExecutedLongStop;
 		public event ClosePosHandler ExecutedShortStop;
 		public event ClosePosHandler KilledLongStop;
@@ -57,7 +61,7 @@ namespace RansacBot.Trading
 			int IndexToRemoveFrom = (int)(longStops.Count * (100 - percent) / 100);
 			foreach (decimal price in longStops.GetRange(IndexToRemoveFrom, longStops.Count - IndexToRemoveFrom))
 			{
-				KilledLongStop?.Invoke(price);
+				KilledLongStop?.Invoke(price, price);
 			}
 			longStops.RemoveRange(IndexToRemoveFrom, longStops.Count - IndexToRemoveFrom);
 		}
@@ -66,7 +70,7 @@ namespace RansacBot.Trading
 			int IndexToRemoveFrom = (int)(shortStops.Count * (100 - percent) / 100);
 			foreach (decimal price in shortStops.GetRange(IndexToRemoveFrom, shortStops.Count - IndexToRemoveFrom))
 			{
-				KilledShortStop?.Invoke(price);
+				KilledShortStop?.Invoke(price, price);
 			}
 			shortStops.RemoveRange(IndexToRemoveFrom, shortStops.Count - IndexToRemoveFrom);
 		}
@@ -84,7 +88,7 @@ namespace RansacBot.Trading
 				i++;
 				foreach (decimal stopPrice in longStops.GetRange(i, longStops.Count - i))
 				{
-					ExecutedLongStop?.Invoke(stopPrice);
+					ExecutedLongStop?.Invoke(stopPrice, price);
 				}
 				longStops.RemoveRange(i, longStops.Count - i);
 			}
@@ -99,7 +103,7 @@ namespace RansacBot.Trading
 				i++;
 				foreach (decimal stopPrice in shortStops.GetRange(i, shortStops.Count - i))
 				{
-					ExecutedShortStop?.Invoke(stopPrice);
+					ExecutedShortStop?.Invoke(stopPrice, price);
 				}
 				shortStops.RemoveRange(i, shortStops.Count - i);
 			}

@@ -62,5 +62,14 @@ namespace BotTests
 			//Console.WriteLine(order.OrderNum);
 			List<Order> orders = QuikContainer.Quik.Orders.GetOrders().Result;
 		}
+		[TestMethod]
+		public void InheritTest()
+		{
+			BigZopa b = new BigZopa();
+			Zopa a = b;
+			Assert.AreEqual(b, a as BigZopa);
+		}
+		class Zopa { }
+		class BigZopa : Zopa { }
 	}
 }

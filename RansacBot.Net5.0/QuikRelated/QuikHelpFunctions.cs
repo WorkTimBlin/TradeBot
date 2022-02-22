@@ -73,5 +73,10 @@ namespace RansacBot.QuikRelated
 						checkingPriceParam
 						).Result.ParamValue, System.Globalization.CultureInfo.InvariantCulture);
 		}
+
+		public static Trade? GetTradeByTransID(long transID)
+		{
+			return quik.Trading.GetTrades().Result.Find((trade) => trade.TransID == transID);
+		}
 	}
 }

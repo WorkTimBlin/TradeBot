@@ -23,10 +23,10 @@ namespace RansacBot.QuikRelated
 			//SubscribeSelfAndSendOrder();
 		}
 
-		protected override double GetExecutionPrice()
+		protected override double GetCompletionAttribute()
 		{
-			return 
-				(QuikHelpFunctions.GetTradeByTransID(Order.TransID) ?? 
+			return
+				(QuikHelpFunctions.GetTradeByTransID(Order.TransID) ??
 				throw new Exception("couldn't find corresponding trade")).Price;
 		}
 

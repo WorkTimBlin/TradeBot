@@ -34,14 +34,15 @@ namespace RansacBot.Trading
 		}
 	}
 
-	class CloserOnRansacStops
+	class CloserOnRansacStops : IClosingProvider
 	{
-		readonly IStopsOperator tradesHystory;
+		public event Action<double> ClosePercentOfLongs;
+		public event Action<double> ClosePercentOfShorts;
+
 		readonly int level;
 		readonly double percent;
-		public CloserOnRansacStops(IStopsOperator tradesHystory, RansacsCascade cascade, int level, double percent)
+		public CloserOnRansacStops(RansacsCascade cascade, int level, double percent)
 		{
-			this.tradesHystory = tradesHystory;
 			this.level = level;
 			this.percent = percent;
 			cascade.StopRansac += OnStopRansac;
@@ -52,11 +53,11 @@ namespace RansacBot.Trading
 			if (level != this.level) return;
 			if (ransac.Slope > 0)
 			{
-				tradesHystory.ClosePercentOfLongs(percent);
+				ClosePercentOfLongs.Invoke(percent);
 			}
 			else
 			{
-				tradesHystory.ClosePercentOfShorts(percent);
+				ClosePercentOfShorts.Invoke(percent);
 			}
 		}
 	}

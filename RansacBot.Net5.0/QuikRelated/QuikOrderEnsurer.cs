@@ -13,38 +13,21 @@ namespace RansacBot.QuikRelated
 	/// <summary>
 	/// warning: can call OrderEnsuranceStatusChanged twice completed - once when got an execution price
 	/// </summary>
-	class OrderEnsurer : AbstractOrderEnsurer<Order>
+	class QuikOrderEnsurer : AbstractOrderEnsurerWithPrice<Order>
 	{
 		IQuikEvents events;
 		
-		public OrderEnsurer(Order order) : base(order, QuikOrderFunctions.Instance)
+		public QuikOrderEnsurer(Order order) : base(order, QuikOrderFunctions.Instance)
 		{
 			events = QuikContainer.Quik.Events;
-			SubscribeToOnTradeEvent();
 			//SubscribeSelfAndSendOrder();
 		}
 
-		public void UpdateCompletionPrice()
+		protected override double GetExecutionPrice()
 		{
-			OnNewTrade(
-				QuikHelpFunctions.GetTradeByTransID(Order.TransID) ?? 
-				throw new Exception("no trade with such transID found"));
-		}
-
-		private void OnNewTrade(QuikSharp.DataStructures.Transaction.Trade trade)
-		{
-			if (trade.TransID != Order.TransID) return;
-			UnsubscribeFromOnTradeEvent();
-			ExecutionPrice = trade.Price;
-			UpdateOrderFromQuikByTransID();
-		}
-		private void SubscribeToOnTradeEvent()
-		{
-			events.OnTrade += OnNewTrade;
-		}
-		private void UnsubscribeFromOnTradeEvent()
-		{
-			events.OnTrade -= OnNewTrade;
+			return 
+				(QuikHelpFunctions.GetTradeByTransID(Order.TransID) ?? 
+				throw new Exception("couldn't find corresponding trade")).Price;
 		}
 
 		protected override State GetState(Order order)

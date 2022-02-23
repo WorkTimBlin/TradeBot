@@ -12,9 +12,8 @@ namespace RansacBot.Trading
 {
 	public abstract class AbstractOrderEnsurer<TOrder>
 	{
-		public event Action<AbstractOrderEnsurer<TOrder>> OrderEnsuranceStatusChanged;
+		public event Action<object> OrderEnsuranceStatusChanged;
 		public TOrder Order { get; protected set; }
-		public double ExecutionPrice { get; protected set; }
 		public EnsuranceState State { get; private set; } = EnsuranceState.NotSentYet;
 		public bool IsComplete { get { return State == EnsuranceState.Executed || State == EnsuranceState.Killed; } }
 
@@ -55,11 +54,6 @@ namespace RansacBot.Trading
 		{
 			OnOrderChanged(functions.GetOrder_by_transID(Order).Result);
 		}
-		void ChangeStateTo(EnsuranceState state)
-		{
-			this.State = state;
-			OrderEnsuranceStatusChanged?.Invoke(this);
-		}
 
 		protected void OnOrderChanged(TOrder order)
 		{
@@ -67,18 +61,37 @@ namespace RansacBot.Trading
 			Order = order;
 			if (GetState(Order) == QuikSharp.DataStructures.State.Active)
 			{
-				ChangeStateTo(EnsuranceState.Active);
+				OnActive();
 			}
 			if (GetState(Order) == QuikSharp.DataStructures.State.Completed)
 			{
-				ChangeStateTo(EnsuranceState.Executed);
 				UnsubscribeFromOnOrderEvent();
+				OnCompleted();
 			}
 			if (GetState(Order) == QuikSharp.DataStructures.State.Canceled)
 			{
-				ChangeStateTo(EnsuranceState.Killed);
 				UnsubscribeFromOnOrderEvent();
+				OnExecuted();
 			}
+		}
+		void ChangeStateTo(EnsuranceState state)
+		{
+			this.State = state;
+			OrderEnsuranceStatusChanged?.Invoke(this);
+		}
+
+
+		protected virtual void OnActive()
+		{
+			ChangeStateTo(EnsuranceState.Active);
+		}
+		protected virtual void OnCompleted()
+		{
+			ChangeStateTo(EnsuranceState.Executed);
+		}
+		protected virtual void OnExecuted()
+		{
+			ChangeStateTo(EnsuranceState.Killed);
 		}
 
 		protected abstract void SubscribeToOnOrderEvent();

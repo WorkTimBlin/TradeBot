@@ -37,6 +37,7 @@ namespace BotTests
 			};
 			checkpoint.OnNewTradeWithStop(new(new(157600, RansacBot.Trading.TradeDirection.buy), 156000));
 			Assert.IsTrue(Task.Run(() => { while (trade == null) ; }).Wait(500));
+			Assert.AreNotEqual(157600, trade.price);
 		}
 		[TestMethod]
 		public void TestCheckpointKill()
@@ -62,14 +63,5 @@ namespace BotTests
 			//Console.WriteLine(order.OrderNum);
 			List<Order> orders = QuikContainer.Quik.Orders.GetOrders().Result;
 		}
-		[TestMethod]
-		public void InheritTest()
-		{
-			BigZopa b = new BigZopa();
-			Zopa a = b;
-			Assert.AreEqual(b, a as BigZopa);
-		}
-		class Zopa { }
-		class BigZopa : Zopa { }
 	}
 }

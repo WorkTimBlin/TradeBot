@@ -9,27 +9,33 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Trading
 {
-	class OrderOnHystoryEnsurer : AbstractOrderEnsurer<TradeOrder>
+	class OrderOnHystoryEnsurer : AbstractOrderEnsurerWithPrice<HystoryOrder>
 	{
-		public OrderOnHystoryEnsurer(TradeOrder trade):base(trade, HystoryInfra.Instance) { }
+		public OrderOnHystoryEnsurer(HystoryOrder trade):base(trade, HystoryInfra.Instance) { }
 
-		protected override State GetState(TradeOrder order)
+		protected override double GetCompletionAttribute()
+		{
+			return Order.completionPrice;
+		}
+
+		protected override State GetState(HystoryOrder order)
 		{
 			return order.state;
 		}
 
 		//don't need this funcs because order is updating itself
-		protected override bool IsTransIDMatching(TradeOrder order) => false;
+		
+		protected override bool IsTransIDMatching(HystoryOrder order) => false;
 		protected override void SetTransID(long transID) { }
 		protected override void SubscribeToOnOrderEvent() { }
 		protected override void UnsubscribeFromOnOrderEvent() { }
 	}
 
-	class HystoryInfra : IOrderFunctions<TradeOrder>, ITickFilter
+	class HystoryInfra : IOrderFunctions<HystoryOrder>, ITickFilter
 	{
 		public static HystoryInfra Instance { get; private set; } = new();
-		List<TradeOrder> done = new();
-		List<TradeOrder> actives = new();
+		List<HystoryOrder> done = new();
+		List<HystoryOrder> actives = new();
 
 		public event Action<Tick> NewTick;
 
@@ -40,7 +46,7 @@ namespace RansacBot.Trading
 			Instance = new();
 		}
 
-		public async Task<long> CreateOrder(TradeOrder order)
+		public async Task<long> CreateOrder(HystoryOrder order)
 		{
 			actives.Add(order);
 			return order.transID;
@@ -51,12 +57,12 @@ namespace RansacBot.Trading
 		/// </summary>
 		/// <param name="order"></param>
 		/// <returns></returns>
-		public async Task<TradeOrder?> GetOrder_by_transID(TradeOrder order)
+		public async Task<HystoryOrder?> GetOrder_by_transID(HystoryOrder order)
 		{
 			return order;
 		}
 
-		public async Task<long> KillOrder(TradeOrder order)
+		public async Task<long> KillOrder(HystoryOrder order)
 		{
 			actives.Remove(order);
 			done.Add(order);
@@ -78,16 +84,16 @@ namespace RansacBot.Trading
 		}
 		private void ExecuteOrderAtPriceInActivesAt(double price, int i)
 		{
-			TradeOrder order = actives[i];
-			order.price = price;
+			HystoryOrder order = actives[i];
+			order.completionPrice = price;
 			done.Add(order);
 			actives.RemoveAt(i);
 			order.state = State.Completed;
 		}
-		private bool ShouldExecuteOrderOnPrice(TradeOrder order, double price)
+		private bool ShouldExecuteOrderOnPrice(HystoryOrder order, double price)
 		{
-			return order.direction == TradeDirection.buy && order.price >= price ||
-				order.direction == TradeDirection.sell && order.price <= price;
+			return order.trade.direction == TradeDirection.buy && order.completionPrice >= price ||
+				order.trade.direction == TradeDirection.sell && order.completionPrice <= price;
 		}
 	}
 

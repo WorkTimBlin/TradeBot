@@ -67,10 +67,7 @@ namespace RansacBot.HystoryTest
 			fileFeeder.Subscribe(new("", ""), (Tick tick) => { lastTick = tick; });
 			HystoryInfra hystoryInfra = HystoryInfra.Instance;
 			fileFeeder.Subscribe(new("", ""), hystoryInfra.OnNewTick);
-			HystoryStops hystoryStops = new();
-			hystoryInfra.NewTick += hystoryStops.OnNewTick;
 			ThroughProvider<Tick> provider = new();
-			hystoryStops.NewTick += provider.OnNewN;
 			ObservingSession session = new(new Param("", ""), provider, 100);
 			Dictionary<SigmaType, RansacsCascade> cascades = new();
 			foreach(KeyValuePair<SigmaType, int> i in GetEnoughRansacsCascades())
@@ -79,11 +76,7 @@ namespace RansacBot.HystoryTest
 			}
 			InvertedNDecider decider = new();
 			session.ransacs.monkeyNFilter.NewExtremum += decider.OnNewExtremum;
-			CloserOnRansacStops closer = new(
-				hystoryStops, 
-				cascades[closingRansacLevelUsageControl.SigmaType], 
-				closingRansacLevelUsageControl.Level, 
-				90);
+			
 			HigherLowerFilterOnRansac filter = new(
 				cascades[higherLowerFilterRansacLevelUsageControl.SigmaType],
 				higherLowerFilterRansacLevelUsageControl.Level);
@@ -105,7 +98,6 @@ namespace RansacBot.HystoryTest
 			{
 				(tradeWithStop.direction == TradeDirection.buy ? longs : shorts).Add(new(tradeWithStop, lastTick));
 			};
-			checkpoint.NewTradeWithStop += hystoryStops.OnNewTradeWithStop;
 			StreamWriter dealsWriter = new(outputDirectoryTextBox.Text + @"\deals.txt");
 		}
 
@@ -125,9 +117,9 @@ namespace RansacBot.HystoryTest
 			progressBar1.Invoke((Action)(() => { progressBar1.Value++; }));
 		}
 
-		class OneAtATimeHystoryCheckpoint : AbstractOneAtATimeCheckpoint<TradeOrder>
+		class OneAtATimeHystoryCheckpoint : AbstractOneAtATimeCheckpoint<HystoryOrder>
 		{
-			protected override AbstractOrderEnsurer<TradeOrder> GetNewOrderEnsurer(Trade trade)
+			protected override AbstractOrderEnsurerWithPrice<HystoryOrder> GetNewOrderEnsurer(Trade trade)
 			{
 				return new OrderOnHystoryEnsurer(new(trade));
 			}

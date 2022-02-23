@@ -14,7 +14,7 @@ namespace RansacBot.Trading
 	{
 		public event Action<TradeWithStop> NewTradeWithStop;
 
-		AbstractOrderEnsurer<TOrder> orderEnsurer;
+		AbstractOrderEnsurerWithPrice<TOrder> orderEnsurer;
 
 		TradeWithStop currentTradeWithStop;
 
@@ -63,14 +63,18 @@ namespace RansacBot.Trading
 			while (!ArrivalAwaiter.Wait(10));
 		}
 
-		private void OnOrderEnsuranceStatusChanged(AbstractOrderEnsurer<TOrder> orderEnsurer)
+		private void OnOrderEnsuranceStatusChanged(object orderEnsurer) =>
+			OnOrderEnsuranceStatusChanged(
+				orderEnsurer as AbstractOrderEnsurerWithPrice<TOrder> ??
+				throw new TypeAccessException("cant cast orderEnsurer To right Type"));
+		private void OnOrderEnsuranceStatusChanged(AbstractOrderEnsurerWithPrice<TOrder> orderEnsurer)
 		{
 			if (orderEnsurer.IsComplete)
 			{
 				if(orderEnsurer.State == EnsuranceState.Executed)
 				{
-					if (orderEnsurer.ExecutionPrice == 0) return;
-					NewTradeWithStop?.Invoke(GetCurrentTradeWithStopWithRepalcedPrice(orderEnsurer.ExecutionPrice));
+					if (orderEnsurer.CompletionAttribute == 0) return;
+					NewTradeWithStop?.Invoke(GetCurrentTradeWithStopWithRepalcedPrice(orderEnsurer.CompletionAttribute));
 				}
 				orderEnsurer.OrderEnsuranceStatusChanged -= OnOrderEnsuranceStatusChanged;
 				goodToGo = true;
@@ -84,7 +88,7 @@ namespace RansacBot.Trading
 
 		//protected abstract TOrderEnsurer GetNewOrderEnsurer<TOrderEnsurer>(Trading.Trade trade)
 		//where TOrderEnsurer : AbstractOrderEnsurer<TOrder>;
-		protected abstract AbstractOrderEnsurer<TOrder> GetNewOrderEnsurer(Trading.Trade trade);
+		protected abstract AbstractOrderEnsurerWithPrice<TOrder> GetNewOrderEnsurer(Trading.Trade trade);
 	}
 
 	public class TimerUpdater : Task

@@ -17,7 +17,7 @@ namespace RansacBot.Trading
 		Ransac? previousRansac;
 		readonly Vertexes vertexes;
 		
-		public event TradeWithStopHandler NewTradeWithStop;
+		public event Action<TradeWithStop> NewTradeWithStop;
 
 		public MaximinStopPlacer(RansacsCascade cascade, int level)
 		{

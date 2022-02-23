@@ -19,8 +19,8 @@ namespace RansacBot.QuikRelated
 			this.tradeParams = tradeParams;
 		}
 
-		protected override AbstractOrderEnsurer<Order> GetNewOrderEnsurer(Trading.Trade trade) => 
-			new OrderEnsurer(BuildOrder(trade));
+		protected override AbstractOrderEnsurerWithPrice<Order> GetNewOrderEnsurer(Trading.Trade trade) => 
+			new QuikOrderEnsurer(BuildOrder(trade));
 
 		Order BuildOrder(Trading.Trade trade)
 		{

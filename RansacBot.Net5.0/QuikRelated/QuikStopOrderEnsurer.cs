@@ -1,5 +1,6 @@
 ﻿using QuikSharp;
 using QuikSharp.DataStructures;
+using QuikSharp.DataStructures.Transaction;
 using RansacBot.Trading;
 using System;
 using System.Collections.Generic;
@@ -12,38 +13,20 @@ namespace RansacBot.QuikRelated
 	/// <summary>
 	/// can call orderEnsuranceStatusChanged twice - once when got an execution price
 	/// </summary>
-	class StopOrderEnsurer : AbstractOrderEnsurer<StopOrder>
+	class QuikStopOrderEnsurer : AbstractStopOrderEnsurer<StopOrder, Order>
 	{
 		IQuikEvents events;
 
-		public StopOrderEnsurer(StopOrder stopOrder):base(stopOrder, QuikStopOrderFunctions.Instance)
+		public QuikStopOrderEnsurer(StopOrder stopOrder):base(stopOrder, QuikStopOrderFunctions.Instance)
 		{
 			this.events = QuikContainer.Quik.Events;
-			SubscribeToOnTradeEvent();
 			//SubscribeSelfAndSendOrder();
 		}
 
-		public void UpdateCompletionPrice()
+		protected override Order GetCompletionAttribute()
 		{
-			OnNewTrade(
-				QuikHelpFunctions.GetTradeByTransID(Order.TransId) ??
-				throw new Exception("no trade with such transID found"));
-		}
-
-		private void OnNewTrade(QuikSharp.DataStructures.Transaction.Trade trade)
-		{
-			if (trade.TransID != Order.TransId) return;
-			UnsubscribeFromOnTradeEvent();
-			ExecutionPrice = trade.Price;
-			UpdateOrderFromQuikByTransID();
-		}
-		private void SubscribeToOnTradeEvent()
-		{
-			events.OnTrade += OnNewTrade;
-		}
-		private void UnsubscribeFromOnTradeEvent()
-		{
-			events.OnTrade -= OnNewTrade;
+			return QuikHelpFunctions.GetOrderByTransID(Order.ClassCode, Order.SecCode, Order.TransId) ?? 
+				throw new Exception("no such order in quik");
 		}
 
 		protected override State GetState(StopOrder order)
@@ -83,7 +66,7 @@ namespace RansacBot.QuikRelated
 			{
 				return await GetOrderByTransID(order.ClassCode, order.SecCode, order.TransId);
 			}
-			private async Task<StopOrder?> GetOrderByTransID(string classCode, string securityCode, long transID)
+			public async Task<StopOrder?> GetOrderByTransID(string classCode, string securityCode, long transID)
 			{
 				return (await func.GetStopOrders(classCode, securityCode)).
 						Find((stopOrder) => stopOrder.TransId == transID)

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RansacBot;
 
 namespace RansacBot.HystoryTest
 {
@@ -44,21 +45,11 @@ namespace RansacBot.HystoryTest
 	{
 		public TicksFromFiles(string path) : base(new StreamReader(path).GetStrings()) { }
 		public TicksFromFiles(IEnumerable<string> paths) :
-			base(Concat(GetStreamReaders(paths).Select(StringsFromStream.GetStringsFromStream)))
+			base(GetStreamReaders(paths).Select(StringsFromStream.GetStringsFromStream).Concat())
 		{ }
 		static IEnumerable<StreamReader> GetStreamReaders(IEnumerable<string> paths)
 		{
 			foreach (string path in paths) yield return new(path);
-		}
-		static IEnumerable<TSource> Concat<TSource>(IEnumerable<IEnumerable<TSource>> sources)
-		{
-			foreach(IEnumerable<TSource> source in sources)
-			{
-				foreach(TSource obj in source)
-				{
-					yield return obj;
-				}
-			}
 		}
 	}
 

@@ -10,6 +10,11 @@ namespace RansacBot.Assemblies
 {
 	class QuikTradingModule
 	{
+		public event Action<TradeWithStop> TradeExecuted;
+		public event Action<TradeWithStop, double> StopExecutedOnPrice;
+		public event Action<TradeWithStop, double> TradeClosedOnPrice;
+		public IStopsContainer StopsContainer { get => stopsOperator; }
+
 		public ITradeWithStopProvider TradeWithStopProvider
 		{
 			set
@@ -41,6 +46,16 @@ namespace RansacBot.Assemblies
 		readonly TradeParams tradeParams;
 		OneOrderAtATimeCheckpoint checkpoint;
 		QuikClassicStopsOperator stopsOperator;
+		QuikKilledStopsMarketCompensator compensator;
+
+		public QuikTradingModule(TradeParams tradeParams, 
+			ITradeWithStopProvider tradeWithStopProvider, 
+			IClosingProvider closingProvider) :
+			this(tradeParams)
+		{
+			TradeWithStopProvider = tradeWithStopProvider;
+			ClosingProvider = closingProvider;
+		}
 
 		public QuikTradingModule(TradeParams tradeParams)
 		{
@@ -48,6 +63,19 @@ namespace RansacBot.Assemblies
 			checkpoint = new(tradeParams);
 			stopsOperator = new(tradeParams);
 			checkpoint.NewTradeWithStop += stopsOperator.OnNewTradeWithStop;
+			compensator = new(tradeParams);
+			stopsOperator.UnexecutedStopRemoved += compensator.OnNewTradeWithStop;
+
+			checkpoint.NewTradeWithStop += InvokeTradeExecuted;
+			stopsOperator.StopExecuted += InvokeTradeStopExecuted;
+			compensator.FullyClosedTradeWithStop += InvokeTradeClosedOnPrice;
 		}
+
+		void InvokeTradeExecuted(TradeWithStop tradeWithStop) =>
+			TradeExecuted?.Invoke(tradeWithStop);
+		void InvokeTradeStopExecuted(TradeWithStop tradeWithStop, double executionPrice) =>
+			StopExecutedOnPrice?.Invoke(tradeWithStop, executionPrice);
+		void InvokeTradeClosedOnPrice(TradeWithStop tradeWithStop, double executionPrice) =>
+			TradeClosedOnPrice?.Invoke(tradeWithStop, executionPrice);
 	}
 }

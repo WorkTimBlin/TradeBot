@@ -13,6 +13,7 @@ namespace RansacsRealTime
 		void OnNewTick(Tick tick);
 		public event VertexHandler NewVertex; 
 		public event VertexHandler LastVertexWasExtremum;
+		public event ExtremumHandler NewExtremum;
 	}
 
 	public interface IVertexFilter

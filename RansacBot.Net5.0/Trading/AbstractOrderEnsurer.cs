@@ -71,10 +71,10 @@ namespace RansacBot.Trading
 			if (GetState(Order) == QuikSharp.DataStructures.State.Canceled)
 			{
 				UnsubscribeFromOnOrderEvent();
-				OnExecuted();
+				OnKilled();
 			}
 		}
-		void ChangeStateTo(EnsuranceState state)
+		protected void ChangeStateTo(EnsuranceState state)
 		{
 			this.State = state;
 			OrderEnsuranceStatusChanged?.Invoke(this);
@@ -89,7 +89,7 @@ namespace RansacBot.Trading
 		{
 			ChangeStateTo(EnsuranceState.Executed);
 		}
-		protected virtual void OnExecuted()
+		protected virtual void OnKilled()
 		{
 			ChangeStateTo(EnsuranceState.Killed);
 		}

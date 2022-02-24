@@ -118,7 +118,7 @@ namespace RansacBot.QuikRelated
 		{
 			(stopOrder.State == State.Completed ?
 				(IsLong(stopOrder) ? ExecutedLongStop : ExecutedShortStop) :
-				(IsLong(stopOrder) ? KilledLongStop : KilledShortStop)).Invoke(stopOrder.Price, stopOrder.Price);
+				(IsLong(stopOrder) ? KilledLongStop : KilledShortStop)).Invoke((double)stopOrder.Price, (double)stopOrder.Price);
 		}
 		void CompensateKilledStopWithMarketOrder(StopOrder stopOrder)
 		{

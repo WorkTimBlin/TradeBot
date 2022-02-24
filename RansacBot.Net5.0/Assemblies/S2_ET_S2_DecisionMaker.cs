@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Assemblies
 {
-	class S2_ET_S2_TradeWithStopProvider : ITickProcessor
+	class S2_ET_S2_DecisionMaker : ITickProcessor
 	{
 		public IClosingProvider ClosingProvider { get; private set; }
 		public ITradeWithStopProvider TradeWithStopProvider { get; private set; }
@@ -19,16 +19,17 @@ namespace RansacBot.Assemblies
 		}
 
 		RansacsSession session;
-		RansacsCascade SCascade;
-		RansacsCascade ETCascade;
+		public IVertexFinder vertexProvider { get => session.monkeyNFilter; }
+		public RansacsCascade SCascade { get; private set; }
+		public RansacsCascade ETCascade { get; private set; }
 		ITradeByVertexDecider decider;
 		ITradeFilter filter;
 		IStopPlacer stopPlacer;
 		IClosingProvider closer;
 
-		public S2_ET_S2_TradeWithStopProvider(bool useFilter = true)
+		public S2_ET_S2_DecisionMaker(bool useFilter = true, int n = 100)
 		{
-			session = new(100);
+			session = new(n);
 			SCascade = new(session.vertexes, SigmaType.Sigma, 1, 90);
 			ETCascade = new(session.vertexes, SigmaType.Sigma, 3, 90);
 			decider = new InvertedNDecider();

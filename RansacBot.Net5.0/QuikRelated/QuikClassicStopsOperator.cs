@@ -20,10 +20,6 @@ namespace RansacBot.QuikRelated
 			this.tradeParams = tradeParams;
 		}
 
-		protected override AbstractStopOrderEnsurer<StopOrder, Order> BuildStopOrderEnsurer(TradeWithStop trade)
-		{
-			return new QuikStopOrderEnsurer(QuikHelpFunctions.BuildStopOrder(trade, tradeParams, 1));
-		}
 
 		protected override SortedDictionary<AbstractStopOrderEnsurer<StopOrder, Order>, TradeWithStop> 
 			GetDict(AbstractStopOrderEnsurer<StopOrder, Order> ensurer)
@@ -46,6 +42,10 @@ namespace RansacBot.QuikRelated
 					{ return stopOrder.Order.TransId.ToString() + " " + stopOrder.Order.ConditionPrice.ToString(); }));
 		}
 
+		protected override AbstractStopOrderEnsurer<StopOrder, Order> BuildStopOrderEnsurer(TradeWithStop trade)
+		{
+			return new QuikStopOrderEnsurer(QuikHelpFunctions.BuildStopOrder(trade, tradeParams, 1));
+		}
 		protected override AbstractOrderEnsurerWithPrice<Order> GetOrderEnsurer(Order order)
 		{
 			return new QuikOrderEnsurer(order);

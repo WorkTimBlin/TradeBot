@@ -44,7 +44,7 @@ namespace RansacBot.HystoryTest
 				new("", ""),
 				(tick) =>
 				{
-					tradesHystory.CheckForStops((decimal)tick.PRICE);
+					tradesHystory.CheckForStops(tick.PRICE);
 				});
 
 			monkeyNFinder.NewExtremum += decider.OnNewExtremum;
@@ -68,7 +68,7 @@ namespace RansacBot.HystoryTest
 
 			tradesHystory.ExecutedLongStop += (price, exPrice) =>
 			{
-				int tradeIndex = longs.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
+				int tradeIndex = longs.FindIndex((trade) => trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = longs[tradeIndex];
 				longs.RemoveAt(tradeIndex);
 				dealsWriter.WriteLine(
@@ -83,7 +83,7 @@ namespace RansacBot.HystoryTest
 			};
 			tradesHystory.ExecutedShortStop += (price, exPrice) =>
 			{
-				int tradeIndex = shorts.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
+				int tradeIndex = shorts.FindIndex((trade) => trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = shorts[tradeIndex];
 				shorts.RemoveAt(tradeIndex);
 				dealsWriter.WriteLine(
@@ -98,7 +98,7 @@ namespace RansacBot.HystoryTest
 			};
 			tradesHystory.KilledLongStop += (price, exPrice) =>
 			{
-				int tradeIndex = longs.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
+				int tradeIndex = longs.FindIndex((trade) => trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = longs[tradeIndex];
 				longs.RemoveAt(tradeIndex);
 				dealsWriter.WriteLine(
@@ -113,7 +113,7 @@ namespace RansacBot.HystoryTest
 			};
 			tradesHystory.KilledShortStop += (price, exPrice) =>
 			{
-				int tradeIndex = shorts.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
+				int tradeIndex = shorts.FindIndex((trade) => trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = shorts[tradeIndex];
 				shorts.RemoveAt(tradeIndex);
 				dealsWriter.WriteLine(

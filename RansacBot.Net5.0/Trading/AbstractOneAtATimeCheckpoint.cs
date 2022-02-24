@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 namespace RansacBot.Trading
 {
 	/// <summary>
-	/// let TradeWithStop through exactly and only when order ensurer gives a callback having non-zero execution price
+	/// let TradeWithStop through when it's completed, kills current if got new while current isn't executed
+	/// passed TradeWithStop transforms corresponding to execution price
 	/// </summary>
 	/// <typeparam name="TOrder"></typeparam>
 	abstract class AbstractOneAtATimeCheckpoint<TOrder> : ITradeWithStopFilter

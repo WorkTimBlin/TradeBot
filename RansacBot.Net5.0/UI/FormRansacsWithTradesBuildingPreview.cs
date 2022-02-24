@@ -174,7 +174,7 @@ namespace RansacBot
 			FileFeeder fileFeeder = new();
 			TradesHystory tradesHystory = new();
 			InitAndSetupSession_2_0(fileFeeder, tradesHystory, tradesHystory).
-				ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops((decimal)tick.PRICE); };
+				ransacs.vertexes.NewVertex += (Tick tick, VertexType vertexType) => { tradesHystory.CheckForStops(tick.PRICE); };
 
 			tradesHystory.NewTradeWithStop -= tradesHystory.OnNewTradeWithStop;
 

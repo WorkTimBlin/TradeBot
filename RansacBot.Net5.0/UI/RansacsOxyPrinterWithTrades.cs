@@ -69,7 +69,7 @@ namespace RansacBot.UI
 			CheckIfTradeWithStopHappenedThenAddToPlot();
 		}
 
-		public void OnNewExtremum(Tick extremum, VertexType vertexType, Tick current)
+		public override void OnNewExtremum(Tick extremum, VertexType vertexType, Tick current)
 		{
 			lastExtremumVertexIndex = extremum.VERTEXINDEX;
 			lastExtremumFound = true;
@@ -101,7 +101,7 @@ namespace RansacBot.UI
 			}
 		}
 
-		public void OnClosePos(decimal stopPrice, decimal executionPrice)
+		public void OnClosePos(double stopPrice, double executionPrice)
 		{
 			for(int i = 0; i < stops.Points.Count; i++)
 			{

@@ -9,16 +9,6 @@ using RansacBot.Trading;
 
 namespace RansacBot.Trading
 {
-	public interface IStopsOperator
-	{
-		public event Action<TradeWithStop, double> StopExecuted;
-		public event Action<TradeWithStop> UnexecutedStopRemoved;
-
-		public void ClosePercentOfLongs(double percent);
-		public void ClosePercentOfShorts(double percent);
-		public void OnNewTradeWithStop(TradeWithStop tradeWithStop);
-	}
-
 	public interface ITradesHystory
 	{
 		public event ClosePosHandler ExecutedLongStop;
@@ -31,7 +21,7 @@ namespace RansacBot.Trading
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop);
 	}
 	
-	public delegate void ClosePosHandler(decimal closedStop, decimal executionPrice);
+	public delegate void ClosePosHandler(double closedStop, double executionPrice);
 	class TradesHystory : ITradesHystory, ITradeWithStopFilter
 	{
 		public event Action<TradeWithStop> NewTradeWithStop;
@@ -40,18 +30,18 @@ namespace RansacBot.Trading
 		public event ClosePosHandler KilledLongStop;
 		public event ClosePosHandler KilledShortStop;
 
-		UpSortedList<decimal> longStops = new();
-		SortedList<decimal> shortStops = new(new DecimalComparer());
+		UpSortedList<double> longStops = new();
+		SortedList<double> shortStops = new(new DoubleComparer());
 
 		public void OnNewTradeWithStop(TradeWithStop trade)
 		{
 			if (trade.direction == TradeDirection.buy)
 			{
-				longStops.Add((decimal)trade.stop.price);
+				longStops.Add(trade.stop.price);
 			}
 			else if (trade.direction == TradeDirection.sell)
 			{
-				shortStops.Add((decimal)trade.stop.price);
+				shortStops.Add(trade.stop.price);
 			}
 			NewTradeWithStop?.Invoke(trade);
 		}
@@ -59,7 +49,7 @@ namespace RansacBot.Trading
 		public void ClosePercentOfLongs(double percent)
 		{
 			int IndexToRemoveFrom = (int)(longStops.Count * (100 - percent) / 100);
-			foreach (decimal price in longStops.GetRange(IndexToRemoveFrom, longStops.Count - IndexToRemoveFrom))
+			foreach (double price in longStops.GetRange(IndexToRemoveFrom, longStops.Count - IndexToRemoveFrom))
 			{
 				KilledLongStop?.Invoke(price, price);
 			}
@@ -68,14 +58,14 @@ namespace RansacBot.Trading
 		public void ClosePercentOfShorts(double percent)
 		{
 			int IndexToRemoveFrom = (int)(shortStops.Count * (100 - percent) / 100);
-			foreach (decimal price in shortStops.GetRange(IndexToRemoveFrom, shortStops.Count - IndexToRemoveFrom))
+			foreach (double price in shortStops.GetRange(IndexToRemoveFrom, shortStops.Count - IndexToRemoveFrom))
 			{
 				KilledShortStop?.Invoke(price, price);
 			}
 			shortStops.RemoveRange(IndexToRemoveFrom, shortStops.Count - IndexToRemoveFrom);
 		}
 
-		public void CheckForStops(decimal price)
+		public void CheckForStops(double price)
 		{
 			if (longStops.Count > 0 && longStops[^1] > price)
 			{
@@ -86,7 +76,7 @@ namespace RansacBot.Trading
 				}
 				while (i >= 0 && longStops[i] >= price);
 				i++;
-				foreach (decimal stopPrice in longStops.GetRange(i, longStops.Count - i))
+				foreach (double stopPrice in longStops.GetRange(i, longStops.Count - i))
 				{
 					ExecutedLongStop?.Invoke(stopPrice, price);
 				}
@@ -101,7 +91,7 @@ namespace RansacBot.Trading
 				}
 				while (i >= 0 && shortStops[i] <= price);
 				i++;
-				foreach (decimal stopPrice in shortStops.GetRange(i, shortStops.Count - i))
+				foreach (double stopPrice in shortStops.GetRange(i, shortStops.Count - i))
 				{
 					ExecutedShortStop?.Invoke(stopPrice, price);
 				}
@@ -110,9 +100,9 @@ namespace RansacBot.Trading
 		}
 
 	}
-	class DecimalComparer : IComparer<decimal>
+	class DoubleComparer : IComparer<double>
 	{
-		public int Compare(decimal first, decimal second)
+		public int Compare(double first, double second)
 		{
 			if (first > second) return -1;
 			else if (first == second) return 0;

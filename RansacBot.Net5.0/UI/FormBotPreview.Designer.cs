@@ -30,9 +30,6 @@ namespace RansacBot
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			this.showDemoContinousButton = new System.Windows.Forms.Button();
-			this.showDemoAllAtOnseButton = new System.Windows.Forms.Button();
-			this.firstOnly = new System.Windows.Forms.CheckBox();
 			this.pause = new System.Windows.Forms.CheckBox();
 			this.stop = new System.Windows.Forms.Button();
 			this.plotView1 = new OxyPlot.WindowsForms.PlotView();
@@ -46,6 +43,7 @@ namespace RansacBot
 			this.reloadQuik = new System.Windows.Forms.Button();
 			this.listBox1 = new System.Windows.Forms.ListBox();
 			this.timer1 = new System.Windows.Forms.Timer(this.components);
+			this.useFilterCheckbox = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Speed)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_NSetter)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -53,46 +51,6 @@ namespace RansacBot
 			this.splitContainer1.Panel2.SuspendLayout();
 			this.splitContainer1.SuspendLayout();
 			this.SuspendLayout();
-			// 
-			// showDemoContinousButton
-			// 
-			this.showDemoContinousButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.showDemoContinousButton.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-			this.showDemoContinousButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.showDemoContinousButton.ForeColor = System.Drawing.SystemColors.ControlText;
-			this.showDemoContinousButton.Location = new System.Drawing.Point(820, 146);
-			this.showDemoContinousButton.Name = "showDemoContinousButton";
-			this.showDemoContinousButton.Size = new System.Drawing.Size(93, 40);
-			this.showDemoContinousButton.TabIndex = 1;
-			this.showDemoContinousButton.Text = "show demo continous";
-			this.showDemoContinousButton.UseVisualStyleBackColor = false;
-			this.showDemoContinousButton.Click += new System.EventHandler(this.OnShowDemoProgressing);
-			// 
-			// showDemoAllAtOnseButton
-			// 
-			this.showDemoAllAtOnseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.showDemoAllAtOnseButton.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-			this.showDemoAllAtOnseButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.showDemoAllAtOnseButton.Location = new System.Drawing.Point(820, 192);
-			this.showDemoAllAtOnseButton.Name = "showDemoAllAtOnseButton";
-			this.showDemoAllAtOnseButton.Size = new System.Drawing.Size(93, 40);
-			this.showDemoAllAtOnseButton.TabIndex = 1;
-			this.showDemoAllAtOnseButton.Text = "show demo all at once";
-			this.showDemoAllAtOnseButton.UseVisualStyleBackColor = false;
-			this.showDemoAllAtOnseButton.Click += new System.EventHandler(this.OnShowDemoAllAtOnce);
-			// 
-			// firstOnly
-			// 
-			this.firstOnly.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.firstOnly.Appearance = System.Windows.Forms.Appearance.Button;
-			this.firstOnly.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-			this.firstOnly.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.firstOnly.Location = new System.Drawing.Point(820, 65);
-			this.firstOnly.Name = "firstOnly";
-			this.firstOnly.Size = new System.Drawing.Size(93, 75);
-			this.firstOnly.TabIndex = 2;
-			this.firstOnly.Text = "show only first builded versions of ransacs";
-			this.firstOnly.UseVisualStyleBackColor = false;
 			// 
 			// pause
 			// 
@@ -275,6 +233,7 @@ namespace RansacBot
 			// 
 			this.listBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
+			this.listBox1.BackColor = System.Drawing.SystemColors.ControlDark;
 			this.listBox1.FormattingEnabled = true;
 			this.listBox1.ItemHeight = 15;
 			this.listBox1.Location = new System.Drawing.Point(12, 12);
@@ -287,12 +246,26 @@ namespace RansacBot
 			this.timer1.Interval = 500;
 			this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
 			// 
+			// useFilterCheckbox
+			// 
+			this.useFilterCheckbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.useFilterCheckbox.AutoSize = true;
+			this.useFilterCheckbox.Checked = true;
+			this.useFilterCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.useFilterCheckbox.Location = new System.Drawing.Point(820, 434);
+			this.useFilterCheckbox.Name = "useFilterCheckbox";
+			this.useFilterCheckbox.Size = new System.Drawing.Size(95, 19);
+			this.useFilterCheckbox.TabIndex = 15;
+			this.useFilterCheckbox.Text = "Use ET4-filter";
+			this.useFilterCheckbox.UseVisualStyleBackColor = true;
+			// 
 			// FormBotPreview
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
 			this.ClientSize = new System.Drawing.Size(925, 538);
+			this.Controls.Add(this.useFilterCheckbox);
 			this.Controls.Add(this.listBox1);
 			this.Controls.Add(this.reloadQuik);
 			this.Controls.Add(this.splitContainer1);
@@ -303,9 +276,6 @@ namespace RansacBot
 			this.Controls.Add(this.numericUpDown_Speed);
 			this.Controls.Add(this.stop);
 			this.Controls.Add(this.pause);
-			this.Controls.Add(this.firstOnly);
-			this.Controls.Add(this.showDemoAllAtOnseButton);
-			this.Controls.Add(this.showDemoContinousButton);
 			this.MinimumSize = new System.Drawing.Size(941, 577);
 			this.Name = "FormBotPreview";
 			this.Text = "Form1";
@@ -321,9 +291,6 @@ namespace RansacBot
 		}
 
 		#endregion
-		private System.Windows.Forms.Button showDemoContinousButton;
-		private System.Windows.Forms.Button showDemoAllAtOnseButton;
-		private System.Windows.Forms.CheckBox firstOnly;
 		private System.Windows.Forms.CheckBox pause;
 		private System.Windows.Forms.Button stop;
 		private OxyPlot.WindowsForms.PlotView plotView1;
@@ -337,5 +304,6 @@ namespace RansacBot
 		private System.Windows.Forms.Button reloadQuik;
 		private System.Windows.Forms.ListBox listBox1;
 		private System.Windows.Forms.Timer timer1;
+		private System.Windows.Forms.CheckBox useFilterCheckbox;
 	}
 }

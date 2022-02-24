@@ -9,9 +9,9 @@ namespace RansacBot.Trading
 {
 	abstract class AbstractKilledStopsMarketCompensator<TOrder> : ITradeWithStopProcessor
 	{
-		Dictionary<AbstractOrderEnsurerWithPrice<TOrder>, TradeWithStop> marketOrders;
+		readonly Dictionary<AbstractOrderEnsurerWithPrice<TOrder>, TradeWithStop> marketOrders = new();
 
-		public Action<TradeWithStop, double> FullyClosedTradeWithStop;
+		public event Action<TradeWithStop, double> FullyClosedTradeWithStop;
 
 		public void OnNewTradeWithStop(TradeWithStop trade)
 		{

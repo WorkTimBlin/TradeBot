@@ -11,7 +11,7 @@ namespace RansacBot.Trading
 	/// needs AbstractOrderEnsurer that gives callback when got executionPrice
 	/// </summary>
 	/// <typeparam name="TStopOrder"></typeparam>
-	abstract class AbstractClassicStopsOperator<TStopOrder, TOrder> : IStopsOperator
+	abstract class AbstractClassicStopsOperator<TStopOrder, TOrder> : IStopsOperator, IStopsContainer
 	{
 		public event Action<TradeWithStop, double> StopExecuted;
 		public event Action<TradeWithStop> UnexecutedStopRemoved;
@@ -69,6 +69,7 @@ namespace RansacBot.Trading
 		{
 			if (ensurer.IsComplete)
 			{
+				ensurer.OrderEnsuranceStatusChanged -= OnStopOrderEnsuranceStatusChanged;
 				if (ensurer.State == EnsuranceState.Killed)
 				{
 					UnexecutedStopRemoved?.Invoke(GetTradeWithStop(ensurer));

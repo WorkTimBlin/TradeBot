@@ -96,5 +96,9 @@ namespace RansacBot.UI
 		{
 			this.plotModel.InvalidatePlot(updateData);
 		}
+		public virtual void OnNewExtremum(Tick tick, VertexType vertexType, Tick current)
+		{
+			
+		}
 	}
 }

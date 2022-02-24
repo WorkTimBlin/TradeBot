@@ -1,5 +1,6 @@
 ﻿using RansacsRealTime;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -9,40 +10,26 @@ using System.Threading.Tasks;
 
 namespace RansacBot.HystoryTest
 {
-	class FileFeeder : IProviderByParam<Tick>
+	class FileFeeder : TicksFeeder
 	{
-		public IEnumerable<Tick> ticks;//used for feeding
-		private event Action<Tick> NewTick;
+		public FileFeeder(string path) : base(new TicksFromFiles(path)) { }
+	}
 
-		public FileFeeder(string path)
+	class TicksFeeder : IProviderByParam<Tick>
+	{
+		public event Action<Tick> NewTick;
+		private IEnumerable<Tick> ticks;
+		public TicksFeeder(IEnumerable<Tick> ticks)
 		{
-			ticks = new TicksLazySequentialParser(StringsFromFile(path));
+			this.ticks = ticks;
 		}
-
-		IEnumerable<string> StringsFromFile(string filePath)
+		public void FeedAllStandart()
 		{
-			using StreamReader stream = new(filePath);
-			while (!stream.EndOfStream)
-			{
-				yield return stream.ReadLine() ?? throw new DataException("string was null");
-			}
-		}
-
-		public void FeedAllStandart(Action action)
-		{
-			int count = 0;
-			foreach (Tick tick in ticks)
+			foreach(Tick tick in ticks)
 			{
 				NewTick.Invoke(tick);
-				if (count == 10000)
-				{
-					count = 0;
-					action.Invoke();
-				}
-				count++;
 			}
 		}
-
 		public void Subscribe(Param instrument, Action<Tick> handler)
 		{
 			NewTick += handler;
@@ -50,6 +37,44 @@ namespace RansacBot.HystoryTest
 		public void Unsubscribe(Param instrument, Action<Tick> handler)
 		{
 			NewTick -= handler;
+		}
+	}
+
+	class TicksFromFiles : TicksLazySequentialParser
+	{
+		public TicksFromFiles(string path) : base(new StreamReader(path).GetStrings()) { }
+		public TicksFromFiles(IEnumerable<string> paths) :
+			base(Concat(GetStreamReaders(paths).Select(StringsFromStream.GetStringsFromStream)))
+		{ }
+		static IEnumerable<StreamReader> GetStreamReaders(IEnumerable<string> paths)
+		{
+			foreach (string path in paths) yield return new(path);
+		}
+		static IEnumerable<TSource> Concat<TSource>(IEnumerable<IEnumerable<TSource>> sources)
+		{
+			foreach(IEnumerable<TSource> source in sources)
+			{
+				foreach(TSource obj in source)
+				{
+					yield return obj;
+				}
+			}
+		}
+	}
+
+	static class StringsFromStream
+	{
+		public static IEnumerable<string> GetStrings(this StreamReader stream)
+		{
+			return GetStringsFromStream(stream);
+		}
+		public static IEnumerable<string> GetStringsFromStream(StreamReader stream)
+		{
+			using StreamReader stream1 = stream;
+			while (!stream1.EndOfStream)
+			{
+				yield return stream1.ReadLine() ?? throw new Exception("somehow reached end of stream");
+			}
 		}
 	}
 }

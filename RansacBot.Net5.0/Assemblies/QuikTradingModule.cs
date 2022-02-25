@@ -22,7 +22,8 @@ namespace RansacBot.Assemblies
 				if(tradeWithStopProvider != null)
 					tradeWithStopProvider.NewTradeWithStop -= checkpoint.OnNewTradeWithStop;
 				tradeWithStopProvider = value;
-				tradeWithStopProvider.NewTradeWithStop += checkpoint.OnNewTradeWithStop;
+				if (tradeWithStopProvider != null)
+					tradeWithStopProvider.NewTradeWithStop += checkpoint.OnNewTradeWithStop;
 			}
 		}
 		public IClosingProvider ClosingProvider
@@ -35,8 +36,11 @@ namespace RansacBot.Assemblies
 					closingProvider.ClosePercentOfShorts -= stopsOperator.ClosePercentOfShorts;
 				}
 				closingProvider = value;
-				closingProvider.ClosePercentOfLongs += stopsOperator.ClosePercentOfLongs;
-				closingProvider.ClosePercentOfShorts += stopsOperator.ClosePercentOfShorts;
+				if (closingProvider != null)
+				{
+					closingProvider.ClosePercentOfLongs += stopsOperator.ClosePercentOfLongs;
+					closingProvider.ClosePercentOfShorts += stopsOperator.ClosePercentOfShorts;
+				}
 			}
 		}
 

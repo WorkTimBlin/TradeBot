@@ -17,7 +17,7 @@ namespace BotTests
 	{
 		TradeParams tradeParamsDemo = new("SPBFUT", "RIH2", "SPBFUT0067Y", "50290");
 		TradeParams tradeParamsReal = new("SPBFUT", "RIH2", "SPBFUTL81pa", "SPBFUTL81pa");
-		[TestMethod]
+		//[TestMethod]
 		public void TestStopStorage()
 		{
 			StopStorageClassic stopStorage = new(tradeParamsDemo);
@@ -25,7 +25,7 @@ namespace BotTests
 			Task.Delay(100).Wait();
 			stopStorage.ClosePercentOfLongs(100);
 		}
-		[TestMethod]
+		//[TestMethod]
 		public void TestCheckpointExecuted()
 		{
 			TradeWithStop? trade = null;
@@ -39,7 +39,7 @@ namespace BotTests
 			Assert.IsTrue(Task.Run(() => { while (trade == null) ; }).Wait(500));
 			Assert.AreNotEqual(157600, trade.price);
 		}
-		[TestMethod]
+		//[TestMethod]
 		public void TestCheckpointKill()
 		{
 			TradeParams tradeParams = tradeParamsDemo;
@@ -56,7 +56,7 @@ namespace BotTests
 			//Assert.IsTrue(Task.Run(() => { while (trade == null) ; }).Wait(1000));
 			//debil
 		}
-		[TestMethod]
+		//[TestMethod]
 		public void TestQuikFunctions()
 		{
 			//Order order = QuikContainer.Quik.Orders.SendLimitOrder(
@@ -73,16 +73,32 @@ namespace BotTests
 		public void TestStopsOperator()
 		{
 			SimpleStopsOperator stopsOperator = new();
-			stopsOperator.OnNewTradeWithStop(new(new(10, TradeDirection.buy), 0));
-			TradeWithStop? recievedStop;
+			TradeWithStop sentTradeToComplete = new(new(1000, TradeDirection.buy), 0);
+			TradeWithStop sentTradeToKill = new(new(100, TradeDirection.buy), 0);
+			stopsOperator.OnNewTradeWithStop(sentTradeToComplete);
+			TradeWithStop? recievedStop = null;
 
 			stopsOperator.StopExecuted += (tradeWithStop, price) =>
 			{
+				Assert.AreEqual(sentTradeToComplete, tradeWithStop);
 				Assert.AreEqual(price, tradeWithStop.stop.price);
+				recievedStop = tradeWithStop;
 			};
 
 			SimpleEnsurersController.CompleteAllStops();
-			throw new NotImplementedException();
+
+			Assert.AreEqual(sentTradeToComplete, recievedStop);
+
+			stopsOperator.UnexecutedStopRemoved += (trade) =>
+			{
+				Assert.AreEqual(sentTradeToKill, trade);
+				recievedStop = trade;
+			};
+
+			stopsOperator.OnNewTradeWithStop(sentTradeToKill);
+			SimpleEnsurersController.KillAllStops();
+
+			Assert.AreEqual(sentTradeToKill, recievedStop);
 		}
 		class SimpleEnsurersController
 		{
@@ -93,8 +109,8 @@ namespace BotTests
 		class SimpleStopsOperator : AbstractClassicStopsOperator<TradeWithStop, RansacBot.Trading.Trade>
 		{
 			public SimpleStopsOperator() : base(
-				(trade1, trade2) => trade1.Order.price > trade2.Order.price ? 1 : -1,
-				(trade1, trade2) => trade1.Order.price > trade2.Order.price ? -1 : 1)
+				(trade1, trade2) => trade1 == trade2 ? 0 : (trade1.Order.price > trade2.Order.price ? 1 : -1),
+				(trade1, trade2) => trade1 == trade2 ? 0 : (trade1.Order.price > trade2.Order.price ? -1 : 1))
 			{ }
 
 			public override List<string> GetLongs()
@@ -144,27 +160,19 @@ namespace BotTests
 			{
 				return Order.stop;
 			}
-
 			protected override State GetState(TradeWithStop order)
 			{
 				throw new NotImplementedException();
 			}
-
 			protected override bool IsTransIDMatching(TradeWithStop order)
 			{
 				throw new NotImplementedException();
 			}
-
 			protected override void SetTransID(long transID)
 			{
-				throw new NotImplementedException();
+				//throw new NotImplementedException();
 			}
-
-			protected override void SubscribeToOnOrderEvent()
-			{
-				throw new NotImplementedException();
-			}
-
+			protected override void SubscribeToOnOrderEvent() { }
 			protected override void UnsubscribeFromOnOrderEvent()
 			{
 				throw new NotImplementedException();
@@ -194,7 +202,7 @@ namespace BotTests
 
 			protected override bool IsTransIDMatching(Trade order)
 			{
-				throw new NotImplementedException();
+				return order == Order;
 			}
 
 			protected override void SetTransID(long transID)
@@ -207,10 +215,7 @@ namespace BotTests
 				throw new NotImplementedException();
 			}
 
-			protected override void UnsubscribeFromOnOrderEvent()
-			{
-				throw new NotImplementedException();
-			}
+			protected override void UnsubscribeFromOnOrderEvent() { }
 
 		}
 		class TradeWithStopFuncs<TTrade> : IOrderFunctions<TTrade>
@@ -220,7 +225,7 @@ namespace BotTests
 
 			public Task<long> CreateOrder(TTrade order)
 			{
-				throw new NotImplementedException();
+				return Task.FromResult(1l);
 			}
 
 			public Task<TTrade> GetOrder_by_transID(TTrade order)

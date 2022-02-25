@@ -7,17 +7,11 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Trading
 {
-	class HystoryOrder
+	class HystoryOrder : Trade
 	{
-		static int lastTransID = 0;
 		public State state = State.Active;
-		public readonly int transID;
-		public readonly Trade trade;
+		public long transID = 0;
 		public double completionPrice;
-		public HystoryOrder(Trade trade)
-		{
-			transID = ++lastTransID;
-			this.trade = trade;
-		}
+		public HystoryOrder(Trade trade) : base(trade.price, trade.direction) { }
 	}
 }

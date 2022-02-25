@@ -1,4 +1,5 @@
 ﻿using RansacBot.Trading;
+using RansacBot.Trading.Hystory;
 using RansacBot.UI.Components;
 using RansacsRealTime;
 using System;
@@ -65,8 +66,6 @@ namespace RansacBot.HystoryTest
 
 			FileFeeder fileFeeder = new(hystoryTicksFilePath.Text);
 			fileFeeder.Subscribe(new("", ""), (Tick tick) => { lastTick = tick; });
-			HystoryInfra hystoryInfra = HystoryInfra.Instance;
-			fileFeeder.Subscribe(new("", ""), hystoryInfra.OnNewTick);
 			ThroughProvider<Tick> provider = new();
 			ObservingSession session = new(new Param("", ""), provider, 100);
 			Dictionary<SigmaType, RansacsCascade> cascades = new();

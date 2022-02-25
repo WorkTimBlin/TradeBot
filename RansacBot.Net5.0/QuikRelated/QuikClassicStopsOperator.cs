@@ -14,8 +14,8 @@ namespace RansacBot.QuikRelated
 		TradeParams tradeParams;
 
 		public QuikClassicStopsOperator(TradeParams tradeParams) :
-			base((ensurer1, ensurer2) => ensurer1.Order.Price > ensurer2.Order.Price ? 1 : -1,
-				(ensurer1, ensurer2) => ensurer1.Order.Price > ensurer2.Order.Price ? 1 : -1)
+			base((ensurer1, ensurer2) => ensurer1 == ensurer2 ? 0 : (ensurer1.Order.Price > ensurer2.Order.Price ? 1 : -1),
+				(ensurer1, ensurer2) => ensurer1 == ensurer2 ? 0 : (ensurer1.Order.Price > ensurer2.Order.Price ? 1 : -1))
 		{
 			this.tradeParams = tradeParams;
 		}

@@ -40,13 +40,6 @@ namespace RansacBot
 			InitializeComponent();
 		}
 
-		private void OnShowDemoProgressing(object sender, EventArgs e)
-		{
-		}
-		private void OnShowDemoAllAtOnce(object sender, EventArgs e)
-		{
-		}
-
 		private void pause_CheckedChanged(object sender, EventArgs e)
 		{
 			if (pause.Checked)
@@ -63,7 +56,10 @@ namespace RansacBot
 		{
 			if (isRunning) stopRequired = true;
 			timer1.Stop();
-			QuikTickProvider.GetInstance().Unsubscribe(tradeParams, decisionMaker.OnNewTick);
+			if(decisionMaker != null)
+			{
+				QuikTickProvider.GetInstance().Unsubscribe(tradeParams, decisionMaker.OnNewTick);
+			}
 			UnlockNSetter();
 			UnlockUseFilterCheckbox();
 		}

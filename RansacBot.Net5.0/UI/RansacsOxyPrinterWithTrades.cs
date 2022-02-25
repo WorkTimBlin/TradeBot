@@ -105,7 +105,7 @@ namespace RansacBot.UI
 		{
 			for(int i = 0; i < stops.Points.Count; i++)
 			{
-				if(stops.Points[i].Y == (double)stopPrice)
+				if(stops.Points[i].Y == stopPrice)
 				{
 					stops.Points.RemoveAt(i);
 					return;

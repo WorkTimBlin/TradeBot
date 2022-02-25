@@ -54,6 +54,7 @@ namespace RansacBot.Trading
 				stopsDic.Keys.Skip((int)(stopsDic.Count * (100 - percent) / 100));
 			foreach (AbstractStopOrderEnsurer<TStopOrder, TOrder> stop in stops)
 			{
+				stop.UpdateOrderFromQuikByTransID();
 				if (stop.State == EnsuranceState.Active)
 				{
 					stop.Kill();

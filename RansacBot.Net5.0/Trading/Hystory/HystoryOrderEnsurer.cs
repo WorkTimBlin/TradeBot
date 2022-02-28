@@ -1,4 +1,5 @@
 ﻿using QuikSharp.DataStructures;
+using RansacBot.Trading.Hystory.Infrastructure;
 using RansacsRealTime;
 using System;
 using System.Collections.Generic;
@@ -9,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Trading.Hystory
 {
-	class OrderOnHystoryEnsurer : AbstractOrderEnsurerWithPrice<HystoryOrder>
+	class HystoryOrderEnsurer : AbstractOrderEnsurerWithPrice<HystoryOrder>
 	{
-		IOrderEvents orderEvents;
-		public OrderOnHystoryEnsurer(HystoryOrder trade) : 
+		IHystoryOrderEvents orderEvents;
+		public HystoryOrderEnsurer(HystoryOrder trade) :
 			base(trade, Infrastructure.HystoryQuikSimulator.Instance.Orders)
 		{
-			throw new NotImplementedException();
+			orderEvents = HystoryQuikSimulator.Instance.Orders;
 		}
 
 		protected override double GetCompletionAttribute()

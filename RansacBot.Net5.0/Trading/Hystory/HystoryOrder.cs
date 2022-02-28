@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RansacBot.Trading
+namespace RansacBot.Trading.Hystory
 {
 	class HystoryOrder : Trade
 	{

@@ -15,7 +15,7 @@ namespace RansacBot.Trading
 
 		public void OnNewTradeWithStop(TradeWithStop trade)
 		{
-			AbstractOrderEnsurerWithPrice<TOrder> ensurer = GetEnsurer(trade);
+			AbstractOrderEnsurerWithPrice<TOrder> ensurer = GetMarketEnsurer(trade);
 			ensurer.OrderEnsuranceStatusChanged += OnOrderEnsuranceStatusChanged;
 			marketOrders.Add(ensurer, trade);
 			ensurer.SubscribeSelfAndSendOrder();
@@ -40,6 +40,6 @@ namespace RansacBot.Trading
 			}
 		}
 
-		protected abstract AbstractOrderEnsurerWithPrice<TOrder> GetEnsurer(TradeWithStop trade);
+		protected abstract AbstractOrderEnsurerWithPrice<TOrder> GetMarketEnsurer(TradeWithStop trade);
 	}
 }

@@ -190,7 +190,7 @@ namespace RansacBot
 			//QuikTradeConnector quikTradeConnector = new(new Param("SPBFUT", "RIH2"), "SPBFUT005gx");
 			TradeParams tradeParams = new("SPBFUT", "RIH2", "SPBFUT0067Y", "50290");
 			stopStorage = new(tradeParams);
-			OneOrderAtATimeCheckpoint ensurer = new(tradeParams);
+			QuikOneOrderAtATimeCheckpoint ensurer = new(tradeParams);
 			ObservingSession session = InitAndSetupSession_2_0(quikTickProvider, stopStorage, ensurer);
 
 			Quik quik = QuikContainer.Quik;
@@ -218,7 +218,7 @@ namespace RansacBot
 						Replace(@"\RansacBot.Net5.0\bin\Debug\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt");
 #endif
 #if RELEASE
-						Replace(@"\RansacBot.Net5.0\bin\Release\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt"));
+						Replace(@"\RansacBot.Net5.0\bin\Release\net5.0-windows", @"\BotTests\bin\Debug\net5.0-windows\TestsProperties\FolderForTests" + @"\1.txt");
 #endif
 			static string fullRiz1Loc = @"C:\Users\ir2\Desktop\1.txt";
 			public TicksLazyParser ticks = new(

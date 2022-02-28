@@ -30,7 +30,7 @@ namespace BotTests
 		{
 			TradeWithStop? trade = null;
 			StopStorageClassic stopStorage = new(tradeParamsDemo);
-			OneOrderAtATimeCheckpoint checkpoint = new(tradeParamsDemo);
+			QuikOneOrderAtATimeCheckpoint checkpoint = new(tradeParamsDemo);
 			checkpoint.NewTradeWithStop += (tradeW) => 
 			{ 
 				trade = tradeW;
@@ -45,7 +45,7 @@ namespace BotTests
 			TradeParams tradeParams = tradeParamsDemo;
 			TradeWithStop? trade = null;
 			StopStorageClassic stopStorage = new(tradeParams);
-			OneOrderAtATimeCheckpoint checkpoint = new(tradeParams);
+			QuikOneOrderAtATimeCheckpoint checkpoint = new(tradeParams);
 			checkpoint.NewTradeWithStop += (tradeW) => { trade = tradeW; };
 			checkpoint.OnNewTradeWithStop(new(new(152000, TradeDirection.buy), 150000));
 			Task.Delay(1500).Wait();
@@ -113,14 +113,14 @@ namespace BotTests
 				(trade1, trade2) => trade1 == trade2 ? 0 : (trade1.Order.price > trade2.Order.price ? -1 : 1))
 			{ }
 
-			public override List<string> GetLongs()
+			public override string GetSerialized(AbstractStopOrderEnsurer<TradeWithStop, Trade> stopOrder)
 			{
-				return new(longs.Keys.Select((ensurer) => ensurer.Order.price.ToString()));
+				return stopOrder.Order.price.ToString();
 			}
 
-			public override List<string> GetShorts()
+			public override string GetSerialized(AbstractOrderEnsurerWithPrice<Trade> ensurer)
 			{
-				return new(shorts.Keys.Select((ensurer) => ensurer.Order.price.ToString()));
+				return ensurer.Order.price.ToString();
 			}
 
 			protected override AbstractStopOrderEnsurer<TradeWithStop, RansacBot.Trading.Trade> 
@@ -129,17 +129,15 @@ namespace BotTests
 				return new SimpleStopEnsurer(trade);
 			}
 
-			protected override 
-				SortedDictionary<AbstractStopOrderEnsurer<TradeWithStop, RansacBot.Trading.Trade>, TradeWithStop> 
-				GetDict(AbstractStopOrderEnsurer<TradeWithStop, RansacBot.Trading.Trade> ensurer)
-			{
-				return ensurer.Order.direction == TradeDirection.buy ? longs : shorts;
-			}
-
 			protected override AbstractOrderEnsurerWithPrice<RansacBot.Trading.Trade> 
 				GetOrderEnsurer(RansacBot.Trading.Trade order)
 			{
 				return new SimpleOrderEnsurer(order);
+			}
+
+			protected override bool IsLong(AbstractStopOrderEnsurer<TradeWithStop, Trade> stopEnsurer)
+			{
+				return stopEnsurer.Order.direction == TradeDirection.buy;
 			}
 		}
 		class SimpleStopEnsurer : AbstractStopOrderEnsurer<TradeWithStop, Trade>

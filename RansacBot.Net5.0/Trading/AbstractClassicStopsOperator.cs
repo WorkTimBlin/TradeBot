@@ -16,18 +16,20 @@ namespace RansacBot.Trading
 		public event Action<TradeWithStop, double> StopExecuted;
 		public event Action<TradeWithStop> UnexecutedStopRemoved;
 
-		readonly protected SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> longs;
-		readonly protected SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> shorts;
+		readonly SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> longs;
+		readonly SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> shorts;
 
-		readonly protected Dictionary<AbstractOrderEnsurerWithPrice<TOrder>, TradeWithStop> 
+		readonly Dictionary<AbstractOrderEnsurerWithPrice<TOrder>, TradeWithStop>
 			executedStopsUnexecutedOrders = new();
 
 		public AbstractClassicStopsOperator(
 			Comparison<AbstractStopOrderEnsurer<TStopOrder, TOrder>> longsComparer,
 			Comparison<AbstractStopOrderEnsurer<TStopOrder, TOrder>> shortsComparer)
 		{
-			longs = new(Comparer<AbstractStopOrderEnsurer<TStopOrder, TOrder>>.Create(longsComparer));
-			shorts = new(Comparer<AbstractStopOrderEnsurer<TStopOrder, TOrder>>.Create(shortsComparer));
+			longs = new(Comparer<AbstractStopOrderEnsurer<TStopOrder, TOrder>>.Create(
+				(first, second) => first.IsSame(second.Order) ? 0 : longsComparer(first, second)));
+			shorts = new(Comparer<AbstractStopOrderEnsurer<TStopOrder, TOrder>>.Create(
+				(first, second) => first.IsSame(second.Order) ? 0 : shortsComparer(first, second)));
 		}
 
 		public void ClosePercentOfLongs(double percent)
@@ -47,11 +49,11 @@ namespace RansacBot.Trading
 		}
 
 		void KillPercentOfStops(
-			SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> stopsDic, 
+			SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> stopsDic,
 			double percent)
 		{
-			IEnumerable<AbstractStopOrderEnsurer<TStopOrder, TOrder>> stops = 
-				stopsDic.Keys.Skip((int)(stopsDic.Count * (100 - percent) / 100));
+			IEnumerable<AbstractStopOrderEnsurer<TStopOrder, TOrder>> stops =
+				stopsDic.Keys.Skip((int)(stopsDic.Count * (100 - percent) / 100)).ToList();
 			foreach (AbstractStopOrderEnsurer<TStopOrder, TOrder> stop in stops)
 			{
 				stop.UpdateOrderFromQuikByTransID();
@@ -61,7 +63,6 @@ namespace RansacBot.Trading
 				}
 			}
 		}
-
 
 		void OnStopOrderEnsuranceStatusChanged(object ensurer) =>
 			OnStopOrderEnsuranceStatusChanged(ensurer as AbstractStopOrderEnsurer<TStopOrder, TOrder> ??
@@ -79,6 +80,7 @@ namespace RansacBot.Trading
 				{
 					AbstractOrderEnsurerWithPrice<TOrder> order = GetOrderEnsurer(ensurer.CompletionAttribute);
 					order.OrderEnsuranceStatusChanged += OnExecutedStopOrderEnsuranceStatusChanged;
+					order.Subscribe();
 					executedStopsUnexecutedOrders.Add(order, GetTradeWithStop(ensurer));
 
 					if (order.IsComplete) OnExecutedStopOrderEnsuranceStatusChanged(order);
@@ -95,11 +97,11 @@ namespace RansacBot.Trading
 			if (ensurer.IsComplete)
 			{
 				ensurer.OrderEnsuranceStatusChanged -= OnExecutedStopOrderEnsuranceStatusChanged;
-				if(ensurer.State == EnsuranceState.Killed)
+				if (ensurer.State == EnsuranceState.Killed)
 				{
 					UnexecutedStopRemoved?.Invoke(GetTradeWithStop(ensurer));
 				}
-				if(ensurer.State == EnsuranceState.Executed)
+				if (ensurer.State == EnsuranceState.Executed)
 				{
 					StopExecuted?.Invoke(GetTradeWithStop(ensurer), ensurer.CompletionAttribute);
 				}
@@ -116,19 +118,51 @@ namespace RansacBot.Trading
 		{
 			GetDict(ensurer).Add(ensurer, tradeWithStop);
 		}
-		TradeWithStop GetTradeWithStop(AbstractStopOrderEnsurer<TStopOrder, TOrder> ensurer) =>
-			GetDict(ensurer)[ensurer];
+		TradeWithStop GetTradeWithStop(AbstractStopOrderEnsurer<TStopOrder, TOrder> ensurer)
+		{
+			try
+			{
+				return GetDict(ensurer)[ensurer];
+			}
+			catch
+			{
+				return GetDict(ensurer).Values.ToList()
+					[GetDict(ensurer).Keys.ToList().FindIndex((ens) => ens == ensurer)];
+			}
+		}
 		TradeWithStop GetTradeWithStop(AbstractOrderEnsurerWithPrice<TOrder> ensurer) =>
 			executedStopsUnexecutedOrders[ensurer];
 
 
-		protected abstract SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop>
-			GetDict(AbstractStopOrderEnsurer<TStopOrder, TOrder> ensurer);
+		private SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop>
+			GetDict(AbstractStopOrderEnsurer<TStopOrder, TOrder> ensurer)
+		{
+			return IsLong(ensurer) ? longs : shorts;
+		}
+		protected abstract bool IsLong(AbstractStopOrderEnsurer<TStopOrder, TOrder> stopEnsurer);
 		protected abstract AbstractStopOrderEnsurer<TStopOrder, TOrder> 
 			BuildStopOrderEnsurer(Trading.TradeWithStop trade);
 		protected abstract AbstractOrderEnsurerWithPrice<TOrder> GetOrderEnsurer(TOrder order);
 
-		public abstract List<string> GetLongs();
-		public abstract List<string> GetShorts();
+		public IEnumerable<string> GetLongs()
+		{
+			return GetStopsStrings(longs);
+		}
+		public IEnumerable<string> GetShorts()
+		{
+			return GetStopsStrings(shorts);
+		}
+		public IEnumerable<string> GetExecuted()
+		{
+			return executedStopsUnexecutedOrders.Keys.Select(GetSerialized);
+		}
+
+		private IEnumerable<string> GetStopsStrings(
+			SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> stops)
+		{
+			return stops.Keys.Select(GetSerialized);
+		}
+		public abstract string GetSerialized(AbstractStopOrderEnsurer<TStopOrder, TOrder> stopOrder);
+		public abstract string GetSerialized(AbstractOrderEnsurerWithPrice<TOrder> ensurer);
 	}
 }

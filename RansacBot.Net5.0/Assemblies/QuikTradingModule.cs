@@ -1,4 +1,6 @@
-﻿using RansacBot.QuikRelated;
+﻿using QuikSharp.DataStructures;
+using QuikSharp.DataStructures.Transaction;
+using RansacBot.QuikRelated;
 using RansacBot.Trading;
 using System;
 using System.Collections.Generic;
@@ -8,78 +10,33 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Assemblies
 {
-	class QuikTradingModule
+	class QuikTradingModule : AbstractTradingModule<Order, StopOrder>
 	{
-		public event Action<TradeWithStop> TradeExecuted;
-		public event Action<TradeWithStop, double> StopExecutedOnPrice;
-		public event Action<TradeWithStop, double> TradeClosedOnPrice;
-		public IStopsContainer StopsContainer { get => stopsOperator; }
-
-		public ITradeWithStopProvider TradeWithStopProvider
-		{
-			set
-			{
-				if(tradeWithStopProvider != null)
-					tradeWithStopProvider.NewTradeWithStop -= checkpoint.OnNewTradeWithStop;
-				tradeWithStopProvider = value;
-				if (tradeWithStopProvider != null)
-					tradeWithStopProvider.NewTradeWithStop += checkpoint.OnNewTradeWithStop;
-			}
-		}
-		public IClosingProvider ClosingProvider
-		{
-			set
-			{
-				if(closingProvider != null)
-				{
-					closingProvider.ClosePercentOfLongs -= stopsOperator.ClosePercentOfLongs;
-					closingProvider.ClosePercentOfShorts -= stopsOperator.ClosePercentOfShorts;
-				}
-				closingProvider = value;
-				if (closingProvider != null)
-				{
-					closingProvider.ClosePercentOfLongs += stopsOperator.ClosePercentOfLongs;
-					closingProvider.ClosePercentOfShorts += stopsOperator.ClosePercentOfShorts;
-				}
-			}
-		}
-
-		ITradeWithStopProvider tradeWithStopProvider;
-		IClosingProvider closingProvider;
-
-		readonly TradeParams tradeParams;
-		OneOrderAtATimeCheckpoint checkpoint;
-		QuikClassicStopsOperator stopsOperator;
-		QuikKilledStopsMarketCompensator compensator;
-
+		TradeParams tradeParams;
 		public QuikTradingModule(TradeParams tradeParams, 
 			ITradeWithStopProvider tradeWithStopProvider, 
 			IClosingProvider closingProvider) :
-			this(tradeParams)
-		{
-			TradeWithStopProvider = tradeWithStopProvider;
-			ClosingProvider = closingProvider;
-		}
-
-		public QuikTradingModule(TradeParams tradeParams)
+			base(tradeWithStopProvider, closingProvider)
 		{
 			this.tradeParams = tradeParams;
-			checkpoint = new(tradeParams);
-			stopsOperator = new(tradeParams);
-			checkpoint.NewTradeWithStop += stopsOperator.OnNewTradeWithStop;
-			compensator = new(tradeParams);
-			stopsOperator.UnexecutedStopRemoved += compensator.OnNewTradeWithStop;
-
-			checkpoint.NewTradeWithStop += InvokeTradeExecuted;
-			stopsOperator.StopExecuted += InvokeTradeStopExecuted;
-			compensator.FullyClosedTradeWithStop += InvokeTradeClosedOnPrice;
 		}
 
-		void InvokeTradeExecuted(TradeWithStop tradeWithStop) =>
-			TradeExecuted?.Invoke(tradeWithStop);
-		void InvokeTradeStopExecuted(TradeWithStop tradeWithStop, double executionPrice) =>
-			StopExecutedOnPrice?.Invoke(tradeWithStop, executionPrice);
-		void InvokeTradeClosedOnPrice(TradeWithStop tradeWithStop, double executionPrice) =>
-			TradeClosedOnPrice?.Invoke(tradeWithStop, executionPrice);
+		public QuikTradingModule(TradeParams tradeParams) : base()
+		{
+			this.tradeParams = tradeParams;
+		}
+
+		protected override AbstractOneAtATimeCheckpoint<Order> GetCheckpoint()
+		{
+			return new QuikOneOrderAtATimeCheckpoint(tradeParams);
+		}
+		protected override AbstractClassicStopsOperator<StopOrder, Order> GetStopsOperator()
+		{
+			return new QuikClassicStopsOperator(tradeParams);
+		}
+		protected override AbstractKilledStopsMarketCompensator<Order> GetCompensator()
+		{
+			return new QuikKilledStopsMarketCompensator(tradeParams);
+		}
 	}
 }

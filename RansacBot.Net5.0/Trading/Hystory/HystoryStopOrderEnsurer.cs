@@ -1,4 +1,5 @@
 ﻿using QuikSharp.DataStructures;
+using RansacBot.Trading.Hystory.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,12 @@ namespace RansacBot.Trading.Hystory
 {
 	class HystoryStopOrderEnsurer : AbstractStopOrderEnsurer<HystoryOrder, HystoryOrder>
 	{
-		IOrderEvents orderEvents;
+		readonly IHystoryOrderEvents orderEvents;
 
-		public HystoryStopOrderEnsurer(HystoryOrder order) : 
+		public HystoryStopOrderEnsurer(HystoryOrder order) :
 			base(order, Infrastructure.HystoryQuikSimulator.Instance.Stops)
 		{
-			throw new NotImplementedException();
+			orderEvents = HystoryQuikSimulator.Instance.Stops;
 		}
 
 		protected override HystoryOrder GetCompletionAttribute()

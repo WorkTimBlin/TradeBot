@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RansacBot.Trading.Hystory
+namespace RansacBot.Trading
 {
 	class FinishedTradesBuilder : ITickFilter
 	{
@@ -36,17 +36,32 @@ namespace RansacBot.Trading.Hystory
 
 	readonly struct FinishedTrade
 	{
-		public readonly Trade trade;
+		public readonly TradeWithStop trade;
 		public readonly double closingPrice;
 		public readonly Tick openingTick;
 		public readonly Tick closingTick;
 
-		public FinishedTrade(Trade trade, double closingPrice, Tick openingTick, Tick closingTick)
+		public FinishedTrade(TradeWithStop trade, double closingPrice, Tick openingTick, Tick closingTick)
 		{
 			this.trade = trade;
 			this.closingPrice = closingPrice;
 			this.openingTick = openingTick;
 			this.closingTick = closingTick;
+		}
+
+		public override string ToString()
+		{
+			return String.Join(';', SplittedString());
+		}
+		public IEnumerable<string> SplittedString()
+		{
+			yield return trade.direction == TradeDirection.buy ? "B" : "S";
+			yield return trade.stop.price.ToString();
+			yield return openingTick.ID.ToString();
+			yield return closingTick.ID.ToString();
+			yield return trade.price.ToString();
+			yield return closingPrice.ToString();
+			yield return "1";
 		}
 	}
 }

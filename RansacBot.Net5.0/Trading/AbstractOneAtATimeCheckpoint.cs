@@ -36,21 +36,33 @@ namespace RansacBot.Trading
 			}
 			else
 			{
-				if (killingAttempt == null)
-				{
-					killingAttempt = Task.Run(() =>
-					{
-						WaitForArrival();
-						if (orderEnsurer.State == EnsuranceState.Active)
-						{
-							orderEnsurer.Kill();
-						}
-						killingAttempt = null;
-					});
-				}
+				PerformKilling();
 			}
 		}
 
+		protected virtual void PerformKilling()
+		{
+			PerformAsyncKillingAttempt();
+		}
+		protected void KillSyncronously()
+		{
+			WaitForArrival();
+			if (orderEnsurer.State == EnsuranceState.Active)
+			{
+				orderEnsurer.Kill();
+			}
+		}
+		protected void PerformAsyncKillingAttempt()
+		{
+			if (killingAttempt == null)
+			{
+				killingAttempt = Task.Run(() =>
+				{
+					KillSyncronously();
+					killingAttempt = null;
+				});
+			}
+		}
 		private void WaitForArrival()
 		{
 			Task ArrivalAwaiter = Task.Run(() =>

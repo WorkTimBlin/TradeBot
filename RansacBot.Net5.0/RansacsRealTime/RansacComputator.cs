@@ -30,7 +30,7 @@ namespace RansacsRealTime
 			maxEvaluations = ticks.Count > 100 ? 100 : ticks.Count;
 			MinSamples = (int)(0.3 * ticks.Count) > 2 ? (int)(0.3 * ticks.Count) : 2;
 
-			//UseAntiRandomMode(ticks.Count);
+			UseAntiRandomMode(ticks.Count);// for anti-randim
 
 			Best = new (int count, LeastSquaresRegression reg)[maxEvaluations];
 
@@ -51,8 +51,8 @@ namespace RansacsRealTime
 				bestReg = Best[Convert.ToInt32(result.LowestBreakIteration.ToString())].reg;
 			}
 
-			//SingleIteration();
-			//bestReg = Best[0].reg;
+			SingleIteration();// for anti-random
+			bestReg = Best[0].reg;// for anti-random
 
 			double slope = bestReg.Slope;
 			double intercept = bestReg.Intercept;

@@ -28,6 +28,11 @@ namespace RansacBot.Trading
 			this.Order = order;
 		}
 
+		public virtual void Subscribe()
+		{
+			UnsubscribeFromOnOrderEvent();
+			SubscribeToOnOrderEvent();
+		}
 		public void SubscribeSelfAndSendOrder()
 		{
 			if(State > EnsuranceState.Sent)
@@ -52,7 +57,9 @@ namespace RansacBot.Trading
 		}
 		public void UpdateOrderFromQuikByTransID()
 		{
-			OnOrderChanged(functions.GetOrder_by_transID(Order).Result);
+			TOrder? order = functions.GetOrder_by_transID(Order).Result;
+			if(order != null)
+				OnOrderChanged(order);
 		}
 
 		protected void OnOrderChanged(TOrder order)
@@ -99,6 +106,7 @@ namespace RansacBot.Trading
 		protected abstract State GetState(TOrder order);
 		protected abstract void SetTransID(long transID);
 		protected abstract bool IsTransIDMatching(TOrder order);
+		public bool IsSame(TOrder order) => IsTransIDMatching(order);
 	}
 
 	class StateException : Exception

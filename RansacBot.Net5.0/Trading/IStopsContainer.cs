@@ -8,7 +8,8 @@ namespace RansacBot.Trading
 {
 	interface IStopsContainer
 	{
-		public List<string> GetLongs();
-		public List<string> GetShorts();
+		public IEnumerable<string> GetLongs();
+		public IEnumerable<string> GetShorts();
+		public IEnumerable<string> GetExecuted();
 	}
 }

@@ -51,8 +51,20 @@ namespace RansacBot.UI
 			}
 
 			var clippingRect = GetClippingRect();
-
-			var screenPoints = Points.Select(this.Transform).ToList();
+			List<ScreenPoint> screenPoints = new();
+			bool gotError = false;
+			do
+			{
+				gotError = false;
+				try
+				{
+					screenPoints = Points.Select(this.Transform).ToList();
+				}
+				catch
+				{
+					gotError = true;
+				}
+			} while (gotError);
 			var verticalLines = new List<ScreenPoint>();
 
 			for (int i = 0; i < screenPoints.Count; i += 2)

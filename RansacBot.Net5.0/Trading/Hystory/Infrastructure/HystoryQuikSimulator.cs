@@ -13,14 +13,14 @@ namespace RansacBot.Trading.Hystory.Infrastructure
 	{
 		public static HystoryQuikSimulator Instance { get; private set; } = new();
 
+		public event Action<Tick> NewTick;
+
 		public OrdersContainer Orders { get; } = new();
 		public StopsContainer Stops { get; } = new();
 		private HystoryQuikSimulator()
 		{
 			Stops.OrderChanged += CreateOrderFromStopIfExecuted;
 		}
-
-		public event Action<Tick> NewTick;
 
 		public void OnNewTick(Tick tick)
 		{
@@ -32,18 +32,16 @@ namespace RansacBot.Trading.Hystory.Infrastructure
 		private void CreateOrderFromStopIfExecuted(HystoryOrder order)
 		{
 			if (order.state != QuikSharp.DataStructures.State.Completed) return;
-			order.completionPrice = 0;
-			order.state = QuikSharp.DataStructures.State.Active;
-			Orders.CreateOrder(order);
+			HystoryOrder newOrder = new(order);
+			newOrder.transID = order.transID;
+			//newOrder.state = QuikSharp.DataStructures.State.Active;
+			Orders.CreateOrder(newOrder);
 		}
-		public long GetNewTransID()
-		{
-			return ++lastTransID;
-		}
+		public long GetNewTransID() => ++lastTransID;
 		private long lastTransID = 0;
 	}
 
-	abstract class AbstractOrdersContainer : IOrderFunctions<HystoryOrder>, IOrderEvents, ITickProcessor
+	abstract class AbstractOrdersContainer : IOrderFunctions<HystoryOrder>, IHystoryOrderEvents, ITickProcessor
 	{
 		public event Action<HystoryOrder> OrderChanged;
 
@@ -73,7 +71,8 @@ namespace RansacBot.Trading.Hystory.Infrastructure
 
 		public Task<long> CreateOrder(HystoryOrder order)
 		{
-			if (order.state != QuikSharp.DataStructures.State.Active) return Task.FromResult(-1L);
+			if (order.state != QuikSharp.DataStructures.State.Active) 
+				return Task.FromResult(-1L);
 			if(order.transID == 0)
 				order.transID = HystoryQuikSimulator.Instance.GetNewTransID();
 			awaitingActivation.Add(order);
@@ -100,6 +99,7 @@ namespace RansacBot.Trading.Hystory.Infrastructure
 		protected void ExecuteOrderAt(int index, double price)
 		{
 			actives[index].completionPrice = price;
+			actives[index].state = QuikSharp.DataStructures.State.Completed;
 			MoveOrderAtIndexToDones(index);
 		}
 		protected void MoveOrderAtIndexToDones(int index)

@@ -17,7 +17,7 @@ namespace RansacBot.QuikRelated
 			this.tradeParams = tradeParams;
 		}
 
-		protected override AbstractOrderEnsurerWithPrice<Order> GetEnsurer(TradeWithStop trade)
+		protected override AbstractOrderEnsurerWithPrice<Order> GetMarketEnsurer(TradeWithStop trade)
 		{
 			return new QuikOrderEnsurer(QuikHelpFunctions.BuildMarketOrder(trade.GetOperation(), tradeParams, 1));
 		}

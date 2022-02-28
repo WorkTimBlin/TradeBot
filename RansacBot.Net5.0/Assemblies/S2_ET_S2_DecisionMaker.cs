@@ -8,7 +8,12 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Assemblies
 {
-	class S2_ET_S2_DecisionMaker : ITickProcessor
+	interface IDecisionProvider : ITickProcessor
+	{
+		public IClosingProvider ClosingProvider { get; }
+		public ITradeWithStopProvider TradeWithStopProvider { get; }
+	}
+	class S2_ET_S2_DecisionMaker : ITickProcessor, IDecisionProvider
 	{
 		public IClosingProvider ClosingProvider { get; private set; }
 		public ITradeWithStopProvider TradeWithStopProvider { get; private set; }
@@ -19,7 +24,7 @@ namespace RansacBot.Assemblies
 		}
 
 		RansacsSession session;
-		public IVertexFinder vertexProvider { get => session.monkeyNFilter; }
+		public IVertexFinder VertexProvider { get => session.monkeyNFilter; }
 		public RansacsCascade SCascade { get; private set; }
 		public RansacsCascade ETCascade { get; private set; }
 		ITradeByVertexDecider decider;

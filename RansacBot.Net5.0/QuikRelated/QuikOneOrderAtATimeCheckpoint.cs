@@ -10,11 +10,11 @@ using QuikSharp.DataStructures;
 
 namespace RansacBot.QuikRelated
 {
-	class OneOrderAtATimeCheckpoint : AbstractOneAtATimeCheckpoint<Order>
+	class QuikOneOrderAtATimeCheckpoint : AbstractOneAtATimeCheckpoint<Order>
 	{
 		readonly TradeParams tradeParams;
 
-		public OneOrderAtATimeCheckpoint (TradeParams tradeParams) : base()
+		public QuikOneOrderAtATimeCheckpoint (TradeParams tradeParams) : base()
 		{
 			this.tradeParams = tradeParams;
 		}

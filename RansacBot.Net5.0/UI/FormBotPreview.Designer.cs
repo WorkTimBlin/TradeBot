@@ -44,6 +44,7 @@ namespace RansacBot
 			this.listBox1 = new System.Windows.Forms.ListBox();
 			this.timer1 = new System.Windows.Forms.Timer(this.components);
 			this.useFilterCheckbox = new System.Windows.Forms.CheckBox();
+			this.showHystoryDemoButton = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_Speed)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.numericUpDown_NSetter)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -125,13 +126,13 @@ namespace RansacBot
 			this.buttonQuickWatch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.buttonQuickWatch.BackColor = System.Drawing.SystemColors.ControlDarkDark;
 			this.buttonQuickWatch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-			this.buttonQuickWatch.Location = new System.Drawing.Point(820, 503);
+			this.buttonQuickWatch.Location = new System.Drawing.Point(820, 494);
 			this.buttonQuickWatch.Name = "buttonQuickWatch";
-			this.buttonQuickWatch.Size = new System.Drawing.Size(93, 23);
+			this.buttonQuickWatch.Size = new System.Drawing.Size(93, 32);
 			this.buttonQuickWatch.TabIndex = 8;
 			this.buttonQuickWatch.Text = "QuickTicks";
 			this.buttonQuickWatch.UseVisualStyleBackColor = false;
-			this.buttonQuickWatch.Click += new System.EventHandler(this.buttonQuickWatch_Click);
+			this.buttonQuickWatch.Click += new System.EventHandler(this.buttonQuikWatch_Click);
 			// 
 			// numericUpDown_NSetter
 			// 
@@ -141,7 +142,7 @@ namespace RansacBot
             0,
             0,
             0});
-			this.numericUpDown_NSetter.Location = new System.Drawing.Point(820, 474);
+			this.numericUpDown_NSetter.Location = new System.Drawing.Point(820, 465);
 			this.numericUpDown_NSetter.Minimum = new decimal(new int[] {
             10,
             0,
@@ -161,7 +162,7 @@ namespace RansacBot
 			// 
 			this.labelNSetter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.labelNSetter.AutoSize = true;
-			this.labelNSetter.Location = new System.Drawing.Point(820, 456);
+			this.labelNSetter.Location = new System.Drawing.Point(820, 447);
 			this.labelNSetter.Name = "labelNSetter";
 			this.labelNSetter.Size = new System.Drawing.Size(19, 15);
 			this.labelNSetter.TabIndex = 10;
@@ -252,12 +253,25 @@ namespace RansacBot
 			this.useFilterCheckbox.AutoSize = true;
 			this.useFilterCheckbox.Checked = true;
 			this.useFilterCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.useFilterCheckbox.Location = new System.Drawing.Point(820, 434);
+			this.useFilterCheckbox.Location = new System.Drawing.Point(820, 425);
 			this.useFilterCheckbox.Name = "useFilterCheckbox";
 			this.useFilterCheckbox.Size = new System.Drawing.Size(95, 19);
 			this.useFilterCheckbox.TabIndex = 15;
 			this.useFilterCheckbox.Text = "Use ET4-filter";
 			this.useFilterCheckbox.UseVisualStyleBackColor = true;
+			// 
+			// showHystoryDemoButton
+			// 
+			this.showHystoryDemoButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.showHystoryDemoButton.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+			this.showHystoryDemoButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+			this.showHystoryDemoButton.Location = new System.Drawing.Point(820, 200);
+			this.showHystoryDemoButton.Name = "showHystoryDemoButton";
+			this.showHystoryDemoButton.Size = new System.Drawing.Size(93, 32);
+			this.showHystoryDemoButton.TabIndex = 8;
+			this.showHystoryDemoButton.Text = "Hystory Ticks";
+			this.showHystoryDemoButton.UseVisualStyleBackColor = false;
+			this.showHystoryDemoButton.Click += new System.EventHandler(this.showHystoryDemoButton_Click);
 			// 
 			// FormBotPreview
 			// 
@@ -272,6 +286,7 @@ namespace RansacBot
 			this.Controls.Add(this.labelSpeed);
 			this.Controls.Add(this.labelNSetter);
 			this.Controls.Add(this.numericUpDown_NSetter);
+			this.Controls.Add(this.showHystoryDemoButton);
 			this.Controls.Add(this.buttonQuickWatch);
 			this.Controls.Add(this.numericUpDown_Speed);
 			this.Controls.Add(this.stop);
@@ -305,5 +320,6 @@ namespace RansacBot
 		private System.Windows.Forms.ListBox listBox1;
 		private System.Windows.Forms.Timer timer1;
 		private System.Windows.Forms.CheckBox useFilterCheckbox;
+		private System.Windows.Forms.Button showHystoryDemoButton;
 	}
 }

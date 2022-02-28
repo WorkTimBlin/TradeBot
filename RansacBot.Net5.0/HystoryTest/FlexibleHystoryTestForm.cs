@@ -32,9 +32,9 @@ namespace RansacBot.HystoryTest
 		{
 			List<RansacLevelUsageControl> usedRansacLevels = new()
 			{
-				stopPlacerRansacLevelUsageControl,
-				higherLowerFilterRansacLevelUsageControl,
-				closingRansacLevelUsageControl
+				//stopPlacerRansacLevelUsageControl,
+				//higherLowerFilterRansacLevelUsageControl,
+				//closingRansacLevelUsageControl
 			};
 			Dictionary<SigmaType, int> levels = new();
 			foreach(RansacLevelUsageControl control in usedRansacLevels)
@@ -76,16 +76,16 @@ namespace RansacBot.HystoryTest
 			InvertedNDecider decider = new();
 			session.ransacs.monkeyNFilter.NewExtremum += decider.OnNewExtremum;
 			
-			HigherLowerFilterOnRansac filter = new(
-				cascades[higherLowerFilterRansacLevelUsageControl.SigmaType],
-				higherLowerFilterRansacLevelUsageControl.Level);
-			decider.NewTrade += filter.OnNewTrade;
-			MaximinStopPlacer stopPlacer = new(
-				cascades[stopPlacerRansacLevelUsageControl.SigmaType],
-				stopPlacerRansacLevelUsageControl.Level);
-			filter.NewTrade += stopPlacer.OnNewTrade;
+			//HigherLowerFilterOnRansac filter = new(
+			//	cascades[higherLowerFilterRansacLevelUsageControl.SigmaType],
+			//	higherLowerFilterRansacLevelUsageControl.Level);
+			//decider.NewTrade += filter.OnNewTrade;
+			//MaximinStopPlacer stopPlacer = new(
+			//	cascades[stopPlacerRansacLevelUsageControl.SigmaType],
+			//	stopPlacerRansacLevelUsageControl.Level);
+			//filter.NewTrade += stopPlacer.OnNewTrade;
 			OneAtATimeHystoryCheckpoint checkpoint = new();
-			stopPlacer.NewTradeWithStop += checkpoint.OnNewTradeWithStop;
+			//stopPlacer.NewTradeWithStop += checkpoint.OnNewTradeWithStop;
 			session.SubscribeToProvider();
 
 
@@ -120,7 +120,7 @@ namespace RansacBot.HystoryTest
 		{
 			protected override AbstractOrderEnsurerWithPrice<HystoryOrder> GetNewOrderEnsurer(Trade trade)
 			{
-				return new OrderOnHystoryEnsurer(new(trade));
+				return new HystoryOrderEnsurer(new(trade));
 			}
 		}
 	}

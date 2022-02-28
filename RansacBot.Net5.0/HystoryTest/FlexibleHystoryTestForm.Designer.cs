@@ -29,6 +29,7 @@ namespace RansacBot.HystoryTest
 		/// </summary>
 		private void InitializeComponent()
 		{
+			System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Node0");
 			this.inputFileDialog = new System.Windows.Forms.OpenFileDialog();
 			this.chooseHystoryFilePathButton = new System.Windows.Forms.Button();
 			this.inputFileLabel = new System.Windows.Forms.Label();
@@ -38,13 +39,14 @@ namespace RansacBot.HystoryTest
 			this.runButton = new System.Windows.Forms.Button();
 			this.outputFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
 			this.progressBar1 = new System.Windows.Forms.ProgressBar();
-			this.hystoryTicksFilePath = new System.Windows.Forms.TextBox();
+			this.treeView1 = new System.Windows.Forms.TreeView();
 			this.SuspendLayout();
 			// 
 			// inputFileDialog
 			// 
 			this.inputFileDialog.FileName = "openFileDialog1";
 			this.inputFileDialog.Filter = "txt files (*.txt)|*.txt|csv files (*.csv)|*.csv";
+			this.inputFileDialog.Multiselect = true;
 			this.inputFileDialog.Title = "Hystory Ticks File";
 			// 
 			// chooseHystoryFilePathButton
@@ -68,7 +70,7 @@ namespace RansacBot.HystoryTest
 			// 
 			// outputDirectoryTextBox
 			// 
-			this.outputDirectoryTextBox.Location = new System.Drawing.Point(116, 41);
+			this.outputDirectoryTextBox.Location = new System.Drawing.Point(116, 159);
 			this.outputDirectoryTextBox.Name = "outputDirectoryTextBox";
 			this.outputDirectoryTextBox.ReadOnly = true;
 			this.outputDirectoryTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
@@ -78,7 +80,7 @@ namespace RansacBot.HystoryTest
 			// outputDirectoryLabel
 			// 
 			this.outputDirectoryLabel.AutoSize = true;
-			this.outputDirectoryLabel.Location = new System.Drawing.Point(12, 44);
+			this.outputDirectoryLabel.Location = new System.Drawing.Point(12, 162);
 			this.outputDirectoryLabel.Name = "outputDirectoryLabel";
 			this.outputDirectoryLabel.Size = new System.Drawing.Size(96, 15);
 			this.outputDirectoryLabel.TabIndex = 2;
@@ -86,7 +88,7 @@ namespace RansacBot.HystoryTest
 			// 
 			// chooseOutputDirectoryButton
 			// 
-			this.chooseOutputDirectoryButton.Location = new System.Drawing.Point(713, 41);
+			this.chooseOutputDirectoryButton.Location = new System.Drawing.Point(713, 158);
 			this.chooseOutputDirectoryButton.Name = "chooseOutputDirectoryButton";
 			this.chooseOutputDirectoryButton.Size = new System.Drawing.Size(75, 23);
 			this.chooseOutputDirectoryButton.TabIndex = 0;
@@ -113,27 +115,29 @@ namespace RansacBot.HystoryTest
 			this.progressBar1.Size = new System.Drawing.Size(747, 23);
 			this.progressBar1.TabIndex = 7;
 			// 
-			// hystoryTicksFilePath
+			// treeView1
 			// 
-			this.hystoryTicksFilePath.Location = new System.Drawing.Point(116, 12);
-			this.hystoryTicksFilePath.Name = "hystoryTicksFilePath";
-			this.hystoryTicksFilePath.ReadOnly = true;
-			this.hystoryTicksFilePath.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
-			this.hystoryTicksFilePath.Size = new System.Drawing.Size(591, 23);
-			this.hystoryTicksFilePath.TabIndex = 1;
-			this.hystoryTicksFilePath.Text = "C:\\Users\\ir2\\Desktop\\1.txt";
+			this.treeView1.Location = new System.Drawing.Point(117, 13);
+			this.treeView1.Name = "treeView1";
+			treeNode1.ForeColor = System.Drawing.Color.Red;
+			treeNode1.Name = "Node0";
+			treeNode1.Text = "Node0";
+			this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
+            treeNode1});
+			this.treeView1.Size = new System.Drawing.Size(121, 97);
+			this.treeView1.TabIndex = 8;
 			// 
 			// FlexibleHystoryRunForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.treeView1);
 			this.Controls.Add(this.progressBar1);
 			this.Controls.Add(this.runButton);
 			this.Controls.Add(this.outputDirectoryLabel);
 			this.Controls.Add(this.inputFileLabel);
 			this.Controls.Add(this.outputDirectoryTextBox);
-			this.Controls.Add(this.hystoryTicksFilePath);
 			this.Controls.Add(this.chooseOutputDirectoryButton);
 			this.Controls.Add(this.chooseHystoryFilePathButton);
 			this.Name = "FlexibleHystoryRunForm";
@@ -154,6 +158,6 @@ namespace RansacBot.HystoryTest
 		private System.Windows.Forms.Button runButton;
 		private System.Windows.Forms.FolderBrowserDialog outputFolderBrowserDialog;
 		private System.Windows.Forms.ProgressBar progressBar1;
-		private System.Windows.Forms.TextBox hystoryTicksFilePath;
+		private System.Windows.Forms.TreeView treeView1;
 	}
 }

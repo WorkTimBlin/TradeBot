@@ -25,7 +25,8 @@ namespace RansacBot.HystoryTest
 		private void chooseHystoryFilePathButton_Click(object sender, EventArgs e)
 		{
 			inputFileDialog.ShowDialog();
-			hystoryTicksFilePath.Text = inputFileDialog.InitialDirectory + inputFileDialog.FileName;
+			//hystoryTicksFilePath.Text = inputFileDialog.FileName;
+			
 		}
 
 		private Dictionary<SigmaType, int> GetEnoughRansacsCascades()
@@ -64,8 +65,8 @@ namespace RansacBot.HystoryTest
 		{
 			Tick lastTick = new();
 
-			FileFeeder fileFeeder = new(hystoryTicksFilePath.Text);
-			fileFeeder.Subscribe(new("", ""), (Tick tick) => { lastTick = tick; });
+			//FileFeeder fileFeeder = new(hystoryTicksFilePath.Text);
+			//fileFeeder.Subscribe(new("", ""), (Tick tick) => { lastTick = tick; });
 			ThroughProvider<Tick> provider = new();
 			ObservingSession session = new(new Param("", ""), provider, 100);
 			Dictionary<SigmaType, RansacsCascade> cascades = new();

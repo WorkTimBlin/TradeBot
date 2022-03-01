@@ -28,7 +28,7 @@ namespace BotTests
 		//[TestMethod]
 		public void TestCheckpointExecuted()
 		{
-			TradeWithStop? trade = null;
+			TradeWithStop trade = null;
 			StopStorageClassic stopStorage = new(tradeParamsDemo);
 			QuikOneOrderAtATimeCheckpoint checkpoint = new(tradeParamsDemo);
 			checkpoint.NewTradeWithStop += (tradeW) => 
@@ -43,7 +43,7 @@ namespace BotTests
 		public void TestCheckpointKill()
 		{
 			TradeParams tradeParams = tradeParamsDemo;
-			TradeWithStop? trade = null;
+			TradeWithStop trade = null;
 			StopStorageClassic stopStorage = new(tradeParams);
 			QuikOneOrderAtATimeCheckpoint checkpoint = new(tradeParams);
 			checkpoint.NewTradeWithStop += (tradeW) => { trade = tradeW; };
@@ -76,7 +76,7 @@ namespace BotTests
 			TradeWithStop sentTradeToComplete = new(new(1000, TradeDirection.buy), 0);
 			TradeWithStop sentTradeToKill = new(new(100, TradeDirection.buy), 0);
 			stopsOperator.OnNewTradeWithStop(sentTradeToComplete);
-			TradeWithStop? recievedStop = null;
+			TradeWithStop recievedStop = null;
 
 			stopsOperator.StopExecuted += (tradeWithStop, price) =>
 			{
@@ -223,7 +223,7 @@ namespace BotTests
 
 			public Task<long> CreateOrder(TTrade order)
 			{
-				return Task.FromResult(1l);
+				return Task.FromResult(1L);
 			}
 
 			public Task<TTrade> GetOrder_by_transID(TTrade order)

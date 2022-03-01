@@ -20,7 +20,7 @@ namespace RansacBot.UI.Components
 		}
 		public SigmaType SigmaType 
 		{ 
-			get => Enum.Parse<SigmaType>(sigmaTypeComboBox.SelectedItem.ToString()); 
+			get => Enum.Parse<SigmaType>(sigmaTypeComboBox.SelectedItem.ToString() ?? throw new Exception()); 
 			set { sigmaTypeComboBox.SelectedItem = value.ToString(); }
 		}
 		public int Level 

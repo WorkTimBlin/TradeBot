@@ -197,7 +197,7 @@ namespace RansacBot
 			//listBox1.Items.Add(quik.Trading.GetParamEx("SPBFUT", "RIH2", ParamNames.HIGH).Result.ParamValue.ToString());
 			//listBox1.Items.Add(quik.StopOrders.GetStopOrders().Result[^1].TransId);
 
-			void OnStopClick(object sender, EventArgs e)
+			void OnStopClick(object? sender, EventArgs e)
 			{
 				this.stop.Click -= OnStopClick;
 				stopStorage.ClosePercentOfLongs(100);

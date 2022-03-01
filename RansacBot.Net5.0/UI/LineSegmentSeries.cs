@@ -115,7 +115,7 @@ namespace RansacBot.UI
 		/// <returns>
 		/// A TrackerHitResult for the current hit.
 		/// </returns>
-		public override TrackerHitResult GetNearestPoint(ScreenPoint point, bool interpolate)
+		public override TrackerHitResult? GetNearestPoint(ScreenPoint point, bool interpolate)
 		{
 			var points = this.Points;
 

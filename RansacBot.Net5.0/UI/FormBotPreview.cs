@@ -143,7 +143,7 @@ namespace RansacBot
 			Task.Run(() =>
 			{
 				foreach (Tick tick in
-					new TicksFromFiles(@"C:\Users\ir2\Desktop\1.txt"))
+					new TicksFromFiles(@"C:\Users\ir2\Desktop\1.txt", TicksParser.FinamStandart))
 				{
 					finishedTradesBuilder.OnNewTick(tick);
 				}

@@ -13,6 +13,11 @@ namespace RansacBot.UI.Components
 {
 	public partial class RansacLevelUsageControl : UserControl
 	{
+		public string LabelText
+		{
+			get => nameLabel.Text;
+			set => nameLabel.Text = value;
+		}
 		public SigmaType SigmaType 
 		{ 
 			get => Enum.Parse<SigmaType>(sigmaTypeComboBox.SelectedItem.ToString()); 

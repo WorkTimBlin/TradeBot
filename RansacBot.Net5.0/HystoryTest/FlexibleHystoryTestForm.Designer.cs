@@ -1,7 +1,7 @@
 ﻿
 namespace RansacBot.HystoryTest
 {
-	partial class FlexibleHystoryRunForm
+	partial class FlexibleHystoryTestForm
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -29,7 +29,6 @@ namespace RansacBot.HystoryTest
 		/// </summary>
 		private void InitializeComponent()
 		{
-			System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode("Node0");
 			this.inputFileDialog = new System.Windows.Forms.OpenFileDialog();
 			this.chooseHystoryFilePathButton = new System.Windows.Forms.Button();
 			this.inputFileLabel = new System.Windows.Forms.Label();
@@ -39,7 +38,11 @@ namespace RansacBot.HystoryTest
 			this.runButton = new System.Windows.Forms.Button();
 			this.outputFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
 			this.progressBar1 = new System.Windows.Forms.ProgressBar();
-			this.treeView1 = new System.Windows.Forms.TreeView();
+			this.inputFilesTreeView = new System.Windows.Forms.TreeView();
+			this.clearInputFilesButton = new System.Windows.Forms.Button();
+			this.allFileProcessing = new System.ComponentModel.BackgroundWorker();
+			this.useFilterCheckbox = new System.Windows.Forms.CheckBox();
+			this.statusRichTextBox = new System.Windows.Forms.RichTextBox();
 			this.SuspendLayout();
 			// 
 			// inputFileDialog
@@ -51,11 +54,11 @@ namespace RansacBot.HystoryTest
 			// 
 			// chooseHystoryFilePathButton
 			// 
-			this.chooseHystoryFilePathButton.Location = new System.Drawing.Point(713, 12);
+			this.chooseHystoryFilePathButton.Location = new System.Drawing.Point(475, 15);
 			this.chooseHystoryFilePathButton.Name = "chooseHystoryFilePathButton";
 			this.chooseHystoryFilePathButton.Size = new System.Drawing.Size(75, 23);
 			this.chooseHystoryFilePathButton.TabIndex = 0;
-			this.chooseHystoryFilePathButton.Text = "Find...";
+			this.chooseHystoryFilePathButton.Text = "Add...";
 			this.chooseHystoryFilePathButton.UseVisualStyleBackColor = true;
 			this.chooseHystoryFilePathButton.Click += new System.EventHandler(this.chooseHystoryFilePathButton_Click);
 			// 
@@ -70,7 +73,7 @@ namespace RansacBot.HystoryTest
 			// 
 			// outputDirectoryTextBox
 			// 
-			this.outputDirectoryTextBox.Location = new System.Drawing.Point(116, 159);
+			this.outputDirectoryTextBox.Location = new System.Drawing.Point(117, 118);
 			this.outputDirectoryTextBox.Name = "outputDirectoryTextBox";
 			this.outputDirectoryTextBox.ReadOnly = true;
 			this.outputDirectoryTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Horizontal;
@@ -80,7 +83,7 @@ namespace RansacBot.HystoryTest
 			// outputDirectoryLabel
 			// 
 			this.outputDirectoryLabel.AutoSize = true;
-			this.outputDirectoryLabel.Location = new System.Drawing.Point(12, 162);
+			this.outputDirectoryLabel.Location = new System.Drawing.Point(12, 121);
 			this.outputDirectoryLabel.Name = "outputDirectoryLabel";
 			this.outputDirectoryLabel.Size = new System.Drawing.Size(96, 15);
 			this.outputDirectoryLabel.TabIndex = 2;
@@ -88,7 +91,7 @@ namespace RansacBot.HystoryTest
 			// 
 			// chooseOutputDirectoryButton
 			// 
-			this.chooseOutputDirectoryButton.Location = new System.Drawing.Point(713, 158);
+			this.chooseOutputDirectoryButton.Location = new System.Drawing.Point(714, 118);
 			this.chooseOutputDirectoryButton.Name = "chooseOutputDirectoryButton";
 			this.chooseOutputDirectoryButton.Size = new System.Drawing.Size(75, 23);
 			this.chooseOutputDirectoryButton.TabIndex = 0;
@@ -98,8 +101,9 @@ namespace RansacBot.HystoryTest
 			// 
 			// runButton
 			// 
+			this.runButton.Enabled = false;
 			this.runButton.Font = new System.Drawing.Font("Segoe UI", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-			this.runButton.Location = new System.Drawing.Point(41, 335);
+			this.runButton.Location = new System.Drawing.Point(12, 332);
 			this.runButton.Name = "runButton";
 			this.runButton.Size = new System.Drawing.Size(136, 67);
 			this.runButton.TabIndex = 6;
@@ -109,38 +113,65 @@ namespace RansacBot.HystoryTest
 			// 
 			// progressBar1
 			// 
-			this.progressBar1.Location = new System.Drawing.Point(41, 415);
-			this.progressBar1.Maximum = 2153;
+			this.progressBar1.Location = new System.Drawing.Point(12, 415);
+			this.progressBar1.Maximum = 1000;
 			this.progressBar1.Name = "progressBar1";
-			this.progressBar1.Size = new System.Drawing.Size(747, 23);
+			this.progressBar1.Size = new System.Drawing.Size(776, 23);
 			this.progressBar1.TabIndex = 7;
 			// 
-			// treeView1
+			// inputFilesTreeView
 			// 
-			this.treeView1.Location = new System.Drawing.Point(117, 13);
-			this.treeView1.Name = "treeView1";
-			treeNode1.ForeColor = System.Drawing.Color.Red;
-			treeNode1.Name = "Node0";
-			treeNode1.Text = "Node0";
-			this.treeView1.Nodes.AddRange(new System.Windows.Forms.TreeNode[] {
-            treeNode1});
-			this.treeView1.Size = new System.Drawing.Size(121, 97);
-			this.treeView1.TabIndex = 8;
+			this.inputFilesTreeView.Cursor = System.Windows.Forms.Cursors.Default;
+			this.inputFilesTreeView.Location = new System.Drawing.Point(117, 15);
+			this.inputFilesTreeView.Name = "inputFilesTreeView";
+			this.inputFilesTreeView.Size = new System.Drawing.Size(352, 97);
+			this.inputFilesTreeView.TabIndex = 8;
 			// 
-			// FlexibleHystoryRunForm
+			// clearInputFilesButton
+			// 
+			this.clearInputFilesButton.Location = new System.Drawing.Point(475, 44);
+			this.clearInputFilesButton.Name = "clearInputFilesButton";
+			this.clearInputFilesButton.Size = new System.Drawing.Size(75, 23);
+			this.clearInputFilesButton.TabIndex = 0;
+			this.clearInputFilesButton.Text = "Clear";
+			this.clearInputFilesButton.UseVisualStyleBackColor = true;
+			this.clearInputFilesButton.Click += new System.EventHandler(this.clearInputFilesButton_Click);
+			// 
+			// useFilterCheckbox
+			// 
+			this.useFilterCheckbox.AutoSize = true;
+			this.useFilterCheckbox.Location = new System.Drawing.Point(13, 307);
+			this.useFilterCheckbox.Name = "useFilterCheckbox";
+			this.useFilterCheckbox.Size = new System.Drawing.Size(164, 19);
+			this.useFilterCheckbox.TabIndex = 9;
+			this.useFilterCheckbox.Text = "Use ET4 higher-lower filter";
+			this.useFilterCheckbox.UseVisualStyleBackColor = true;
+			// 
+			// statusRichTextBox
+			// 
+			this.statusRichTextBox.Location = new System.Drawing.Point(154, 332);
+			this.statusRichTextBox.Name = "statusRichTextBox";
+			this.statusRichTextBox.Size = new System.Drawing.Size(315, 67);
+			this.statusRichTextBox.TabIndex = 10;
+			this.statusRichTextBox.Text = "";
+			// 
+			// FlexibleHystoryTestForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
-			this.Controls.Add(this.treeView1);
+			this.Controls.Add(this.statusRichTextBox);
+			this.Controls.Add(this.useFilterCheckbox);
+			this.Controls.Add(this.inputFilesTreeView);
 			this.Controls.Add(this.progressBar1);
 			this.Controls.Add(this.runButton);
 			this.Controls.Add(this.outputDirectoryLabel);
 			this.Controls.Add(this.inputFileLabel);
 			this.Controls.Add(this.outputDirectoryTextBox);
 			this.Controls.Add(this.chooseOutputDirectoryButton);
+			this.Controls.Add(this.clearInputFilesButton);
 			this.Controls.Add(this.chooseHystoryFilePathButton);
-			this.Name = "FlexibleHystoryRunForm";
+			this.Name = "FlexibleHystoryTestForm";
 			this.Text = "FlexibleHystoryTest";
 			this.ResumeLayout(false);
 			this.PerformLayout();
@@ -158,6 +189,10 @@ namespace RansacBot.HystoryTest
 		private System.Windows.Forms.Button runButton;
 		private System.Windows.Forms.FolderBrowserDialog outputFolderBrowserDialog;
 		private System.Windows.Forms.ProgressBar progressBar1;
-		private System.Windows.Forms.TreeView treeView1;
+		private System.Windows.Forms.TreeView inputFilesTreeView;
+		private System.Windows.Forms.Button clearInputFilesButton;
+		private System.ComponentModel.BackgroundWorker allFileProcessing;
+		private System.Windows.Forms.CheckBox useFilterCheckbox;
+		private System.Windows.Forms.RichTextBox statusRichTextBox;
 	}
 }

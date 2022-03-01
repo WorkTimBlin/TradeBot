@@ -13,7 +13,7 @@ namespace RansacBot.HystoryTest
 {
 	class FileFeeder : TicksFeeder
 	{
-		public FileFeeder(string path) : base(new TicksFromFiles(path)) { }
+		public FileFeeder(string path) : base(new TicksFromFiles(path, TicksParser.FinamStandart)) { }
 	}
 
 	class TicksFeeder : IProviderByParam<Tick>
@@ -31,6 +31,20 @@ namespace RansacBot.HystoryTest
 				NewTick.Invoke(tick);
 			}
 		}
+		public void FeedAllStandartWithperiodicalInvoking(int period, Action action)
+		{
+			int count = 0;
+			foreach (Tick tick in ticks)
+			{
+				NewTick.Invoke(tick);
+				if(count >= period)
+				{
+					count = 0;
+					action?.Invoke();
+				}
+				count++;
+			}
+		}
 		public void Subscribe(Param instrument, Action<Tick> handler)
 		{
 			NewTick += handler;
@@ -43,9 +57,10 @@ namespace RansacBot.HystoryTest
 
 	class TicksFromFiles : TicksLazySequentialParser
 	{
-		public TicksFromFiles(string path) : base(new StreamReader(path).GetStrings()) { }
-		public TicksFromFiles(IEnumerable<string> paths) :
-			base(GetStreamReaders(paths).Select(StringsFromStream.GetStringsFromStream).Concat())
+		public TicksFromFiles(string path, ITicksParser ticksParser) : 
+			base(new StreamReader(path).GetStrings(), ticksParser) { }
+		public TicksFromFiles(IEnumerable<string> paths, ITicksParser ticksParser) :
+			base(GetStreamReaders(paths).Select(StringsFromStream.GetStringsFromStream).Concat(), ticksParser)
 		{ }
 		static IEnumerable<StreamReader> GetStreamReaders(IEnumerable<string> paths)
 		{

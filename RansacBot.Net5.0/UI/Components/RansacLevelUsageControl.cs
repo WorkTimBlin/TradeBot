@@ -31,8 +31,8 @@ namespace RansacBot.UI.Components
 		public RansacLevelUsageControl()
 		{
 			InitializeComponent();
-			sigmaTypeComboBox.Items.AddRange(Enum.GetNames<SigmaType>());
-			sigmaTypeComboBox.SelectedIndex = 0;
+			//sigmaTypeComboBox.Items.AddRange(Enum.GetNames<SigmaType>());
+			//sigmaTypeComboBox.SelectedIndex = 0;
 		}
 	}
 }

@@ -43,6 +43,7 @@ namespace RansacBot.HystoryTest
 			this.allFileProcessing = new System.ComponentModel.BackgroundWorker();
 			this.useFilterCheckbox = new System.Windows.Forms.CheckBox();
 			this.statusRichTextBox = new System.Windows.Forms.RichTextBox();
+			this.ransacLevelUsageControl1 = new RansacBot.UI.Components.RansacLevelUsageControl();
 			this.SuspendLayout();
 			// 
 			// inputFileDialog
@@ -155,11 +156,22 @@ namespace RansacBot.HystoryTest
 			this.statusRichTextBox.TabIndex = 10;
 			this.statusRichTextBox.Text = "";
 			// 
+			// ransacLevelUsageControl1
+			// 
+			this.ransacLevelUsageControl1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.ransacLevelUsageControl1.LabelText = "Ransac";
+			this.ransacLevelUsageControl1.Level = 2;
+			this.ransacLevelUsageControl1.Location = new System.Drawing.Point(12, 147);
+			this.ransacLevelUsageControl1.Name = "ransacLevelUsageControl1";
+			this.ransacLevelUsageControl1.Size = new System.Drawing.Size(289, 42);
+			this.ransacLevelUsageControl1.TabIndex = 11;
+			// 
 			// FlexibleHystoryTestForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.ransacLevelUsageControl1);
 			this.Controls.Add(this.statusRichTextBox);
 			this.Controls.Add(this.useFilterCheckbox);
 			this.Controls.Add(this.inputFilesTreeView);
@@ -194,5 +206,6 @@ namespace RansacBot.HystoryTest
 		private System.ComponentModel.BackgroundWorker allFileProcessing;
 		private System.Windows.Forms.CheckBox useFilterCheckbox;
 		private System.Windows.Forms.RichTextBox statusRichTextBox;
+		private UI.Components.RansacLevelUsageControl ransacLevelUsageControl1;
 	}
 }

@@ -1,4 +1,5 @@
-﻿
+﻿using RansacsRealTime;
+
 namespace RansacBot.UI.Components
 {
 	partial class RansacLevelUsageControl
@@ -40,7 +41,7 @@ namespace RansacBot.UI.Components
 			// sigmaTypeLabel
 			// 
 			this.sigmaTypeLabel.AutoSize = true;
-			this.sigmaTypeLabel.Location = new System.Drawing.Point(3, 19);
+			this.sigmaTypeLabel.Location = new System.Drawing.Point(4, 19);
 			this.sigmaTypeLabel.Name = "sigmaTypeLabel";
 			this.sigmaTypeLabel.Size = new System.Drawing.Size(67, 15);
 			this.sigmaTypeLabel.TabIndex = 0;
@@ -50,7 +51,7 @@ namespace RansacBot.UI.Components
 			// 
 			this.sigmaTypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.sigmaTypeComboBox.FormattingEnabled = true;
-			this.sigmaTypeComboBox.Location = new System.Drawing.Point(76, 16);
+			this.sigmaTypeComboBox.Location = new System.Drawing.Point(76, 15);
 			this.sigmaTypeComboBox.Name = "sigmaTypeComboBox";
 			this.sigmaTypeComboBox.Size = new System.Drawing.Size(130, 23);
 			this.sigmaTypeComboBox.TabIndex = 1;
@@ -105,10 +106,8 @@ namespace RansacBot.UI.Components
 			this.Controls.Add(this.sigmaTypeComboBox);
 			this.Controls.Add(this.levelLabel);
 			this.Controls.Add(this.sigmaTypeLabel);
-			this.MaximumSize = new System.Drawing.Size(292, 42);
-			this.MinimumSize = new System.Drawing.Size(292, 42);
 			this.Name = "RansacLevelUsageControl";
-			this.Size = new System.Drawing.Size(290, 40);
+			this.Size = new System.Drawing.Size(289, 42);
 			((System.ComponentModel.ISupportInitialize)(this.levelNumericUpDown)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();

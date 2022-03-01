@@ -2,7 +2,6 @@
 using RansacBot.Trading;
 using RansacBot.Trading.Hystory;
 using RansacBot.Trading.Hystory.Infrastructure;
-using RansacBot.UI.Components;
 using RansacsRealTime;
 using System;
 using System.Collections.Generic;
@@ -61,36 +60,36 @@ namespace RansacBot.HystoryTest
 		}
 
 
-		private Dictionary<SigmaType, int> GetEnoughRansacsCascades()
-		{
-			List<RansacLevelUsageControl> usedRansacLevels = new()
-			{
-				//stopPlacerRansacLevelUsageControl,
-				//higherLowerFilterRansacLevelUsageControl,
-				//closingRansacLevelUsageControl
-			};
-			return GetEnoughRansacsCascades(usedRansacLevels);
-		}
-		private Dictionary<SigmaType, int> GetEnoughRansacsCascades(
-			List<RansacLevelUsageControl> usedRansacLevels)
-		{
-			Dictionary<SigmaType, int> levels = new();
-			foreach(RansacLevelUsageControl control in usedRansacLevels)
-			{
-				if (levels.ContainsKey(control.SigmaType))
-				{
-					if(control.Level > levels[control.SigmaType])
-					{
-						levels[control.SigmaType] = control.Level;
-					}
-				}
-				else
-				{
-					levels.Add(control.SigmaType, control.Level);
-				}
-			}
-			return levels;
-		}
+		//private Dictionary<SigmaType, int> GetEnoughRansacsCascades()
+		//{
+		//	List<RansacLevelUsageControl> usedRansacLevels = new()
+		//	{
+		//		//stopPlacerRansacLevelUsageControl,
+		//		//higherLowerFilterRansacLevelUsageControl,
+		//		//closingRansacLevelUsageControl
+		//	};
+		//	return GetEnoughRansacsCascades(usedRansacLevels);
+		//}
+		//private Dictionary<SigmaType, int> GetEnoughRansacsCascades(
+		//	List<RansacLevelUsageControl> usedRansacLevels)
+		//{
+		//	Dictionary<SigmaType, int> levels = new();
+		//	foreach(RansacLevelUsageControl control in usedRansacLevels)
+		//	{
+		//		if (levels.ContainsKey(control.SigmaType))
+		//		{
+		//			if(control.Level > levels[control.SigmaType])
+		//			{
+		//				levels[control.SigmaType] = control.Level;
+		//			}
+		//		}
+		//		else
+		//		{
+		//			levels.Add(control.SigmaType, control.Level);
+		//		}
+		//	}
+		//	return levels;
+		//}
 
 
 		private void runButton_Click(object sender, EventArgs e)

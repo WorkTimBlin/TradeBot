@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections;
-
+using RansacBot.Ground;
 
 namespace RansacsRealTime
 {
@@ -24,14 +24,19 @@ namespace RansacsRealTime
 
 	public interface ITickFilter : ITickProvider, ITickProcessor { }
 
-	public interface ITickProvider
+	public interface ITickProvider : IItemProvider<Tick>
 	{
 		public event Action<Tick> NewTick;
+		event Action<Tick> IItemProvider<Tick>.NewItem 
+		{ add => NewTick += value; remove => NewTick -= value; }
+		void IItemProvider<Tick>.Subscribe(Action<Tick> action) => NewTick += action;
+		void IItemProvider<Tick>.Unsubscribe(Action<Tick> action) => NewTick -= action;
 	}
 
-	public interface ITickProcessor
+	public interface ITickProcessor : IItemProcessor<Tick>
 	{
 		void OnNewTick(Tick tick);
+		Action<Tick> IItemProcessor<Tick>.Processor { get => OnNewTick; }
 	}
 
 	public interface IExtremumFilter

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RansacBot.Ground;
 using RansacsRealTime;
 
 namespace RansacBot.Trading
@@ -14,16 +15,27 @@ namespace RansacBot.Trading
 		void OnNewVertex(Tick tick, VertexType vertexType);
 		public event TradeHandler NewTrade;
 	}
-	public interface ITradeFilter
+	public interface ITradeFilter : IItemFilter<Trade>
 	{
 		void OnNewTrade(Trade trade);
-		public event TradeHandler NewTrade;
+		public event Action<Trade> NewTrade;
+		event Action<Trade> IItemProvider<Trade>.NewItem { add => NewTrade += value; remove => NewTrade -= value; }
+		Action<Trade> IItemProcessor<Trade>.Processor { get => OnNewTrade; }
+		void IItemProvider<Trade>.Subscribe(Action<Trade> action)
+		{
+			NewTrade += action;
+		}
+		void IItemProvider<Trade>.Unsubscribe(Action<Trade> action)
+		{
+			NewTrade -= action;
+		}
 	}
 
 	public interface ITradeWithStopFilter : ITradeWithStopProvider, ITradeWithStopProcessor { }
-	public interface ITradeWithStopProcessor
+	public interface ITradeWithStopProcessor : IItemProcessor<TradeWithStop>
 	{
 		public void OnNewTradeWithStop(TradeWithStop trade);
+		Action<TradeWithStop> IItemProcessor<TradeWithStop>.Processor { get => this.OnNewTradeWithStop; }
 	}
 	public interface ITradeWithStopProvider
 	{

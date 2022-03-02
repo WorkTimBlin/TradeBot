@@ -163,6 +163,7 @@ namespace RansacBot.HystoryTest
 			this.ransacLevelUsageControl1.Level = 2;
 			this.ransacLevelUsageControl1.Location = new System.Drawing.Point(12, 147);
 			this.ransacLevelUsageControl1.Name = "ransacLevelUsageControl1";
+			this.ransacLevelUsageControl1.SigmaType = RansacsRealTime.SigmaType.ErrorThreshold;
 			this.ransacLevelUsageControl1.Size = new System.Drawing.Size(289, 42);
 			this.ransacLevelUsageControl1.TabIndex = 11;
 			// 

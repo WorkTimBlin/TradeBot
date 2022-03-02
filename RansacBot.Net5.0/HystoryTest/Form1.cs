@@ -218,7 +218,9 @@ namespace RansacBot.HystoryTest
 			int count = 0;
 			while (!streamReader.EndOfStream)
 			{
-				readedTick = streamReader.ReadLine().Split(';', StringSplitOptions.RemoveEmptyEntries);
+				readedTick = 
+					(streamReader.ReadLine() ?? throw new Exception("Cant read tick!"))
+					.Split(';', StringSplitOptions.RemoveEmptyEntries);
 				dateTime = new DateTime(
 					Convert.ToInt32(readedTick[0].Substring(0, 4)),
 					Convert.ToInt32(readedTick[0].Substring(4, 2)),
@@ -227,7 +229,10 @@ namespace RansacBot.HystoryTest
 					Convert.ToInt32(readedTick[1].Substring(2, 2)),
 					Convert.ToInt32(readedTick[1].Substring(4, 2))
 					).Ticks.ToString();
-				streamWriter.WriteLine(readedTick[4] + ',' + dateTime.ToString().Substring(0, dateTime.Length - 7) + ',' + ((int)Convert.ToDecimal(readedTick[2].Substring(0, readedTick[2].IndexOf('.')))).ToString());
+				streamWriter.WriteLine(
+					readedTick[4] + ',' + 
+					dateTime.ToString().Substring(0, dateTime.Length - 7) + ',' + 
+					((int)Convert.ToDecimal(readedTick[2].Substring(0, readedTick[2].IndexOf('.')))).ToString());
 				if (count == 10000)
 				{
 					count = 0;

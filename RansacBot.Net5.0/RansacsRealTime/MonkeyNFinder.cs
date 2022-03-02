@@ -45,17 +45,18 @@ namespace RansacsRealTime
 		LoadStandart(string path, string name = stdFileName)
 		{
 			using StreamReader reader = new(path + @"/" + name);
-			double n = Convert.ToDouble(reader.ReadLine().Split(';')[1]);
-			int count = Convert.ToInt32(reader.ReadLine().Split(';')[1]);
-			string line = reader.ReadLine();
+			Exception exception = new("error during loading");
+			double n = Convert.ToDouble((reader.ReadLine() ?? throw exception).Split(';')[1]);
+			int count = Convert.ToInt32((reader.ReadLine() ?? throw exception).Split(';')[1]);
+			string line = (reader.ReadLine() ?? throw exception);
 			Tick max = Tick.StandartParse(line.Substring(line.IndexOf(';')));
-			line = reader.ReadLine();
+			line = (reader.ReadLine() ?? throw exception);
 			Tick min = Tick.StandartParse(line.Substring(line.IndexOf(';')));
-			line = reader.ReadLine();
+			line = (reader.ReadLine() ?? throw exception);
 			Tick last = Tick.StandartParse(line.Substring(line.IndexOf(';')));
-			line = reader.ReadLine();
+			line = (reader.ReadLine() ?? throw exception);
 			Tick lastReturned = Tick.StandartParse(line.Substring(line.IndexOf(';') + 1));
-			line = reader.ReadLine();
+			line = (reader.ReadLine() ?? throw exception);
 			TickHandler onNewTickChooser = GetOnNewTickChooserFromString(line.Substring(line.IndexOf(';') + 1));
 			return (n, count, max, min, last, lastReturned, onNewTickChooser);
 		}

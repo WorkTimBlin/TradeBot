@@ -94,44 +94,53 @@ namespace RansacBot.HystoryTest
 
 		private void runButton_Click(object sender, EventArgs e)
 		{
+			this.Invoke((Action)(() => runButton.Enabled = false));
 			Task.Run(() =>
 			{
-				this.Invoke((Action)(() => runButton.Enabled = false));
 				foreach (var dataset in datasets)
 				{
 					ProcessDataset(dataset);
 				}
-				this.Invoke((Action)(() => runButton.Enabled = true));
-			});
+			}).ContinueWith((task) => this.Invoke((Action)(() => runButton.Enabled = true)));
 		}
 
 		private void ProcessDataset(Dataset dataset)
 		{
 			this.Invoke(GetChangingStatusTo("Processing dataset " + dataset.DirName));
 			IEnumerable<string> unparsedTicks = dataset.FilesWithoutHeaders.Concat();
-			HystoryFromFileProcessor processor = GetProcessor(unparsedTicks);
+			FinishedTradesFromUnparsedTicks processor = GetNewProcessor(unparsedTicks);
 			GetProcessorReady(processor);
-			using StreamWriter writer = new(outputDirectoryTextBox.Text + '\\' + dataset.DirName + ".csv");
-			Process(processor, writer.WriteLine);
+			string outputFileName = outputDirectoryTextBox.Text + '\\' + dataset.DirName + ".csv";
+			processor.ProgressChanged += UpdateProgressBarFromProcessor;
+			using (StreamWriter writer = new(outputFileName))
+			{
+				this.Invoke(GetChangingStatusTo("Building Trades..."));
+				foreach(string trade in Process(processor))
+				{
+					writer.WriteLine(trade);
+				}
+				this.Invoke(GetChangingStatusTo("Trades builded!"));
+			}
+			processor.ProgressChanged -= UpdateProgressBarFromProcessor;
 		}
 
-		private HystoryFromFileProcessor GetProcessor(IEnumerable<string> unparsedTicks)
+		private FinishedTradesFromUnparsedTicks GetNewProcessor(IEnumerable<string> unparsedTicks)
 		{
 			return new(useFilterCheckbox.Checked, unparsedTicks, TicksParser.DamirStandart);
 		}
-		private void GetProcessorReady(HystoryFromFileProcessor processor)
+		private void GetProcessorReady(FinishedTradesFromUnparsedTicks processor)
 		{
 			this.Invoke(GetChangingStatusTo("Counting all ticks..."));
 			processor.GetReady();
 			this.Invoke(GetChangingStatusTo("Ticks counted"));
 		}
-		private void Process(HystoryFromFileProcessor processor, Action<string> output)
+		private IEnumerable<string> Process(FinishedTradesFromUnparsedTicks processor)
 		{
-			this.Invoke(GetChangingStatusTo("Building Trades..."));
-			processor.ProgressChanged +=
-			(processor) => this.Invoke(GetChangingProgress((int)processor.ProgressPromille));
-			processor.ProcessFiles(output);
-			this.Invoke(GetChangingStatusTo("Trades builded!"));
+			return processor.GetAllFinishedTrades().Select(trade => trade.ToString());
+		}
+		private void UpdateProgressBarFromProcessor(FinishedTradesFromUnparsedTicks finishedTrades)
+		{
+			this.Invoke(GetChangingProgress((int)finishedTrades.ProgressPromille));
 		}
 
 		private Action GetChangingStatusTo(string status)
@@ -157,7 +166,7 @@ namespace RansacBot.HystoryTest
 					decisionMaker.ClosingProvider);
 
 
-			FinishedTradesBuilder finishedTradesBuilder = new();
+			FinishedTradesProvider finishedTradesBuilder = new();
 			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpend;
 			tradingModule.TradeClosedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 			tradingModule.StopExecutedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;

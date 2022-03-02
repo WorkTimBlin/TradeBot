@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 
 namespace RansacBot.HystoryTest
 {
-	class HystoryFromFileProcessor
+	class FinishedTradesFromUnparsedTicks
 	{
-		public event Action<HystoryFromFileProcessor> ProgressChanged;
+		public event Action<FinishedTradesFromUnparsedTicks> ProgressChanged;
 
 		public HystoryProcessorState State { get; private set; } = HystoryProcessorState.Created;
 		public bool IsComplete { get => State == HystoryProcessorState.Finished; }
@@ -24,7 +24,7 @@ namespace RansacBot.HystoryTest
 		private IEnumerable<Tick> ticks;
 		private IEnumerable<string> unparsedTicks;
 
-		public HystoryFromFileProcessor(bool useFilter, IEnumerable<string> unparsedTicks, ITicksParser parser)
+		public FinishedTradesFromUnparsedTicks(bool useFilter, IEnumerable<string> unparsedTicks, ITicksParser parser)
 		{
 			this.useFilter = useFilter;
 			this.unparsedTicks = unparsedTicks;
@@ -44,7 +44,7 @@ namespace RansacBot.HystoryTest
 			numberOfTicks = (ulong)unparsedTicks.Count();
 		}
 
-		public void ProcessFiles(Action<string> output, int period = 0)
+		public IEnumerable<FinishedTrade> GetAllFinishedTrades(int period = 0)
 		{
 			if (State < HystoryProcessorState.Ready) throw new Exception("not ready to start");
 			if (State > HystoryProcessorState.Ready) throw new Exception("started already");
@@ -59,13 +59,15 @@ namespace RansacBot.HystoryTest
 					decisionMaker.ClosingProvider);
 
 
-			FinishedTradesBuilder finishedTradesBuilder = new();
+			FinishedTradesProvider finishedTradesBuilder = new();
 			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpend;
 			tradingModule.TradeClosedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 			tradingModule.StopExecutedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 
 
-			finishedTradesBuilder.NewTradeFinished += (trade) => output(trade.ToString());
+			FinishedTrade? finishedTrade = null;
+			void SetFinishedTrade(FinishedTrade trade) => finishedTrade = trade;
+			finishedTradesBuilder.NewTradeFinished += SetFinishedTrade;
 
 
 			HystoryQuikSimulator quikSimulator = HystoryQuikSimulator.Instance;
@@ -84,7 +86,13 @@ namespace RansacBot.HystoryTest
 				}
 				numberOfProcessedTicks++;
 				count++;
+				if(finishedTrade != null)
+				{
+					yield return (FinishedTrade)finishedTrade;
+					finishedTrade = null;
+				}
 			}
+			finishedTradesBuilder.NewTradeFinished -= SetFinishedTrade;
 			State = HystoryProcessorState.Finished;
 			ProgressChanged?.Invoke(this);
 		}

@@ -123,7 +123,7 @@ namespace RansacBot
 			tradingModule.TradeClosedOnPrice += (trade, price) => stopPrinter.OnClosePos(trade.stop.price, price);
 
 
-			FinishedTradesBuilder finishedTradesBuilder = new();
+			FinishedTradesProvider finishedTradesBuilder = new();
 			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpend;
 			tradingModule.TradeClosedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 			tradingModule.StopExecutedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;

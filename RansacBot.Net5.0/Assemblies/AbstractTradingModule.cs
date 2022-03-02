@@ -46,7 +46,6 @@ namespace RansacBot.Assemblies
 		ITradeWithStopProvider tradeWithStopProvider;
 		IClosingProvider closingProvider;
 
-		readonly protected TradeParams tradeParams;
 		AbstractOneAtATimeCheckpoint<TOrder> checkpoint;
 		AbstractClassicStopsOperator<TStopOrder, TOrder> stopsOperator;
 		AbstractKilledStopsMarketCompensator<TOrder> compensator;

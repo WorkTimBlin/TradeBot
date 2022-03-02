@@ -11,7 +11,7 @@ namespace RansacBot.Trading
 	{
 		readonly int ransacLevel;
 		RansacType currentRansac = RansacType.None;
-		public event TradeHandler NewTrade;
+		public event Action<Trade> NewTrade;
 
 		public RansacDirectionTradeFilter(RansacsCascade cascade, int ransacLevel)
 		{

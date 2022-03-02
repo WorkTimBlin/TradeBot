@@ -8,7 +8,7 @@ namespace RansacBot
 {
 	abstract class AbstractProviderByParam<TIn, TOut> : IProviderByParam<TOut>
 	{
-		private readonly Dictionary<string, Action<TOut>> recievers = new();
+		private readonly Dictionary<string, Action<TOut>?> recievers = new();
 		protected SequentialProvider<TIn> sequentialProvider;
 
 		public AbstractProviderByParam()

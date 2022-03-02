@@ -8,11 +8,12 @@ using System.Text;
 using System.Threading.Tasks;
 using QuikSharp.DataStructures.Transaction;
 
-namespace RansacBot.QuikRelated
+namespace RansacBot.Trading
 {
-	abstract class AbstractOrderEnsurer<TOrder>
+	public abstract class AbstractOrderEnsurer<TOrder>
 	{
-		public TOrder Order { get; private set; }
+		public event Action<object> OrderEnsuranceStatusChanged;
+		public TOrder Order { get; protected set; }
 		public EnsuranceState State { get; private set; } = EnsuranceState.NotSentYet;
 		public bool IsComplete { get { return State == EnsuranceState.Executed || State == EnsuranceState.Killed; } }
 
@@ -22,12 +23,17 @@ namespace RansacBot.QuikRelated
 		{
 			functions = orderFunctions;
 		}
-		public AbstractOrderEnsurer(TOrder order)
+		private AbstractOrderEnsurer(TOrder order)
 		{
 			this.Order = order;
 		}
 
-		protected void SubscribeSelfAndSendOrder()
+		public virtual void Subscribe()
+		{
+			UnsubscribeFromOnOrderEvent();
+			SubscribeToOnOrderEvent();
+		}
+		public void SubscribeSelfAndSendOrder()
 		{
 			if(State > EnsuranceState.Sent)
 			{
@@ -51,11 +57,9 @@ namespace RansacBot.QuikRelated
 		}
 		public void UpdateOrderFromQuikByTransID()
 		{
-			OnOrderChanged(functions.GetOrder_by_transID(Order).Result);
-		}
-		void ChangeStateTo(EnsuranceState state)
-		{
-			this.State = state;
+			TOrder? order = functions.GetOrder_by_transID(Order).Result;
+			if(order != null)
+				OnOrderChanged(order);
 		}
 
 		protected void OnOrderChanged(TOrder order)
@@ -64,18 +68,37 @@ namespace RansacBot.QuikRelated
 			Order = order;
 			if (GetState(Order) == QuikSharp.DataStructures.State.Active)
 			{
-				ChangeStateTo(EnsuranceState.Active);
+				OnActive();
 			}
 			if (GetState(Order) == QuikSharp.DataStructures.State.Completed)
 			{
-				ChangeStateTo(EnsuranceState.Executed);
 				UnsubscribeFromOnOrderEvent();
+				OnCompleted();
 			}
 			if (GetState(Order) == QuikSharp.DataStructures.State.Canceled)
 			{
-				ChangeStateTo(EnsuranceState.Killed);
 				UnsubscribeFromOnOrderEvent();
+				OnKilled();
 			}
+		}
+		protected void ChangeStateTo(EnsuranceState state)
+		{
+			this.State = state;
+			OrderEnsuranceStatusChanged?.Invoke(this);
+		}
+
+
+		protected virtual void OnActive()
+		{
+			ChangeStateTo(EnsuranceState.Active);
+		}
+		protected virtual void OnCompleted()
+		{
+			ChangeStateTo(EnsuranceState.Executed);
+		}
+		protected virtual void OnKilled()
+		{
+			ChangeStateTo(EnsuranceState.Killed);
 		}
 
 		protected abstract void SubscribeToOnOrderEvent();
@@ -83,13 +106,14 @@ namespace RansacBot.QuikRelated
 		protected abstract State GetState(TOrder order);
 		protected abstract void SetTransID(long transID);
 		protected abstract bool IsTransIDMatching(TOrder order);
+		public bool IsSame(TOrder order) => IsTransIDMatching(order);
 	}
 
 	class StateException : Exception
 	{
 		public StateException(string message) : base(message) { }
 	}
-	enum EnsuranceState
+	public enum EnsuranceState
 	{
 		NotSentYet,
 		Sent,

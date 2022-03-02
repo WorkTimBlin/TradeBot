@@ -11,7 +11,7 @@ namespace RansacBot.Trading
 	{
 		double high;
 		double low;
-		public event TradeHandler NewTrade;
+		public event Action<Trade> NewTrade;
 
 		readonly int level;
 

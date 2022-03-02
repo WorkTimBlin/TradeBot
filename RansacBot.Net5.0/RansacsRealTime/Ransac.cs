@@ -63,7 +63,7 @@ namespace RansacsRealTime
 		/// <param name="percentile"></param>
 		public Ransac(in List<Tick> ticks, int firstIndex, SigmaType typeSigma, double percentile = 90)
 		{
-			RansacComputator.Compute(ticks, typeSigma, percentile, out SimpleLinearRegression reg, out double errorTreshold, out double sigma);
+			RansacComputator.Compute(ticks, typeSigma, percentile, out LeastSquaresRegression reg, out double errorTreshold, out double sigma);
 			Slope = reg.Slope;
 			Intercept = reg.Intercept;
 			Length = ticks.Count;

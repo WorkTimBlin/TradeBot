@@ -1,6 +1,7 @@
 ﻿using QuikSharp;
 using QuikSharp.DataStructures;
 using QuikSharp.DataStructures.Transaction;
+using RansacBot.Trading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,24 @@ using System.Threading.Tasks;
 
 namespace RansacBot.QuikRelated
 {
-	class OrderEnsurer : AbstractOrderEnsurer<Order>
+	/// <summary>
+	/// warning: can call OrderEnsuranceStatusChanged twice completed - once when got an execution price
+	/// </summary>
+	class QuikOrderEnsurer : AbstractOrderEnsurerWithPrice<Order>
 	{
 		IQuikEvents events;
 		
-		public OrderEnsurer(Order order) : base(order, QuikOrderFunctions.Instance)
+		public QuikOrderEnsurer(Order order) : base(order, QuikOrderFunctions.Instance)
 		{
 			events = QuikContainer.Quik.Events;
-			SubscribeSelfAndSendOrder();
+			//SubscribeSelfAndSendOrder();
+		}
+
+		protected override double GetCompletionAttribute()
+		{
+			return
+				(QuikHelpFunctions.GetTradeByTransID(Order.TransID) ??
+				throw new Exception("couldn't find corresponding trade")).Price;
 		}
 
 		protected override State GetState(Order order)

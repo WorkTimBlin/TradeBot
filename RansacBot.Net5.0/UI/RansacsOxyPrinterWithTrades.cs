@@ -66,11 +66,10 @@ namespace RansacBot.UI
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
 		{
 			lastTradeWithStop = tradeWithStop;
-			Console.WriteLine(DateTime.Now.ToString() + " " + "trade with stop " + tradeWithStop.price.ToString());
 			CheckIfTradeWithStopHappenedThenAddToPlot();
 		}
 
-		public void OnNewExtremum(Tick extremum, VertexType vertexType, Tick current)
+		public override void OnNewExtremum(Tick extremum, VertexType vertexType, Tick current)
 		{
 			lastExtremumVertexIndex = extremum.VERTEXINDEX;
 			lastExtremumFound = true;
@@ -102,11 +101,11 @@ namespace RansacBot.UI
 			}
 		}
 
-		public void OnClosePos(decimal stopPrice)
+		public void OnClosePos(double stopPrice, double executionPrice)
 		{
 			for(int i = 0; i < stops.Points.Count; i++)
 			{
-				if(stops.Points[i].Y == (double)stopPrice)
+				if(stops.Points[i].Y == stopPrice)
 				{
 					stops.Points.RemoveAt(i);
 					return;

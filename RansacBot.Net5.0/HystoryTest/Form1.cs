@@ -25,8 +25,6 @@ namespace RansacBot.HystoryTest
 		private void goButton_Click(object sender, EventArgs e)
 		{
 			Tick lastTick = new();
-			List<TradeWithStopWithTick> longs = new();
-			List<TradeWithStopWithTick> shorts = new();
 			FileFeeder feeder = new(textBox1.Text);
 			feeder.Subscribe(new("", ""), (tick) => { lastTick = tick; });
 			ObservingSession session = new(new Param("SPBFUT", "RIZ1"), feeder, 100);
@@ -40,24 +38,27 @@ namespace RansacBot.HystoryTest
 			HigherLowerFilterOnRansac higherLowerFilter = new(ETCascade, 2);
 			MaximinStopPlacer stopPlacer = new(SCascade, 0);
 			TradesHystory tradesHystory = new();
-			CloserOnRansacStops closer100 = new(tradesHystory, SCascade, 0, 100);
+			OldCloserOnRansacStops closer100 = new(tradesHystory, SCascade, 0, 100);
 
 			feeder.Subscribe(
 				new("", ""),
 				(tick) =>
 				{
-					tradesHystory.CheckForStops((decimal)tick.PRICE);
+					tradesHystory.CheckForStops(tick.PRICE);
 				});
 
 			monkeyNFinder.NewExtremum += decider.OnNewExtremum;
 
 			// plug decider to stop placer through te filter
-			//decider.NewTrade += higherLowerFilter.OnNewTrade;
-			//higherLowerFilter.NewTrade += stopPlacer.OnNewTrade;
+			decider.NewTrade += higherLowerFilter.OnNewTrade;
+			higherLowerFilter.NewTrade += stopPlacer.OnNewTrade;
 
 			//plug decider to stop placer without filters
-			decider.NewTrade += stopPlacer.OnNewTrade;
+			//decider.NewTrade += stopPlacer.OnNewTrade;
 
+			List<TradeWithStopWithTick> longs = new();
+			List<TradeWithStopWithTick> shorts = new();
+			
 			stopPlacer.NewTradeWithStop += (tradeWithStop) =>
 			{
 				(tradeWithStop.direction == TradeDirection.buy ? longs : shorts).Add(new(tradeWithStop, lastTick));
@@ -65,9 +66,9 @@ namespace RansacBot.HystoryTest
 			stopPlacer.NewTradeWithStop += tradesHystory.OnNewTradeWithStop;
 			StreamWriter dealsWriter = new(textBox2.Text + @"\deals.txt");
 
-			tradesHystory.ExecutedLongStop += (price) =>
+			tradesHystory.ExecutedLongStop += (price, exPrice) =>
 			{
-				int tradeIndex = longs.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
+				int tradeIndex = longs.FindIndex((trade) => trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = longs[tradeIndex];
 				longs.RemoveAt(tradeIndex);
 				dealsWriter.WriteLine(
@@ -80,9 +81,9 @@ namespace RansacBot.HystoryTest
 					"1"
 					);
 			};
-			tradesHystory.ExecutedShortStop += (price) =>
+			tradesHystory.ExecutedShortStop += (price, exPrice) =>
 			{
-				int tradeIndex = shorts.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
+				int tradeIndex = shorts.FindIndex((trade) => trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = shorts[tradeIndex];
 				shorts.RemoveAt(tradeIndex);
 				dealsWriter.WriteLine(
@@ -95,9 +96,9 @@ namespace RansacBot.HystoryTest
 					"1"
 					);
 			};
-			tradesHystory.KilledLongStop += (price) =>
+			tradesHystory.KilledLongStop += (price, exPrice) =>
 			{
-				int tradeIndex = longs.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
+				int tradeIndex = longs.FindIndex((trade) => trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = longs[tradeIndex];
 				longs.RemoveAt(tradeIndex);
 				dealsWriter.WriteLine(
@@ -110,9 +111,9 @@ namespace RansacBot.HystoryTest
 					"1"
 					);
 			};
-			tradesHystory.KilledShortStop += (price) =>
+			tradesHystory.KilledShortStop += (price, exPrice) =>
 			{
-				int tradeIndex = shorts.FindIndex((trade) => (decimal)trade.trade.stop.price == price);
+				int tradeIndex = shorts.FindIndex((trade) => trade.trade.stop.price == price);
 				TradeWithStopWithTick trade = shorts[tradeIndex];
 				shorts.RemoveAt(tradeIndex);
 				dealsWriter.WriteLine(
@@ -217,7 +218,9 @@ namespace RansacBot.HystoryTest
 			int count = 0;
 			while (!streamReader.EndOfStream)
 			{
-				readedTick = streamReader.ReadLine().Split(';', StringSplitOptions.RemoveEmptyEntries);
+				readedTick = 
+					(streamReader.ReadLine() ?? throw new Exception("Cant read tick!"))
+					.Split(';', StringSplitOptions.RemoveEmptyEntries);
 				dateTime = new DateTime(
 					Convert.ToInt32(readedTick[0].Substring(0, 4)),
 					Convert.ToInt32(readedTick[0].Substring(4, 2)),
@@ -226,7 +229,10 @@ namespace RansacBot.HystoryTest
 					Convert.ToInt32(readedTick[1].Substring(2, 2)),
 					Convert.ToInt32(readedTick[1].Substring(4, 2))
 					).Ticks.ToString();
-				streamWriter.WriteLine(readedTick[4] + ',' + dateTime.ToString().Substring(0, dateTime.Length - 7) + ',' + ((int)Convert.ToDecimal(readedTick[2].Substring(0, readedTick[2].IndexOf('.')))).ToString());
+				streamWriter.WriteLine(
+					readedTick[4] + ',' + 
+					dateTime.ToString().Substring(0, dateTime.Length - 7) + ',' + 
+					((int)Convert.ToDecimal(readedTick[2].Substring(0, readedTick[2].IndexOf('.')))).ToString());
 				if (count == 10000)
 				{
 					count = 0;

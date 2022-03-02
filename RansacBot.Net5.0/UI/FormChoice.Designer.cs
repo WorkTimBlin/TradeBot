@@ -1,7 +1,7 @@
 ﻿
 namespace RansacBot.UI
 {
-	partial class FormBotOrHystoryTestChoice
+	partial class FormChoice
 	{
 		/// <summary>
 		/// Required designer variable.

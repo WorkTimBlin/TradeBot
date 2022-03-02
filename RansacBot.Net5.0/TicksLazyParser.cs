@@ -114,17 +114,20 @@ namespace RansacBot
 
 	public class TicksLazySequentialParser: IEnumerable<Tick>
 	{
+		private ITicksParser ticksParser;
 		private readonly IEnumerable<string> rawStrings;
-		public TicksLazySequentialParser(IEnumerable<string> rawStrings)
+		public TicksLazySequentialParser(IEnumerable<string> rawStrings) : this(rawStrings, TicksParser.FinamStandart) { }
+		public TicksLazySequentialParser(IEnumerable<string> rawStrings, ITicksParser ticksParser)
 		{
 			this.rawStrings = rawStrings;
+			this.ticksParser = ticksParser;
 		}
 		#region IEnumerable
 		public IEnumerator<Tick> GetEnumerator()
 		{
 			foreach (string line in rawStrings)
 			{
-				yield return ParseTick(line);
+				yield return ticksParser.ParseTick(line);
 			}
 		}
 
@@ -132,20 +135,69 @@ namespace RansacBot
 		{
 			foreach (string line in rawStrings)
 			{
-				yield return ParseTick(line);
+				yield return ticksParser.ParseTick(line);
 			}
 		}
 		#endregion
-		static public Tick ParseTick(string[] data)
+	}
+
+	class TicksParser : ITicksParser
+	{
+		char separator;
+		short idIndex;
+		short priceIndex;
+
+		public static ITicksParser FinamStandart { get => FromIndexes(4, 2); }
+		public static ITicksParser DamirStandart { get => FromSeparatorAndIndexes(',', 0, 2); }
+
+		public static ITicksParser FromFunction(Func<string, Tick> parsingFunc)
+		{
+			return new TicksParserFromFunc(parsingFunc);
+		}
+		public static ITicksParser FromIndexes(short idIndex, short priceIndex)
+		{
+			return new TicksParser(';', idIndex, priceIndex);
+		}
+		public static ITicksParser FromSeparatorAndIndexes(char separator, short idIndex, short priceIndex)
+		{
+			return new TicksParser(separator, idIndex, priceIndex);
+		}
+		private TicksParser(char separator, short idIndex, short priceIndex)
+		{
+			this.separator = separator;
+			this.idIndex = idIndex;
+			this.priceIndex = priceIndex;
+		}
+
+		public Tick ParseTick(string[] data)
 		{
 			return new Tick(
-				Convert.ToInt64(data[4]),
+				Convert.ToInt64(data[idIndex]),
 				0,
-				(double)Convert.ToDouble(data[2], System.Globalization.CultureInfo.InvariantCulture));
+				(double)Convert.ToDouble(data[priceIndex], System.Globalization.CultureInfo.InvariantCulture));
 		}
-		static public Tick ParseTick(string line)
+		public Tick ParseTick(string line)
 		{
-			return ParseTick(line.Split(';', StringSplitOptions.RemoveEmptyEntries));
+			return ParseTick(line.Split(separator, StringSplitOptions.RemoveEmptyEntries));
 		}
+		class TicksParserFromFunc : ITicksParser
+		{
+			Func<string, Tick> parsingFunc;
+
+			public TicksParserFromFunc(Func<string, Tick> parsingFunc)
+			{
+				this.parsingFunc = parsingFunc;
+			}
+
+			public Tick ParseTick(string line)
+			{
+				return parsingFunc(line);
+			}
+		}
+	}
+
+	public interface ITicksParser
+	{
+		public Tick ParseTick(string line);
 	}
 }

@@ -20,12 +20,22 @@ namespace RansacBot.HystoryTest
 	{
 		DateTime startDateTime;
 		List<Dataset> datasets = new();
+		List<Control> adjustmentControls;
+		
 		public FlexibleHystoryTestForm()
 		{
 			InitializeComponent();
+			adjustmentControls = new()
+			{
+				runButton,
+				addDatasetButton,
+				clearDatasetsButton,
+				useFilterCheckbox,
+				findOutputDirectoryButton
+			};
 		}
 
-		private void chooseHystoryFilePathButton_Click(object sender, EventArgs e)
+		private void addDatasetButton_Click(object sender, EventArgs e)
 		{
 			inputFileDialog.ShowDialog();
 			//hystoryTicksFilePath.Text = inputFileDialog.FileName;
@@ -36,7 +46,7 @@ namespace RansacBot.HystoryTest
 				names));
 			UpdateTreeView();
 		}
-		private void clearInputFilesButton_Click(object sender, EventArgs e)
+		private void clearDatasetsButton_Click(object sender, EventArgs e)
 		{
 			datasets.Clear();
 			UpdateTreeView();
@@ -53,7 +63,7 @@ namespace RansacBot.HystoryTest
 						));
 			}
 		}
-		private void chooseOutputDirectoryButton_Click(object sender, EventArgs e)
+		private void findOutputDirectoryButton_Click(object sender, EventArgs e)
 		{
 			outputFolderBrowserDialog.ShowDialog();
 			outputDirectoryTextBox.Text = outputFolderBrowserDialog.SelectedPath;
@@ -95,14 +105,14 @@ namespace RansacBot.HystoryTest
 
 		private void runButton_Click(object sender, EventArgs e)
 		{
-			this.Invoke((Action)(() => runButton.Enabled = false));
+			this.Invoke((Action)BlockAllAdjustmentControls);
 			Task.Run(() =>
 			{
 				foreach (var dataset in datasets)
 				{
 					ProcessDataset(dataset);
 				}
-			}).ContinueWith((task) => this.Invoke((Action)(() => runButton.Enabled = true)));
+			}).ContinueWith((task) => this.Invoke((Action)UnblockAllAdjustmentControls));
 		}
 
 		private void ProcessDataset(Dataset dataset)
@@ -149,18 +159,34 @@ namespace RansacBot.HystoryTest
 			((1000 - finishedTrades.ProgressPromille) / finishedTrades.ProgressPromille)).ToString(@"hh\:mm\:ss")));
 		}
 
+		private void BlockAllAdjustmentControls()
+		{
+			foreach (Control control in adjustmentControls)
+			{
+				control.Enabled = false;
+			}
+		}
+		private void UnblockAllAdjustmentControls()
+		{
+			foreach (Control control in adjustmentControls)
+			{
+				control.Enabled = true;
+			}
+		}
 		private Action GetChangingStatusTo(string status)
 		{
-			return () => 
-			statusRichTextBox.Lines =
-			statusRichTextBox.Lines.Append(DateTime.Now.ToString() + ' ' + status).ToArray();
+			return () =>
+			{
+				string newStatus = DateTime.Now.ToString() + ' ' + status + '\n';
+				statusRichTextBox.AppendText(newStatus);
+				statusRichTextBox.ScrollToCaret();
+			};
 		}
 		private Action GetChangingProgress(int progress)
 		{
 			return () => progressBar1.Value = progress;
 		}
 		
-
 		int FileNameComparer(string s1, string s2)
 		{
 			int n1 = NumberOfFile(s1);

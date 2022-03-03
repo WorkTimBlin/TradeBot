@@ -102,7 +102,7 @@ namespace RansacBot
 			LockNSetter();
 
 			S2_ET_S2_DecisionMaker decisionMaker =
-				new S2_ET_S2_DecisionMaker(useFilterCheckbox.Checked, (int)numericUpDown_NSetter.Value);
+				new S2_ET_S2_DecisionMaker(useFilterCheckbox.Checked, (double)numericUpDown_NSetter.Value);
 			decisionProvider = decisionMaker;
 
 			HystoryTradingModule tradingModule =
@@ -124,7 +124,7 @@ namespace RansacBot
 
 
 			FinishedTradesProvider finishedTradesBuilder = new();
-			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpend;
+			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpened;
 			tradingModule.TradeClosedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 			tradingModule.StopExecutedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 			
@@ -135,7 +135,7 @@ namespace RansacBot
 			};
 
 
-			HystoryQuikSimulator quikSimulator = new HystoryQuikSimulator();
+			HystoryQuikSimulator quikSimulator = tradingModule.QuikSimulator;
 			finishedTradesBuilder.NewTick += quikSimulator.OnNewTick;
 			quikSimulator.NewTick += decisionMaker.OnNewTick;
 

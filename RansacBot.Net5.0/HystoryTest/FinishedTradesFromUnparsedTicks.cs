@@ -61,13 +61,13 @@ namespace RansacBot.HystoryTest
 
 
 			FinishedTradesProvider finishedTradesBuilder = new();
-			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpend;
+			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpened;
 			tradingModule.TradeClosedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 			tradingModule.StopExecutedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 
 
-			FinishedTrade? finishedTrade = null;
-			void SetFinishedTrade(FinishedTrade trade) => finishedTrade = trade;
+			List<FinishedTrade> finishedTrades = new();
+			void SetFinishedTrade(FinishedTrade trade) => finishedTrades.Add(trade);
 			finishedTradesBuilder.NewTradeFinished += SetFinishedTrade;
 
 
@@ -87,10 +87,10 @@ namespace RansacBot.HystoryTest
 				}
 				numberOfProcessedTicks++;
 				count++;
-				if(finishedTrade != null)
+				while(finishedTrades.Count > 0)
 				{
-					yield return (FinishedTrade)finishedTrade;
-					finishedTrade = null;
+					yield return finishedTrades[0];
+					finishedTrades.RemoveAt(0);
 				}
 			}
 			finishedTradesBuilder.NewTradeFinished -= SetFinishedTrade;
@@ -128,7 +128,7 @@ namespace RansacBot.HystoryTest
 
 
 			FinishedTradesProvider finishedTradesBuilder = new();
-			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpend;
+			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpened;
 			tradingModule.TradeClosedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 			tradingModule.StopExecutedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 

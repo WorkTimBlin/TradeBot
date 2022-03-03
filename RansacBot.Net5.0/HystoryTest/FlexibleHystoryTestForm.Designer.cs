@@ -30,16 +30,16 @@ namespace RansacBot.HystoryTest
 		private void InitializeComponent()
 		{
 			this.inputFileDialog = new System.Windows.Forms.OpenFileDialog();
-			this.chooseHystoryFilePathButton = new System.Windows.Forms.Button();
+			this.addDatasetButton = new System.Windows.Forms.Button();
 			this.inputFileLabel = new System.Windows.Forms.Label();
 			this.outputDirectoryTextBox = new System.Windows.Forms.TextBox();
 			this.outputDirectoryLabel = new System.Windows.Forms.Label();
-			this.chooseOutputDirectoryButton = new System.Windows.Forms.Button();
+			this.findOutputDirectoryButton = new System.Windows.Forms.Button();
 			this.runButton = new System.Windows.Forms.Button();
 			this.outputFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
 			this.progressBar1 = new System.Windows.Forms.ProgressBar();
 			this.inputFilesTreeView = new System.Windows.Forms.TreeView();
-			this.clearInputFilesButton = new System.Windows.Forms.Button();
+			this.clearDatasetsButton = new System.Windows.Forms.Button();
 			this.useFilterCheckbox = new System.Windows.Forms.CheckBox();
 			this.statusRichTextBox = new System.Windows.Forms.RichTextBox();
 			this.ransacLevelUsageControl1 = new RansacBot.UI.Components.RansacLevelUsageControl();
@@ -53,15 +53,15 @@ namespace RansacBot.HystoryTest
 			this.inputFileDialog.Multiselect = true;
 			this.inputFileDialog.Title = "Hystory Ticks File";
 			// 
-			// chooseHystoryFilePathButton
+			// addDatasetButton
 			// 
-			this.chooseHystoryFilePathButton.Location = new System.Drawing.Point(475, 15);
-			this.chooseHystoryFilePathButton.Name = "chooseHystoryFilePathButton";
-			this.chooseHystoryFilePathButton.Size = new System.Drawing.Size(75, 23);
-			this.chooseHystoryFilePathButton.TabIndex = 0;
-			this.chooseHystoryFilePathButton.Text = "Add...";
-			this.chooseHystoryFilePathButton.UseVisualStyleBackColor = true;
-			this.chooseHystoryFilePathButton.Click += new System.EventHandler(this.chooseHystoryFilePathButton_Click);
+			this.addDatasetButton.Location = new System.Drawing.Point(475, 15);
+			this.addDatasetButton.Name = "addDatasetButton";
+			this.addDatasetButton.Size = new System.Drawing.Size(75, 23);
+			this.addDatasetButton.TabIndex = 0;
+			this.addDatasetButton.Text = "Add...";
+			this.addDatasetButton.UseVisualStyleBackColor = true;
+			this.addDatasetButton.Click += new System.EventHandler(this.addDatasetButton_Click);
 			// 
 			// inputFileLabel
 			// 
@@ -90,15 +90,15 @@ namespace RansacBot.HystoryTest
 			this.outputDirectoryLabel.TabIndex = 2;
 			this.outputDirectoryLabel.Text = "Output Directory";
 			// 
-			// chooseOutputDirectoryButton
+			// findOutputDirectoryButton
 			// 
-			this.chooseOutputDirectoryButton.Location = new System.Drawing.Point(714, 118);
-			this.chooseOutputDirectoryButton.Name = "chooseOutputDirectoryButton";
-			this.chooseOutputDirectoryButton.Size = new System.Drawing.Size(75, 23);
-			this.chooseOutputDirectoryButton.TabIndex = 0;
-			this.chooseOutputDirectoryButton.Text = "Find...";
-			this.chooseOutputDirectoryButton.UseVisualStyleBackColor = true;
-			this.chooseOutputDirectoryButton.Click += new System.EventHandler(this.chooseOutputDirectoryButton_Click);
+			this.findOutputDirectoryButton.Location = new System.Drawing.Point(714, 118);
+			this.findOutputDirectoryButton.Name = "findOutputDirectoryButton";
+			this.findOutputDirectoryButton.Size = new System.Drawing.Size(75, 23);
+			this.findOutputDirectoryButton.TabIndex = 0;
+			this.findOutputDirectoryButton.Text = "Find...";
+			this.findOutputDirectoryButton.UseVisualStyleBackColor = true;
+			this.findOutputDirectoryButton.Click += new System.EventHandler(this.findOutputDirectoryButton_Click);
 			// 
 			// runButton
 			// 
@@ -128,15 +128,15 @@ namespace RansacBot.HystoryTest
 			this.inputFilesTreeView.Size = new System.Drawing.Size(352, 97);
 			this.inputFilesTreeView.TabIndex = 8;
 			// 
-			// clearInputFilesButton
+			// clearDatasetsButton
 			// 
-			this.clearInputFilesButton.Location = new System.Drawing.Point(475, 44);
-			this.clearInputFilesButton.Name = "clearInputFilesButton";
-			this.clearInputFilesButton.Size = new System.Drawing.Size(75, 23);
-			this.clearInputFilesButton.TabIndex = 0;
-			this.clearInputFilesButton.Text = "Clear";
-			this.clearInputFilesButton.UseVisualStyleBackColor = true;
-			this.clearInputFilesButton.Click += new System.EventHandler(this.clearInputFilesButton_Click);
+			this.clearDatasetsButton.Location = new System.Drawing.Point(475, 44);
+			this.clearDatasetsButton.Name = "clearDatasetsButton";
+			this.clearDatasetsButton.Size = new System.Drawing.Size(75, 23);
+			this.clearDatasetsButton.TabIndex = 0;
+			this.clearDatasetsButton.Text = "Clear";
+			this.clearDatasetsButton.UseVisualStyleBackColor = true;
+			this.clearDatasetsButton.Click += new System.EventHandler(this.clearDatasetsButton_Click);
 			// 
 			// useFilterCheckbox
 			// 
@@ -150,9 +150,9 @@ namespace RansacBot.HystoryTest
 			// 
 			// statusRichTextBox
 			// 
-			this.statusRichTextBox.Location = new System.Drawing.Point(154, 332);
+			this.statusRichTextBox.Location = new System.Drawing.Point(475, 147);
 			this.statusRichTextBox.Name = "statusRichTextBox";
-			this.statusRichTextBox.Size = new System.Drawing.Size(315, 67);
+			this.statusRichTextBox.Size = new System.Drawing.Size(313, 234);
 			this.statusRichTextBox.TabIndex = 10;
 			this.statusRichTextBox.Text = "";
 			// 
@@ -191,11 +191,11 @@ namespace RansacBot.HystoryTest
 			this.Controls.Add(this.outputDirectoryLabel);
 			this.Controls.Add(this.inputFileLabel);
 			this.Controls.Add(this.outputDirectoryTextBox);
-			this.Controls.Add(this.chooseOutputDirectoryButton);
-			this.Controls.Add(this.clearInputFilesButton);
-			this.Controls.Add(this.chooseHystoryFilePathButton);
+			this.Controls.Add(this.findOutputDirectoryButton);
+			this.Controls.Add(this.clearDatasetsButton);
+			this.Controls.Add(this.addDatasetButton);
 			this.Name = "FlexibleHystoryTestForm";
-			this.Text = "FlexibleHystoryTest";
+			this.Text = "Bot Hystory Test";
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -204,16 +204,16 @@ namespace RansacBot.HystoryTest
 		#endregion
 
 		private System.Windows.Forms.OpenFileDialog inputFileDialog;
-		private System.Windows.Forms.Button chooseHystoryFilePathButton;
+		private System.Windows.Forms.Button addDatasetButton;
 		private System.Windows.Forms.Label inputFileLabel;
 		private System.Windows.Forms.TextBox outputDirectoryTextBox;
 		private System.Windows.Forms.Label outputDirectoryLabel;
-		private System.Windows.Forms.Button chooseOutputDirectoryButton;
+		private System.Windows.Forms.Button findOutputDirectoryButton;
 		private System.Windows.Forms.Button runButton;
 		private System.Windows.Forms.FolderBrowserDialog outputFolderBrowserDialog;
 		private System.Windows.Forms.ProgressBar progressBar1;
 		private System.Windows.Forms.TreeView inputFilesTreeView;
-		private System.Windows.Forms.Button clearInputFilesButton;
+		private System.Windows.Forms.Button clearDatasetsButton;
 		private System.Windows.Forms.CheckBox useFilterCheckbox;
 		private System.Windows.Forms.RichTextBox statusRichTextBox;
 		private UI.Components.RansacLevelUsageControl ransacLevelUsageControl1;

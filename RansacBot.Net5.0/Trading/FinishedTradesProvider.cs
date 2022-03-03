@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Trading
 {
-	class FinishedTradesProvider : ITickFilter
+	class FinishedTradesProvider : IFinishedTradeProvider
 	{
 
 		public event Action<FinishedTrade> NewTradeFinished;
@@ -38,6 +38,12 @@ namespace RansacBot.Trading
 		{
 			return new(tradeWithStop, closingPrice, openingTicksOfTrades[tradeWithStop], lastTick);
 		}
+	}
+
+	interface IFinishedTradeProvider : ITickFilter
+	{
+		public event Action<FinishedTrade> NewTradeFinished;
+		public void OnTradeClosedOnPrice(TradeWithStop tradeWithStop, double closingPrice);
 	}
 
 	readonly struct FinishedTrade

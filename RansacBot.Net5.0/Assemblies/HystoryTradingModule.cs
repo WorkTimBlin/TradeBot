@@ -1,5 +1,6 @@
 ﻿using RansacBot.Trading;
 using RansacBot.Trading.Hystory;
+using RansacBot.Trading.Hystory.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,7 @@ namespace RansacBot.Assemblies
 {
 	class HystoryTradingModule : AbstractTradingModule<HystoryOrder, HystoryOrder>
 	{
+		public HystoryQuikSimulator QuikSimulator { get; } = new();
 		public HystoryTradingModule() : base() { }
 		public HystoryTradingModule(
 			ITradeWithStopProvider tradeWithStopProvider,
@@ -20,17 +22,17 @@ namespace RansacBot.Assemblies
 
 		protected override AbstractOneAtATimeCheckpoint<HystoryOrder> GetCheckpoint()
 		{
-			return new HystoryOneAtATimeCheckpoint();
+			return new HystoryOneAtATimeCheckpoint(QuikSimulator);
 		}
 
 		protected override AbstractKilledStopsMarketCompensator<HystoryOrder> GetCompensator()
 		{
-			return new HystoryKilledStopsMarketCompensator();
+			return new HystoryKilledStopsMarketCompensator(QuikSimulator);
 		}
 
 		protected override AbstractClassicStopsOperator<HystoryOrder, HystoryOrder> GetStopsOperator()
 		{
-			return new HystoryStopsOperator();
+			return new HystoryStopsOperator(QuikSimulator);
 		}
 	}
 }

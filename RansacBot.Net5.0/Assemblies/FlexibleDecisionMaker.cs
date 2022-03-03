@@ -39,6 +39,11 @@ namespace RansacBot.Assemblies
 		{
 			throw new NotImplementedException();
 		}
+
+		public void Clear()
+		{
+			throw new NotImplementedException();
+		}
 	}
 
 	class LinearTradeFilter : MultipleFilter<ITradeFilter, Trade>, IList<ITradeFilter>, ITradeFilter

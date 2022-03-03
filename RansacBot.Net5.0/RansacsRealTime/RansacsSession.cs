@@ -28,7 +28,7 @@ namespace RansacsRealTime
 			this.monkeyNFilter.NewVertex += this.vertexes.OnNewVertex;
 		}
 
-		public RansacsSession(int N)
+		public RansacsSession(double N)
 		{
 			this.vertexes = new();
 			this.monkeyNFilter = new(N);

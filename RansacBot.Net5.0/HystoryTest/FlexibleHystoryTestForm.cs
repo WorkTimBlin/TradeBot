@@ -18,6 +18,7 @@ namespace RansacBot.HystoryTest
 {
 	public partial class FlexibleHystoryTestForm : Form
 	{
+		DateTime startDateTime;
 		List<Dataset> datasets = new();
 		public FlexibleHystoryTestForm()
 		{
@@ -110,6 +111,7 @@ namespace RansacBot.HystoryTest
 			IEnumerable<string> unparsedTicks = dataset.FilesWithoutHeaders.Concat();
 			FinishedTradesFromUnparsedTicks processor = GetNewProcessor(unparsedTicks);
 			GetProcessorReady(processor);
+			startDateTime = DateTime.Now;
 			string outputFileName = outputDirectoryTextBox.Text + '\\' + dataset.DirName + ".csv";
 			processor.ProgressChanged += UpdateProgressBarFromProcessor;
 			using (StreamWriter writer = new(outputFileName))
@@ -141,6 +143,10 @@ namespace RansacBot.HystoryTest
 		private void UpdateProgressBarFromProcessor(FinishedTradesFromUnparsedTicks finishedTrades)
 		{
 			this.Invoke(GetChangingProgress((int)finishedTrades.ProgressPromille));
+			this.Invoke(new Action(() => 
+			remainingTimeLabel.Text = "Approximate Remaining Time: " + 
+			((DateTime.Now - startDateTime) * 
+			((1000 - finishedTrades.ProgressPromille) / finishedTrades.ProgressPromille)).ToString(@"hh\:mm\:ss")));
 		}
 
 		private Action GetChangingStatusTo(string status)
@@ -155,62 +161,6 @@ namespace RansacBot.HystoryTest
 		}
 		
 
-		private void ProcessFiles(string path, List<string> names, string outputFile, int period)
-		{
-			S2_ET_S2_DecisionMaker decisionMaker =
-				new S2_ET_S2_DecisionMaker(useFilterCheckbox.Checked);
-
-			HystoryTradingModule tradingModule =
-				new(
-					decisionMaker.TradeWithStopProvider,
-					decisionMaker.ClosingProvider);
-
-
-			FinishedTradesProvider finishedTradesBuilder = new();
-			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpend;
-			tradingModule.TradeClosedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
-			tradingModule.StopExecutedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
-
-
-			StreamWriter writer = new(outputFile);
-
-			finishedTradesBuilder.NewTradeFinished += (finishedTrade) =>
-			{
-				writer.WriteLine(finishedTrade.ToString());
-			};
-
-
-			HystoryQuikSimulator quikSimulator = HystoryQuikSimulator.Instance;
-			finishedTradesBuilder.NewTick += quikSimulator.OnNewTick;
-			quikSimulator.NewTick += decisionMaker.OnNewTick;
-
-			names.Sort(FileNameComparer);
-			IEnumerable<Tick> allTicks =
-				new TicksLazySequentialParser(
-					names.
-					Select((name) => path + name).
-					Select((fileName) => File.ReadLines(fileName).Skip(1)).
-					Concat(), 
-					TicksParser.DamirStandart);
-			int numberOfTicks = allTicks.Count();
-			this.Invoke((Action)(() => progressBar1.Maximum = numberOfTicks / period));
-			this.Invoke((Action)(() => progressBar1.Value = 0));
-
-			Task.Run(() =>
-			{
-				int count = 0;
-				foreach (Tick tick in allTicks)
-				{
-					finishedTradesBuilder.OnNewTick(tick);
-					if (count > period)
-					{
-						count = 0;
-					}
-					count++;
-				}
-				writer.Dispose();
-			});
-		}
 		int FileNameComparer(string s1, string s2)
 		{
 			int n1 = NumberOfFile(s1);

@@ -40,10 +40,10 @@ namespace RansacBot.HystoryTest
 			this.progressBar1 = new System.Windows.Forms.ProgressBar();
 			this.inputFilesTreeView = new System.Windows.Forms.TreeView();
 			this.clearInputFilesButton = new System.Windows.Forms.Button();
-			this.allFileProcessing = new System.ComponentModel.BackgroundWorker();
 			this.useFilterCheckbox = new System.Windows.Forms.CheckBox();
 			this.statusRichTextBox = new System.Windows.Forms.RichTextBox();
 			this.ransacLevelUsageControl1 = new RansacBot.UI.Components.RansacLevelUsageControl();
+			this.remainingTimeLabel = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// inputFileDialog
@@ -167,11 +167,21 @@ namespace RansacBot.HystoryTest
 			this.ransacLevelUsageControl1.Size = new System.Drawing.Size(289, 42);
 			this.ransacLevelUsageControl1.TabIndex = 11;
 			// 
+			// remainingTimeLabel
+			// 
+			this.remainingTimeLabel.AutoSize = true;
+			this.remainingTimeLabel.Location = new System.Drawing.Point(475, 384);
+			this.remainingTimeLabel.Name = "remainingTimeLabel";
+			this.remainingTimeLabel.Size = new System.Drawing.Size(10, 15);
+			this.remainingTimeLabel.TabIndex = 13;
+			this.remainingTimeLabel.Text = "|";
+			// 
 			// FlexibleHystoryTestForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.remainingTimeLabel);
 			this.Controls.Add(this.ransacLevelUsageControl1);
 			this.Controls.Add(this.statusRichTextBox);
 			this.Controls.Add(this.useFilterCheckbox);
@@ -204,9 +214,9 @@ namespace RansacBot.HystoryTest
 		private System.Windows.Forms.ProgressBar progressBar1;
 		private System.Windows.Forms.TreeView inputFilesTreeView;
 		private System.Windows.Forms.Button clearInputFilesButton;
-		private System.ComponentModel.BackgroundWorker allFileProcessing;
 		private System.Windows.Forms.CheckBox useFilterCheckbox;
 		private System.Windows.Forms.RichTextBox statusRichTextBox;
 		private UI.Components.RansacLevelUsageControl ransacLevelUsageControl1;
+		private System.Windows.Forms.Label remainingTimeLabel;
 	}
 }

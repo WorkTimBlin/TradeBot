@@ -3,6 +3,7 @@ using RansacBot.Trading;
 using RansacBot.Trading.Hystory.Infrastructure;
 using RansacsRealTime;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -70,7 +71,7 @@ namespace RansacBot.HystoryTest
 			finishedTradesBuilder.NewTradeFinished += SetFinishedTrade;
 
 
-			HystoryQuikSimulator quikSimulator = HystoryQuikSimulator.Instance;
+			HystoryQuikSimulator quikSimulator = tradingModule.QuikSimulator;
 			finishedTradesBuilder.NewTick += quikSimulator.OnNewTick;
 			quikSimulator.NewTick += decisionMaker.OnNewTick;
 
@@ -95,6 +96,73 @@ namespace RansacBot.HystoryTest
 			finishedTradesBuilder.NewTradeFinished -= SetFinishedTrade;
 			State = HystoryProcessorState.Finished;
 			ProgressChanged?.Invoke(this);
+		}
+	}
+	class FinishedTradesFromTicks : IEnumerable<FinishedTrade>
+	{
+		public float ProgressPromille { get => processedTicksCount * 1000 / totalTicksCount; }
+		public HystoryProcessorState State = HystoryProcessorState.Created;
+		IDecisionProvider decisionProvider;
+		IEnumerable<Tick> ticks;
+		int totalTicksCount = 1;
+		int processedTicksCount;
+		public FinishedTradesFromTicks(IEnumerable<Tick> ticks, IDecisionProvider decisionProvider)
+		{
+			this.ticks = ticks;
+			this.decisionProvider = decisionProvider;
+		}
+		public IEnumerator<FinishedTrade> GetEnumerator()
+		{
+			if (State != HystoryProcessorState.Created) 
+				throw new Exception("can't start two enumerators at the same time");
+			State = HystoryProcessorState.Counting;
+			totalTicksCount = ticks.Count();
+			State = HystoryProcessorState.Ready;
+
+			decisionProvider.Clear();
+
+			HystoryTradingModule tradingModule =
+				new(
+					decisionProvider.TradeWithStopProvider,
+					decisionProvider.ClosingProvider);
+
+
+			FinishedTradesProvider finishedTradesBuilder = new();
+			tradingModule.TradeExecuted += finishedTradesBuilder.OnTradeOpend;
+			tradingModule.TradeClosedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
+			tradingModule.StopExecutedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
+
+
+			FinishedTrade? finishedTrade = null;
+			void SetFinishedTrade(FinishedTrade trade) => finishedTrade = trade;
+			finishedTradesBuilder.NewTradeFinished += SetFinishedTrade;
+
+
+			HystoryQuikSimulator quikSimulator = tradingModule.QuikSimulator;
+			finishedTradesBuilder.NewTick += quikSimulator.OnNewTick;
+			quikSimulator.NewTick += decisionProvider.OnNewTick;
+
+
+			State = HystoryProcessorState.Processing;
+			int count = 0;
+			foreach (Tick tick in ticks)
+			{
+				finishedTradesBuilder.OnNewTick(tick);
+				processedTicksCount++;
+				count++;
+				if (finishedTrade != null)
+				{
+					yield return (FinishedTrade)finishedTrade;
+					finishedTrade = null;
+				}
+			}
+			finishedTradesBuilder.NewTradeFinished -= SetFinishedTrade;
+			State = HystoryProcessorState.Created;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 	}
 	public enum HystoryProcessorState

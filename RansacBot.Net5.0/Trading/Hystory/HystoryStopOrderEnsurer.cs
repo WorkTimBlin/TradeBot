@@ -12,10 +12,10 @@ namespace RansacBot.Trading.Hystory
 	{
 		readonly IHystoryOrderEvents orderEvents;
 
-		public HystoryStopOrderEnsurer(HystoryOrder order) :
-			base(order, Infrastructure.HystoryQuikSimulator.Instance.Stops)
+		public HystoryStopOrderEnsurer(HystoryOrder order, Infrastructure.HystoryQuikSimulator quikSimulator) :
+			base(order, quikSimulator.Stops)
 		{
-			orderEvents = HystoryQuikSimulator.Instance.Stops;
+			orderEvents = quikSimulator.Stops;
 		}
 
 		protected override HystoryOrder GetCompletionAttribute()

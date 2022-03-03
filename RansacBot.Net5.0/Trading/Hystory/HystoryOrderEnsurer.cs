@@ -13,10 +13,10 @@ namespace RansacBot.Trading.Hystory
 	class HystoryOrderEnsurer : AbstractOrderEnsurerWithPrice<HystoryOrder>
 	{
 		IHystoryOrderEvents orderEvents;
-		public HystoryOrderEnsurer(HystoryOrder trade) :
-			base(trade, Infrastructure.HystoryQuikSimulator.Instance.Orders)
+		public HystoryOrderEnsurer(HystoryOrder trade, HystoryQuikSimulator quikSimulator) :
+			base(trade, quikSimulator.Orders)
 		{
-			orderEvents = HystoryQuikSimulator.Instance.Orders;
+			orderEvents = quikSimulator.Orders;
 		}
 
 		protected override double GetCompletionAttribute()

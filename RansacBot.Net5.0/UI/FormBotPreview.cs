@@ -135,7 +135,7 @@ namespace RansacBot
 			};
 
 
-			HystoryQuikSimulator quikSimulator = HystoryQuikSimulator.Instance;
+			HystoryQuikSimulator quikSimulator = new HystoryQuikSimulator();
 			finishedTradesBuilder.NewTick += quikSimulator.OnNewTick;
 			quikSimulator.NewTick += decisionMaker.OnNewTick;
 

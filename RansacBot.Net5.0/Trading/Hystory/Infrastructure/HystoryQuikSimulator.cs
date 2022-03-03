@@ -15,10 +15,12 @@ namespace RansacBot.Trading.Hystory.Infrastructure
 
 		public event Action<Tick> NewTick;
 
-		public OrdersContainer Orders { get; } = new();
-		public StopsContainer Stops { get; } = new();
-		private HystoryQuikSimulator()
+		public OrdersContainer Orders { get; }
+		public StopsContainer Stops { get; }
+		public HystoryQuikSimulator()
 		{
+			Orders = new(GetNewTransID);
+			Stops = new(GetNewTransID);
 			Stops.OrderChanged += CreateOrderFromStopIfExecuted;
 		}
 
@@ -49,6 +51,12 @@ namespace RansacBot.Trading.Hystory.Infrastructure
 		protected List<HystoryOrder> actives = new();
 		List<HystoryOrder> dones = new();
 		List<HystoryOrder> awaitingActivation = new();
+		Func<long> GetNewTransId;
+
+		public AbstractOrdersContainer(Func<long> getNewTransId)
+		{
+			GetNewTransId = getNewTransId;
+		}
 
 		public void OnNewTick(Tick tick)
 		{
@@ -74,7 +82,7 @@ namespace RansacBot.Trading.Hystory.Infrastructure
 			if (order.state != QuikSharp.DataStructures.State.Active) 
 				return Task.FromResult(-1L);
 			if(order.transID == 0)
-				order.transID = HystoryQuikSimulator.Instance.GetNewTransID();
+				order.transID = GetNewTransId();
 			awaitingActivation.Add(order);
 			return Task.FromResult(order.transID);
 		}
@@ -121,6 +129,7 @@ namespace RansacBot.Trading.Hystory.Infrastructure
 
 	class OrdersContainer : AbstractOrdersContainer
 	{
+		public OrdersContainer(Func<long> GetNewTransId) : base(GetNewTransId) { }
 		protected override bool NeedExecution(HystoryOrder order, double price)
 		{
 			return (order.direction == TradeDirection.buy && order.price >= price) ||
@@ -130,6 +139,8 @@ namespace RansacBot.Trading.Hystory.Infrastructure
 
 	class StopsContainer : AbstractOrdersContainer
 	{
+		public StopsContainer(Func<long> getNewTransId) : base(getNewTransId) { }
+
 		protected override bool NeedExecution(HystoryOrder order, double price)
 		{
 			return (order.direction == TradeDirection.buy && order.price <= price) ||

@@ -9,9 +9,9 @@
 
 	public enum SigmaType : byte
 	{
-		ErrorThreshold,
-		Sigma,
-		SigmaInliers,
-		СonfidenceInterval
+		ErrorThreshold = 0,
+		Sigma = 1,
+		SigmaInliers = 2,
+		СonfidenceInterval = 3
 	}
 }

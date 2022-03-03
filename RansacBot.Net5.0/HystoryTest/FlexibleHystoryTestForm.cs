@@ -21,6 +21,9 @@ namespace RansacBot.HystoryTest
 		DateTime startDateTime;
 		List<Dataset> datasets = new();
 		List<Control> adjustmentControls;
+		RansacObservingParameters closingRansac;
+		RansacObservingParameters filterRansac;
+		RansacObservingParameters stopsRansac;
 		
 		public FlexibleHystoryTestForm()
 		{
@@ -31,7 +34,10 @@ namespace RansacBot.HystoryTest
 				addDatasetButton,
 				clearDatasetsButton,
 				useFilterCheckbox,
-				findOutputDirectoryButton
+				findOutputDirectoryButton, 
+				closerRansacLevelUsageControl,
+				filterRansacLevelUsageControl,
+				stopsPlacingRansacLevelUsageControl
 			};
 		}
 
@@ -71,40 +77,14 @@ namespace RansacBot.HystoryTest
 		}
 
 
-		//private Dictionary<SigmaType, int> GetEnoughRansacsCascades()
-		//{
-		//	List<RansacLevelUsageControl> usedRansacLevels = new()
-		//	{
-		//		//stopPlacerRansacLevelUsageControl,
-		//		//higherLowerFilterRansacLevelUsageControl,
-		//		//closingRansacLevelUsageControl
-		//	};
-		//	return GetEnoughRansacsCascades(usedRansacLevels);
-		//}
-		//private Dictionary<SigmaType, int> GetEnoughRansacsCascades(
-		//	List<RansacLevelUsageControl> usedRansacLevels)
-		//{
-		//	Dictionary<SigmaType, int> levels = new();
-		//	foreach(RansacLevelUsageControl control in usedRansacLevels)
-		//	{
-		//		if (levels.ContainsKey(control.SigmaType))
-		//		{
-		//			if(control.Level > levels[control.SigmaType])
-		//			{
-		//				levels[control.SigmaType] = control.Level;
-		//			}
-		//		}
-		//		else
-		//		{
-		//			levels.Add(control.SigmaType, control.Level);
-		//		}
-		//	}
-		//	return levels;
-		//}
+		
 
 
 		private void runButton_Click(object sender, EventArgs e)
 		{
+			closingRansac = closerRansacLevelUsageControl.Parameters;
+			filterRansac = filterRansacLevelUsageControl.Parameters;
+			stopsRansac = stopsPlacingRansacLevelUsageControl.Parameters;
 			this.Invoke((Action)BlockAllAdjustmentControls);
 			Task.Run(() =>
 			{
@@ -114,6 +94,7 @@ namespace RansacBot.HystoryTest
 				}
 			}).ContinueWith((task) => this.Invoke((Action)UnblockAllAdjustmentControls));
 		}
+
 
 		private void ProcessDataset(Dataset dataset)
 		{
@@ -136,9 +117,40 @@ namespace RansacBot.HystoryTest
 			processor.ProgressChanged -= UpdateProgressBarFromProcessor;
 		}
 
+		private void ProcessFilesFromDataset(Dataset dataset)
+		{
+			this.Invoke(GetChangingStatusTo("Processing dataset " + dataset.DirName));
+			string outputDirName = outputDirectoryTextBox.Text + '\\' + dataset.DirName + "_Deals";
+			if (Directory.Exists(outputDirName)) throw new Exception("Dir already exists!");
+			foreach(string filename in dataset.fileNames)
+			{
+				IEnumerable<string> unparsedTicks = File.ReadLines(dataset.DirName + filename);
+				FinishedTradesFromUnparsedTicks processor = GetNewProcessor(unparsedTicks);
+				GetProcessorReady(processor);
+				startDateTime = DateTime.Now;
+				processor.ProgressChanged += UpdateProgressBarFromProcessor;
+				using (StreamWriter writer = new(outputFileName))
+				{
+					this.Invoke(GetChangingStatusTo("Building Trades..."));
+					foreach (string trade in Process(processor))
+					{
+						writer.WriteLine(trade);
+					}
+					this.Invoke(GetChangingStatusTo("Trades builded!"));
+				}
+				processor.ProgressChanged -= UpdateProgressBarFromProcessor;
+			}
+		}
+
 		private FinishedTradesFromUnparsedTicks GetNewProcessor(IEnumerable<string> unparsedTicks)
 		{
-			return new(useFilterCheckbox.Checked, unparsedTicks, TicksParser.DamirStandart);
+			return new(unparsedTicks, 
+				TicksParser.DamirStandart, 
+				new Closer_Filter_StopDecisionMaker(
+					closingRansac, 
+					filterRansac, 
+					stopsRansac, 
+					useFilterCheckbox.Checked));
 		}
 		private void GetProcessorReady(FinishedTradesFromUnparsedTicks processor)
 		{

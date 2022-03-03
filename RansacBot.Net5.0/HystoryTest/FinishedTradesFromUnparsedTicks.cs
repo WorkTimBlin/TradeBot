@@ -21,14 +21,14 @@ namespace RansacBot.HystoryTest
 		public double ProgressPromille { get => numberOfProcessedTicks * 1000 / numberOfTicks; }
 		private ulong numberOfTicks;
 		private ulong numberOfProcessedTicks = 0;
-		private bool useFilter;
 		private IEnumerable<Tick> ticks;
 		private IEnumerable<string> unparsedTicks;
+		private IDecisionProvider decisionMaker;
 
-		public FinishedTradesFromUnparsedTicks(bool useFilter, IEnumerable<string> unparsedTicks, ITicksParser parser)
+		public FinishedTradesFromUnparsedTicks(IEnumerable<string> unparsedTicks, ITicksParser parser, IDecisionProvider decisionProvider)
 		{
-			this.useFilter = useFilter;
 			this.unparsedTicks = unparsedTicks;
+			decisionMaker = decisionProvider;
 			ticks = new TicksLazySequentialParser(unparsedTicks, parser);
 		}
 
@@ -51,8 +51,7 @@ namespace RansacBot.HystoryTest
 			if (State > HystoryProcessorState.Ready) throw new Exception("started already");
 			State = HystoryProcessorState.Processing;
 			if (period == 0) period = (int)(numberOfTicks / 1000);
-			S2_ET_S2_DecisionMaker decisionMaker =
-				new S2_ET_S2_DecisionMaker(useFilter);
+			decisionMaker.Clear();
 
 			HystoryTradingModule tradingModule =
 				new(

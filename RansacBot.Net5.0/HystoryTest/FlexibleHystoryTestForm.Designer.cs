@@ -42,8 +42,10 @@ namespace RansacBot.HystoryTest
 			this.clearDatasetsButton = new System.Windows.Forms.Button();
 			this.useFilterCheckbox = new System.Windows.Forms.CheckBox();
 			this.statusRichTextBox = new System.Windows.Forms.RichTextBox();
-			this.ransacLevelUsageControl1 = new RansacBot.UI.Components.RansacLevelUsageControl();
+			this.closerRansacLevelUsageControl = new RansacBot.UI.Components.RansacLevelUsageControl();
 			this.remainingTimeLabel = new System.Windows.Forms.Label();
+			this.filterRansacLevelUsageControl = new RansacBot.UI.Components.RansacLevelUsageControl();
+			this.stopsPlacingRansacLevelUsageControl = new RansacBot.UI.Components.RansacLevelUsageControl();
 			this.SuspendLayout();
 			// 
 			// inputFileDialog
@@ -55,7 +57,7 @@ namespace RansacBot.HystoryTest
 			// 
 			// addDatasetButton
 			// 
-			this.addDatasetButton.Location = new System.Drawing.Point(475, 15);
+			this.addDatasetButton.Location = new System.Drawing.Point(477, 15);
 			this.addDatasetButton.Name = "addDatasetButton";
 			this.addDatasetButton.Size = new System.Drawing.Size(75, 23);
 			this.addDatasetButton.TabIndex = 0;
@@ -125,12 +127,12 @@ namespace RansacBot.HystoryTest
 			this.inputFilesTreeView.Cursor = System.Windows.Forms.Cursors.Default;
 			this.inputFilesTreeView.Location = new System.Drawing.Point(117, 15);
 			this.inputFilesTreeView.Name = "inputFilesTreeView";
-			this.inputFilesTreeView.Size = new System.Drawing.Size(352, 97);
+			this.inputFilesTreeView.Size = new System.Drawing.Size(354, 97);
 			this.inputFilesTreeView.TabIndex = 8;
 			// 
 			// clearDatasetsButton
 			// 
-			this.clearDatasetsButton.Location = new System.Drawing.Point(475, 44);
+			this.clearDatasetsButton.Location = new System.Drawing.Point(477, 44);
 			this.clearDatasetsButton.Name = "clearDatasetsButton";
 			this.clearDatasetsButton.Size = new System.Drawing.Size(75, 23);
 			this.clearDatasetsButton.TabIndex = 0;
@@ -141,7 +143,9 @@ namespace RansacBot.HystoryTest
 			// useFilterCheckbox
 			// 
 			this.useFilterCheckbox.AutoSize = true;
-			this.useFilterCheckbox.Location = new System.Drawing.Point(13, 307);
+			this.useFilterCheckbox.Checked = true;
+			this.useFilterCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.useFilterCheckbox.Location = new System.Drawing.Point(307, 207);
 			this.useFilterCheckbox.Name = "useFilterCheckbox";
 			this.useFilterCheckbox.Size = new System.Drawing.Size(164, 19);
 			this.useFilterCheckbox.TabIndex = 9;
@@ -150,22 +154,22 @@ namespace RansacBot.HystoryTest
 			// 
 			// statusRichTextBox
 			// 
-			this.statusRichTextBox.Location = new System.Drawing.Point(475, 147);
+			this.statusRichTextBox.Location = new System.Drawing.Point(477, 147);
 			this.statusRichTextBox.Name = "statusRichTextBox";
-			this.statusRichTextBox.Size = new System.Drawing.Size(313, 234);
+			this.statusRichTextBox.Size = new System.Drawing.Size(311, 234);
 			this.statusRichTextBox.TabIndex = 10;
 			this.statusRichTextBox.Text = "";
 			// 
-			// ransacLevelUsageControl1
+			// closerRansacLevelUsageControl
 			// 
-			this.ransacLevelUsageControl1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.ransacLevelUsageControl1.LabelText = "Ransac";
-			this.ransacLevelUsageControl1.Level = 2;
-			this.ransacLevelUsageControl1.Location = new System.Drawing.Point(12, 147);
-			this.ransacLevelUsageControl1.Name = "ransacLevelUsageControl1";
-			this.ransacLevelUsageControl1.SigmaType = RansacsRealTime.SigmaType.ErrorThreshold;
-			this.ransacLevelUsageControl1.Size = new System.Drawing.Size(289, 42);
-			this.ransacLevelUsageControl1.TabIndex = 11;
+			this.closerRansacLevelUsageControl.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.closerRansacLevelUsageControl.LabelText = "Closing Ransac";
+			this.closerRansacLevelUsageControl.Level = 2;
+			this.closerRansacLevelUsageControl.Location = new System.Drawing.Point(13, 147);
+			this.closerRansacLevelUsageControl.Name = "closerRansacLevelUsageControl";
+			this.closerRansacLevelUsageControl.SigmaType = RansacsRealTime.SigmaType.Sigma;
+			this.closerRansacLevelUsageControl.Size = new System.Drawing.Size(289, 42);
+			this.closerRansacLevelUsageControl.TabIndex = 11;
 			// 
 			// remainingTimeLabel
 			// 
@@ -176,13 +180,37 @@ namespace RansacBot.HystoryTest
 			this.remainingTimeLabel.TabIndex = 13;
 			this.remainingTimeLabel.Text = "|";
 			// 
+			// filterRansacLevelUsageControl
+			// 
+			this.filterRansacLevelUsageControl.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.filterRansacLevelUsageControl.LabelText = "Filter Ransac";
+			this.filterRansacLevelUsageControl.Level = 4;
+			this.filterRansacLevelUsageControl.Location = new System.Drawing.Point(12, 195);
+			this.filterRansacLevelUsageControl.Name = "filterRansacLevelUsageControl";
+			this.filterRansacLevelUsageControl.SigmaType = RansacsRealTime.SigmaType.ErrorThreshold;
+			this.filterRansacLevelUsageControl.Size = new System.Drawing.Size(289, 42);
+			this.filterRansacLevelUsageControl.TabIndex = 11;
+			// 
+			// stopsPlacingRansacLevelUsageControl
+			// 
+			this.stopsPlacingRansacLevelUsageControl.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.stopsPlacingRansacLevelUsageControl.LabelText = "Stops Ransac";
+			this.stopsPlacingRansacLevelUsageControl.Level = 2;
+			this.stopsPlacingRansacLevelUsageControl.Location = new System.Drawing.Point(12, 243);
+			this.stopsPlacingRansacLevelUsageControl.Name = "stopsPlacingRansacLevelUsageControl";
+			this.stopsPlacingRansacLevelUsageControl.SigmaType = RansacsRealTime.SigmaType.Sigma;
+			this.stopsPlacingRansacLevelUsageControl.Size = new System.Drawing.Size(289, 42);
+			this.stopsPlacingRansacLevelUsageControl.TabIndex = 11;
+			// 
 			// FlexibleHystoryTestForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
 			this.Controls.Add(this.remainingTimeLabel);
-			this.Controls.Add(this.ransacLevelUsageControl1);
+			this.Controls.Add(this.stopsPlacingRansacLevelUsageControl);
+			this.Controls.Add(this.filterRansacLevelUsageControl);
+			this.Controls.Add(this.closerRansacLevelUsageControl);
 			this.Controls.Add(this.statusRichTextBox);
 			this.Controls.Add(this.useFilterCheckbox);
 			this.Controls.Add(this.inputFilesTreeView);
@@ -216,7 +244,9 @@ namespace RansacBot.HystoryTest
 		private System.Windows.Forms.Button clearDatasetsButton;
 		private System.Windows.Forms.CheckBox useFilterCheckbox;
 		private System.Windows.Forms.RichTextBox statusRichTextBox;
-		private UI.Components.RansacLevelUsageControl ransacLevelUsageControl1;
+		private UI.Components.RansacLevelUsageControl closerRansacLevelUsageControl;
 		private System.Windows.Forms.Label remainingTimeLabel;
+		private UI.Components.RansacLevelUsageControl filterRansacLevelUsageControl;
+		private UI.Components.RansacLevelUsageControl stopsPlacingRansacLevelUsageControl;
 	}
 }

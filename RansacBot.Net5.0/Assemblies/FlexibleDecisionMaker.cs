@@ -17,6 +17,9 @@ namespace RansacBot.Assemblies
 
 
 		public ITradeByVertexDecider Decider { get; set; }
+
+		public IVertexFinder VertexProvider => throw new NotImplementedException();
+
 		void SubscribeDicider()
 		{
 			decider.NewTrade -= filter.OnNewTrade;

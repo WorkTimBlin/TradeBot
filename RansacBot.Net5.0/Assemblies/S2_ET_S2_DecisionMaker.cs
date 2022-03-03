@@ -12,6 +12,7 @@ namespace RansacBot.Assemblies
 	{
 		public IClosingProvider ClosingProvider { get; }
 		public ITradeWithStopProvider TradeWithStopProvider { get; }
+		public IVertexFinder VertexProvider { get; }
 		public void Clear();
 	}
 	class S2_ET_S2_DecisionMaker : ITickProcessor, IDecisionProvider

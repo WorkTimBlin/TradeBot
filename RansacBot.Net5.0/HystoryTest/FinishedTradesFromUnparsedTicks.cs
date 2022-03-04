@@ -65,8 +65,8 @@ namespace RansacBot.HystoryTest
 			tradingModule.StopExecutedOnPrice += finishedTradesBuilder.OnTradeClosedOnPrice;
 
 
-			List<FinishedTrade> finishedTrades = new();
-			void SetFinishedTrade(FinishedTrade trade) => finishedTrades.Add(trade);
+			Queue<FinishedTrade> finishedTrades = new();
+			void SetFinishedTrade(FinishedTrade trade) => finishedTrades.Enqueue(trade);
 			finishedTradesBuilder.NewTradeFinished += SetFinishedTrade;
 
 
@@ -87,10 +87,7 @@ namespace RansacBot.HystoryTest
 				numberOfProcessedTicks++;
 				count++;
 				while(finishedTrades.Count > 0)
-				{
-					yield return finishedTrades[0];
-					finishedTrades.RemoveAt(0);
-				}
+					yield return finishedTrades.Dequeue();
 			}
 			finishedTradesBuilder.NewTradeFinished -= SetFinishedTrade;
 			State = HystoryProcessorState.Finished;

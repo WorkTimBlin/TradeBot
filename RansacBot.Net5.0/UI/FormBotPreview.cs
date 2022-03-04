@@ -25,8 +25,6 @@ namespace RansacBot
 {
 	public partial class FormBotPreview : Form
 	{
-		private bool stopRequired = false;
-		private bool isRunning = false;
 		RansacsOxyPrinterWithTrades stopPrinter;
 		RansacsOxyPrinterWithTrades filterPrinter;
 		IStopsContainer stopsContainer;
@@ -55,7 +53,6 @@ namespace RansacBot
 
 		private void stop_Click(object sender, EventArgs e)
 		{
-			if (isRunning) stopRequired = true;
 			timer1.Stop();
 			if(decisionProvider != null)
 			{

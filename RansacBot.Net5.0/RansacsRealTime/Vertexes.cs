@@ -114,7 +114,7 @@ namespace RansacsRealTime
 			reader.ReadLine();
 			while (!reader.EndOfStream)
 			{
-				string[] data = reader.ReadLine().Split(';');
+				string[] data = (reader.ReadLine() ?? throw new Exception()).Split(';');
 				vertexList.Add(new Tick(Convert.ToInt64(data[0]), Convert.ToInt32(data[1]), (double)Convert.ToDecimal(data[2])));
 			}
 		}

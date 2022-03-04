@@ -41,7 +41,7 @@ namespace RansacBot.UI.Components
 			// sigmaTypeLabel
 			// 
 			this.sigmaTypeLabel.AutoSize = true;
-			this.sigmaTypeLabel.Location = new System.Drawing.Point(4, 19);
+			this.sigmaTypeLabel.Location = new System.Drawing.Point(-1, 20);
 			this.sigmaTypeLabel.Name = "sigmaTypeLabel";
 			this.sigmaTypeLabel.Size = new System.Drawing.Size(67, 15);
 			this.sigmaTypeLabel.TabIndex = 0;
@@ -51,7 +51,7 @@ namespace RansacBot.UI.Components
 			// 
 			this.sigmaTypeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.sigmaTypeComboBox.FormattingEnabled = true;
-			this.sigmaTypeComboBox.Location = new System.Drawing.Point(76, 15);
+			this.sigmaTypeComboBox.Location = new System.Drawing.Point(72, 17);
 			this.sigmaTypeComboBox.Name = "sigmaTypeComboBox";
 			this.sigmaTypeComboBox.Size = new System.Drawing.Size(130, 23);
 			this.sigmaTypeComboBox.TabIndex = 1;
@@ -59,7 +59,7 @@ namespace RansacBot.UI.Components
 			// levelLabel
 			// 
 			this.levelLabel.AutoSize = true;
-			this.levelLabel.Location = new System.Drawing.Point(212, 19);
+			this.levelLabel.Location = new System.Drawing.Point(208, 20);
 			this.levelLabel.Name = "levelLabel";
 			this.levelLabel.Size = new System.Drawing.Size(34, 15);
 			this.levelLabel.TabIndex = 0;
@@ -67,7 +67,7 @@ namespace RansacBot.UI.Components
 			// 
 			// levelNumericUpDown
 			// 
-			this.levelNumericUpDown.Location = new System.Drawing.Point(250, 16);
+			this.levelNumericUpDown.Location = new System.Drawing.Point(248, 17);
 			this.levelNumericUpDown.Maximum = new decimal(new int[] {
             20,
             0,
@@ -90,7 +90,7 @@ namespace RansacBot.UI.Components
 			// nameLabel
 			// 
 			this.nameLabel.AutoSize = true;
-			this.nameLabel.Location = new System.Drawing.Point(4, 4);
+			this.nameLabel.Location = new System.Drawing.Point(-1, 0);
 			this.nameLabel.Name = "nameLabel";
 			this.nameLabel.Size = new System.Drawing.Size(44, 15);
 			this.nameLabel.TabIndex = 3;
@@ -107,7 +107,7 @@ namespace RansacBot.UI.Components
 			this.Controls.Add(this.levelLabel);
 			this.Controls.Add(this.sigmaTypeLabel);
 			this.Name = "RansacLevelUsageControl";
-			this.Size = new System.Drawing.Size(289, 42);
+			this.Size = new System.Drawing.Size(287, 42);
 			((System.ComponentModel.ISupportInitialize)(this.levelNumericUpDown)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();

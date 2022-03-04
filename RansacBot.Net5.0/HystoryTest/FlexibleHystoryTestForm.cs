@@ -31,7 +31,9 @@ namespace RansacBot.HystoryTest
 			adjustmentControls = new()
 			{
 				runButton,
+				runFilesSeparatlyButton,
 				addDatasetButton,
+				addDatasetFromFolderButton,
 				clearDatasetsButton,
 				useFilterCheckbox,
 				findOutputDirectoryButton, 
@@ -43,12 +45,34 @@ namespace RansacBot.HystoryTest
 
 		private void addDatasetButton_Click(object sender, EventArgs e)
 		{
-			inputFileDialog.ShowDialog();
+			if (inputFileDialog.ShowDialog() != DialogResult.OK) return;
 			//hystoryTicksFilePath.Text = inputFileDialog.FileName;
 			List<string> names = inputFileDialog.FileNames.Select((s) => s.Substring(s.LastIndexOf('\\') + 1)).ToList();
 			names.Sort(FileNameComparer);
 			datasets.Add(new(
 				inputFileDialog.FileName.Substring(0, inputFileDialog.FileName.LastIndexOf('\\') + 1),
+				names));
+			UpdateTreeView();
+		}
+		private void addDatasetFromFolderButton_Click(object sender, EventArgs e)
+		{
+			if (inputFolderBrowserDialog.ShowDialog() != DialogResult.OK) return;
+			List<string> names = 
+				Directory.GetFiles(inputFolderBrowserDialog.SelectedPath).
+				Select((s) => s.Substring(s.LastIndexOf('\\') + 1)).ToList();
+			if(!names.TrueForAll(s => s.EndsWith(".txt")))
+			{
+				GetChangingStatusTo("Error : there are files that doesn't end with .txt")();
+				return;
+			}
+			try { names.Sort(FileNameComparer); }
+			catch
+			{
+				GetChangingStatusTo("Error during files sort")();
+				return;
+			}
+			datasets.Add(new(
+				inputFolderBrowserDialog.SelectedPath + '\\',
 				names));
 			UpdateTreeView();
 		}
@@ -71,31 +95,48 @@ namespace RansacBot.HystoryTest
 		}
 		private void findOutputDirectoryButton_Click(object sender, EventArgs e)
 		{
-			outputFolderBrowserDialog.ShowDialog();
+			if (outputFolderBrowserDialog.ShowDialog() != DialogResult.OK) return;
 			outputDirectoryTextBox.Text = outputFolderBrowserDialog.SelectedPath;
-			if(outputDirectoryTextBox.Text.Length > 0) runButton.Enabled = true;
+			if (outputDirectoryTextBox.Text.Length > 0)
+			{
+				runButton.Enabled = true;
+				runFilesSeparatlyButton.Enabled = true;
+			}
 		}
 
 
-		
-
-
 		private void runButton_Click(object sender, EventArgs e)
+		{
+			RunProcessingForAllDatasets(ProcessDataset);
+		}
+		private void runFilesSeparatlyButton_Click(object sender, EventArgs e)
+		{
+			RunProcessingForAllDatasets(ProcessSingleFilesFromDataset);
+		}
+
+
+
+		Task RunProcessingForAllDatasets(Action<Dataset> Process)
 		{
 			closingRansac = closerRansacLevelUsageControl.Parameters;
 			filterRansac = filterRansacLevelUsageControl.Parameters;
 			stopsRansac = stopsPlacingRansacLevelUsageControl.Parameters;
 			this.Invoke((Action)BlockAllAdjustmentControls);
-			Task.Run(() =>
+			return Task.Run(() =>
 			{
 				foreach (var dataset in datasets)
 				{
-					ProcessDataset(dataset);
+					Process(dataset);
 				}
 			}).ContinueWith((task) => this.Invoke((Action)UnblockAllAdjustmentControls));
 		}
-
-
+		void ProcessAllDatasets(Action<Dataset> Process)
+		{
+			foreach(Dataset dataset in datasets)
+			{
+				Process(dataset);
+			}
+		}
 		private void ProcessDataset(Dataset dataset)
 		{
 			this.Invoke(GetChangingStatusTo("Processing dataset " + dataset.DirName));
@@ -116,16 +157,24 @@ namespace RansacBot.HystoryTest
 			}
 			processor.ProgressChanged -= UpdateProgressBarFromProcessor;
 		}
-
-		private void ProcessFilesFromDataset(Dataset dataset)
+		private void ProcessSingleFilesFromDataset(Dataset dataset)
 		{
 			this.Invoke(GetChangingStatusTo("Processing dataset " + dataset.DirName));
 			string outputDirName = outputDirectoryTextBox.Text + '\\' + dataset.DirName + "_Deals";
-			if (Directory.Exists(outputDirName)) throw new Exception("Dir already exists!");
-			foreach(string filename in dataset.fileNames)
+			if (Directory.Exists(outputDirName) && Directory.GetFiles(outputDirName).Length > 0)
 			{
-				IEnumerable<string> unparsedTicks = File.ReadLines(dataset.DirName + filename);
-				FinishedTradesFromUnparsedTicks processor = GetNewProcessor(unparsedTicks);
+				this.Invoke(
+					GetChangingStatusTo(
+						"Output folder " + dataset.DirName + " already exists. Please ensure there's no such folder and try again."));
+				return;
+			}
+			Directory.CreateDirectory(outputDirName);
+			while (!Directory.Exists(outputDirName)) ;
+			foreach((string filename, IEnumerable<string> tickStrings) file in Enumerable.Zip(dataset.fileNames, dataset.FilesWithoutHeaders))
+			{
+				this.Invoke(GetChangingStatusTo("Processing file " + file.filename));
+				string outputFileName = outputDirName + '\\' + file.filename.Replace(".txt", ".csv");
+				FinishedTradesFromUnparsedTicks processor = GetNewProcessor(file.tickStrings);
 				GetProcessorReady(processor);
 				startDateTime = DateTime.Now;
 				processor.ProgressChanged += UpdateProgressBarFromProcessor;
@@ -209,7 +258,7 @@ namespace RansacBot.HystoryTest
 		{
 			return Convert.ToInt32(s1.Substring(0, s1.LastIndexOf('.')).Substring(s1.LastIndexOf('_') + 1));
 		}
-		public class Dataset
+		class Dataset
 		{
 			public readonly string path;
 			public readonly IEnumerable<string> fileNames;
@@ -223,5 +272,6 @@ namespace RansacBot.HystoryTest
 				this.fileNames = fileNames;
 			}
 		}
+
 	}
 }

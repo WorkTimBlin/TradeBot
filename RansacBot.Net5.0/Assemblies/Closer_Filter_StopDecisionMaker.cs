@@ -98,15 +98,15 @@ namespace RansacBot.Assemblies
 		}
 		void SetNewStopPlacer()
 		{
-			stopPlacer = new MaximinStopPlacer(GetCascade(stopsRansac), stopsRansac.level);
+			stopPlacer = new MaximinStopPlacer(GetCascade(stopsRansac), stopsRansac.level - 2);
 		}
 		void SetNewFilter()
 		{
-			filter = new HigherLowerFilterOnRansac(GetCascade(filterRansac), filterRansac.level);
+			filter = new HigherLowerFilterOnRansac(GetCascade(filterRansac), filterRansac.level - 2);
 		}
 		void SetNewCloser()
 		{
-			closer = new CloserOnRansacStops(GetCascade(closingRansac), closingRansac.level, 100);
+			closer = new CloserOnRansacStops(GetCascade(closingRansac), closingRansac.level - 2, 100);
 		}
 
 		RansacsCascade GetCascade(RansacObservingParameters parameters)
@@ -129,7 +129,7 @@ namespace RansacBot.Assemblies
 			}
 			for(int i = 0; i < 4; i++)
 			{
-				cascades[i] = new(session.vertexes, (SigmaType)i, levels[i], 90);
+				cascades[i] = new(session.vertexes, (SigmaType)i, levels[i] - 1, 90);
 			}
 		}
 	}

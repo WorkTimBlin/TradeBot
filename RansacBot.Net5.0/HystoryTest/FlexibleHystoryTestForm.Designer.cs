@@ -46,6 +46,9 @@ namespace RansacBot.HystoryTest
 			this.remainingTimeLabel = new System.Windows.Forms.Label();
 			this.filterRansacLevelUsageControl = new RansacBot.UI.Components.RansacLevelUsageControl();
 			this.stopsPlacingRansacLevelUsageControl = new RansacBot.UI.Components.RansacLevelUsageControl();
+			this.runFilesSeparatlyButton = new System.Windows.Forms.Button();
+			this.addDatasetFromFolderButton = new System.Windows.Forms.Button();
+			this.inputFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
 			this.SuspendLayout();
 			// 
 			// inputFileDialog
@@ -145,7 +148,7 @@ namespace RansacBot.HystoryTest
 			this.useFilterCheckbox.AutoSize = true;
 			this.useFilterCheckbox.Checked = true;
 			this.useFilterCheckbox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.useFilterCheckbox.Location = new System.Drawing.Point(307, 207);
+			this.useFilterCheckbox.Location = new System.Drawing.Point(307, 209);
 			this.useFilterCheckbox.Name = "useFilterCheckbox";
 			this.useFilterCheckbox.Size = new System.Drawing.Size(164, 19);
 			this.useFilterCheckbox.TabIndex = 9;
@@ -202,6 +205,28 @@ namespace RansacBot.HystoryTest
 			this.stopsPlacingRansacLevelUsageControl.Size = new System.Drawing.Size(289, 42);
 			this.stopsPlacingRansacLevelUsageControl.TabIndex = 11;
 			// 
+			// runFilesSeparatlyButton
+			// 
+			this.runFilesSeparatlyButton.Enabled = false;
+			this.runFilesSeparatlyButton.Font = new System.Drawing.Font("Segoe UI", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+			this.runFilesSeparatlyButton.Location = new System.Drawing.Point(154, 332);
+			this.runFilesSeparatlyButton.Name = "runFilesSeparatlyButton";
+			this.runFilesSeparatlyButton.Size = new System.Drawing.Size(315, 67);
+			this.runFilesSeparatlyButton.TabIndex = 6;
+			this.runFilesSeparatlyButton.Text = "Run Files Separatly";
+			this.runFilesSeparatlyButton.UseVisualStyleBackColor = true;
+			this.runFilesSeparatlyButton.Click += new System.EventHandler(this.runFilesSeparatlyButton_Click);
+			// 
+			// addDatasetFromFolderButton
+			// 
+			this.addDatasetFromFolderButton.Location = new System.Drawing.Point(558, 15);
+			this.addDatasetFromFolderButton.Name = "addDatasetFromFolderButton";
+			this.addDatasetFromFolderButton.Size = new System.Drawing.Size(112, 23);
+			this.addDatasetFromFolderButton.TabIndex = 0;
+			this.addDatasetFromFolderButton.Text = "Add folder...";
+			this.addDatasetFromFolderButton.UseVisualStyleBackColor = true;
+			this.addDatasetFromFolderButton.Click += new System.EventHandler(this.addDatasetFromFolderButton_Click);
+			// 
 			// FlexibleHystoryTestForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -215,12 +240,14 @@ namespace RansacBot.HystoryTest
 			this.Controls.Add(this.useFilterCheckbox);
 			this.Controls.Add(this.inputFilesTreeView);
 			this.Controls.Add(this.progressBar1);
+			this.Controls.Add(this.runFilesSeparatlyButton);
 			this.Controls.Add(this.runButton);
 			this.Controls.Add(this.outputDirectoryLabel);
 			this.Controls.Add(this.inputFileLabel);
 			this.Controls.Add(this.outputDirectoryTextBox);
 			this.Controls.Add(this.findOutputDirectoryButton);
 			this.Controls.Add(this.clearDatasetsButton);
+			this.Controls.Add(this.addDatasetFromFolderButton);
 			this.Controls.Add(this.addDatasetButton);
 			this.Name = "FlexibleHystoryTestForm";
 			this.Text = "Bot Hystory Test";
@@ -248,5 +275,8 @@ namespace RansacBot.HystoryTest
 		private System.Windows.Forms.Label remainingTimeLabel;
 		private UI.Components.RansacLevelUsageControl filterRansacLevelUsageControl;
 		private UI.Components.RansacLevelUsageControl stopsPlacingRansacLevelUsageControl;
+		private System.Windows.Forms.Button runFilesSeparatlyButton;
+		private System.Windows.Forms.Button addDatasetFromFolderButton;
+		private System.Windows.Forms.FolderBrowserDialog inputFolderBrowserDialog;
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RansacBot.Trading.Hystory.Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,14 @@ namespace RansacBot.Trading.Hystory
 {
 	class HystoryStopsOperator : AbstractClassicStopsOperator<HystoryOrder, HystoryOrder>
 	{
-		public HystoryStopsOperator() : 
+		HystoryQuikSimulator quikSimulator; 
+		public HystoryStopsOperator(HystoryQuikSimulator quikSimulator) : 
 			base(
 				(ensurer1, ensurer2) => ensurer1.Order.price > ensurer2.Order.price ? 1 : -1,
 				(ensurer1, ensurer2) => ensurer1.Order.price < ensurer2.Order.price ? 1 : -1)
-		{ }
+		{
+			this.quikSimulator = quikSimulator;
+		}
 
 		public override string GetSerialized(AbstractStopOrderEnsurer<HystoryOrder, HystoryOrder> stopOrder)
 		{
@@ -27,12 +31,12 @@ namespace RansacBot.Trading.Hystory
 		protected override AbstractStopOrderEnsurer<HystoryOrder, HystoryOrder> 
 			BuildStopOrderEnsurer(TradeWithStop trade)
 		{
-			return new HystoryStopOrderEnsurer(new(trade.stop));
+			return new HystoryStopOrderEnsurer(new(trade.stop), quikSimulator);
 		}
 
 		protected override AbstractOrderEnsurerWithPrice<HystoryOrder> GetOrderEnsurer(HystoryOrder order)
 		{
-			return new HystoryOrderEnsurer(order);
+			return new HystoryOrderEnsurer(order, quikSimulator);
 		}
 
 		protected override bool IsLong(AbstractStopOrderEnsurer<HystoryOrder, HystoryOrder> stopEnsurer)

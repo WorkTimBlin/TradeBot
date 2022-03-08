@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Trading
 {
-	class FinishedTradesProvider : ITickFilter
+	class FinishedTradesProvider : IFinishedTradeProvider
 	{
 
 		public event Action<FinishedTrade> NewTradeFinished;
@@ -23,8 +23,9 @@ namespace RansacBot.Trading
 			NewTick.Invoke(tick);
 		}
 
-		public void OnTradeOpend(TradeWithStop tradeWithStop)
+		public void OnTradeOpened(TradeWithStop tradeWithStop)
 		{
+			if (openingTicksOfTrades.ContainsKey(tradeWithStop)) throw new Exception("Already have this deal!");
 			openingTicksOfTrades.Add(tradeWithStop, lastTick);
 		}
 
@@ -38,6 +39,12 @@ namespace RansacBot.Trading
 		{
 			return new(tradeWithStop, closingPrice, openingTicksOfTrades[tradeWithStop], lastTick);
 		}
+	}
+
+	interface IFinishedTradeProvider : ITickFilter
+	{
+		public event Action<FinishedTrade> NewTradeFinished;
+		public void OnTradeClosedOnPrice(TradeWithStop tradeWithStop, double closingPrice);
 	}
 
 	readonly struct FinishedTrade

@@ -1,4 +1,5 @@
 ﻿using RansacBot.Trading;
+using RansacBot.Trading.Filters;
 using RansacsRealTime;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace RansacBot.Assemblies
 	{
 		public IClosingProvider ClosingProvider { get; }
 		public ITradeWithStopProvider TradeWithStopProvider { get; }
+		public IVertexFinder VertexProvider { get; }
+		public void Clear();
 	}
 	class S2_ET_S2_DecisionMaker : ITickProcessor, IDecisionProvider
 	{
@@ -32,7 +35,7 @@ namespace RansacBot.Assemblies
 		IStopPlacer stopPlacer;
 		IClosingProvider closer;
 
-		public S2_ET_S2_DecisionMaker(bool useFilter = true, int n = 100)
+		public S2_ET_S2_DecisionMaker(bool useFilter = true, double n = 100)
 		{
 			session = new(n);
 			SCascade = new(session.vertexes, SigmaType.Sigma, 1, 90);
@@ -42,6 +45,32 @@ namespace RansacBot.Assemblies
 			stopPlacer = new MaximinStopPlacer(SCascade, 0);
 
 			if (useFilter)
+			{
+				filter = new HigherLowerFilterOnRansac(ETCascade, 2);
+				decider.NewTrade += filter.OnNewTrade;
+				filter.NewTrade += stopPlacer.OnNewTrade;
+			}
+			else
+			{
+				decider.NewTrade += stopPlacer.OnNewTrade;
+			}
+
+			closer = new CloserOnRansacStops(SCascade, 0, 100);
+
+			ClosingProvider = closer;
+			TradeWithStopProvider = stopPlacer;
+		}
+
+		public void Clear()
+		{
+			session = new(session.monkeyNFilter.n);
+			SCascade = new(session.vertexes, SigmaType.Sigma, 1, 90);
+			ETCascade = new(session.vertexes, SigmaType.Sigma, 3, 90);
+			decider = new InvertedNDecider();
+			session.monkeyNFilter.NewExtremum += decider.OnNewExtremum;
+			stopPlacer = new MaximinStopPlacer(SCascade, 0);
+
+			if (filter != null)
 			{
 				filter = new HigherLowerFilterOnRansac(ETCascade, 2);
 				decider.NewTrade += filter.OnNewTrade;

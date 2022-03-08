@@ -18,6 +18,15 @@ namespace RansacBot.UI.Components
 			get => nameLabel.Text;
 			set => nameLabel.Text = value;
 		}
+		public RansacObservingParameters Parameters
+		{
+			get => new(this.SigmaType, this.Level);
+			set
+			{
+				SigmaType = value.sigmaType;
+				Level = value.level;
+			}
+		}
 		public SigmaType SigmaType 
 		{ 
 			get => Enum.Parse<SigmaType>(sigmaTypeComboBox.SelectedItem.ToString() ?? throw new Exception()); 
@@ -32,7 +41,7 @@ namespace RansacBot.UI.Components
 		{
 			InitializeComponent();
 			sigmaTypeComboBox.Items.AddRange(Enum.GetNames<SigmaType>());
-			sigmaTypeComboBox.SelectedIndex = 0;
+			if(sigmaTypeComboBox.SelectedIndex == -1) sigmaTypeComboBox.SelectedIndex = 0;
 		}
 	}
 }

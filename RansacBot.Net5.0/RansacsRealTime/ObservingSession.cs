@@ -170,7 +170,7 @@ namespace RansacBot
 		{
 			using (StreamReader reader = new(path + @"/" + fileName))
 			{
-				return (DateTime.Parse(reader.ReadLine().Split(';', StringSplitOptions.RemoveEmptyEntries)[1]), null);
+				return (DateTime.Parse((reader.ReadLine() ?? throw new Exception()).Split(';', StringSplitOptions.RemoveEmptyEntries)[1]), null);
 			}
 		}
 	}

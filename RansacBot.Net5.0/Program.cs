@@ -19,7 +19,7 @@ namespace RansacBot
 			Application.SetCompatibleTextRenderingDefault(false);
 
 			//UI.FormChoice choiceForm = new();
-			Application.Run(new HystoryTest.FlexibleHystoryTestForm());
+			Application.Run(new UI.FlexibleHystoryTestForm());
 		}
 	}
 }

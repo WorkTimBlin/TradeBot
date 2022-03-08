@@ -53,12 +53,12 @@ namespace RansacsRealTime
 		private void LoadStandart(string path)
 		{
 			using System.IO.StreamReader reader = new(path + "/ransacLevel-" + this.level + ".csv");
-			IsBuilding = Convert.ToBoolean(reader.ReadLine().Split(';')[^1]);
+			IsBuilding = Convert.ToBoolean((reader.ReadLine() ?? throw new Exception()).Split(';')[^1]);
 			Ransacs = new();
 
 			while (!reader.EndOfStream)
 			{
-				string[] data = reader.ReadLine().Split(';');
+				string[] data = (reader.ReadLine() ?? throw new Exception()).Split(';');
 				Ransacs.Add(new Ransac(Convert.ToInt32(data[0]), Convert.ToInt32(data[1]),
 					Convert.ToInt32(data[2]), Convert.ToInt32(data[3]) - Convert.ToInt32(data[0]) + 1,
 					(float)Convert.ToDecimal(data[4]), (float)Convert.ToDecimal(data[5]),

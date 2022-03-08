@@ -110,11 +110,11 @@ namespace RansacsRealTime
 		private void LoadMetadata(string path, string fileName = stdMetadataFileName)
 		{
 			using StreamReader reader = new(path + @"\" + fileName);
-			string line = reader.ReadLine().Split(';')[1];
+			string line = (reader.ReadLine() ?? throw new Exception()).Split(';')[1];
 			
 			TypeOfSigma = (SigmaType)Enum.Parse(typeof(SigmaType), line);
-			percentile = Convert.ToDouble(reader.ReadLine().Split(';')[1]);
-			MaxLevel = Convert.ToInt32(reader.ReadLine().Split(';')[1]);
+			percentile = Convert.ToDouble((reader.ReadLine() ?? throw new Exception()).Split(';')[1]);
+			MaxLevel = Convert.ToInt32((reader.ReadLine() ?? throw new Exception()).Split(';')[1]);
 		}
 		private void LoadLevelsStandart(string path)
 		{

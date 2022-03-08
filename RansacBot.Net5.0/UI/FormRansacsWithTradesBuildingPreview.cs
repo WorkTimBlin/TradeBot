@@ -17,6 +17,7 @@ using OxyPlot;
 using QuikSharp;
 using QuikSharp.DataStructures.Transaction;
 using QuikSharp.DataStructures;
+using RansacBot.Trading.Filters;
 
 namespace RansacBot
 {

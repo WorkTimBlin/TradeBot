@@ -22,14 +22,12 @@ namespace RansacBot.HystoryTest
 		private ulong numberOfTicks;
 		private ulong numberOfProcessedTicks = 0;
 		private IEnumerable<Tick> ticks;
-		private IEnumerable<string> unparsedTicks;
 		private IDecisionProvider decisionMaker;
 
-		public FinishedTradesFromUnparsedTicks(IEnumerable<string> unparsedTicks, ITicksParser parser, IDecisionProvider decisionProvider)
+		public FinishedTradesFromUnparsedTicks(IEnumerable<Tick> ticks, IDecisionProvider decisionProvider)
 		{
-			this.unparsedTicks = unparsedTicks;
 			decisionMaker = decisionProvider;
-			ticks = new TicksLazySequentialParser(unparsedTicks, parser);
+			this.ticks = ticks;
 		}
 
 		public void GetReady()
@@ -42,7 +40,7 @@ namespace RansacBot.HystoryTest
 
 		private void CountTicks()
 		{
-			numberOfTicks = (ulong)unparsedTicks.Count();
+			numberOfTicks = (ulong)ticks.Count();
 		}
 
 		public IEnumerable<FinishedTrade> GetAllFinishedTrades(int period = 0)

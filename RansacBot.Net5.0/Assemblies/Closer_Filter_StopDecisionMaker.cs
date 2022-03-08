@@ -1,4 +1,5 @@
 ﻿using RansacBot.Trading;
+using RansacBot.Trading.Filters;
 using RansacsRealTime;
 using System;
 using System.Collections.Generic;
@@ -26,18 +27,22 @@ namespace RansacBot.Assemblies
 		readonly RansacObservingParameters filterRansac;
 		readonly RansacObservingParameters stopsRansac;
 		readonly List<RansacsCascade?> cascades = new() { null, null, null, null };
+		readonly IEnumerable<Func<ITradeFilter>> additionalTradeFilterGetters;
 
 		public Closer_Filter_StopDecisionMaker(
-			RansacObservingParameters closingRansac, 
-			RansacObservingParameters filterRansac, 
+			RansacObservingParameters closingRansac,
+			RansacObservingParameters filterRansac,
 			RansacObservingParameters stopsRansac,
-			bool useFilter = true, double n = 100)
+			bool useFilter = true, 
+			double n = 100,
+			IEnumerable<Func<ITradeFilter>>? additionalTradeFilterGetters = null)
 		{
 			this.closingRansac = closingRansac;
 			this.filterRansac = filterRansac;
 			this.stopsRansac = stopsRansac;
 			usingFilter = useFilter;
 			this.n = n;
+			this.additionalTradeFilterGetters = additionalTradeFilterGetters ?? new List<Func<ITradeFilter>>();
 			Init();
 		}
 
@@ -48,8 +53,7 @@ namespace RansacBot.Assemblies
 		}
 		public void Clear()
 		{
-			if (usingFilter) UnsubscribeThroughFilter();
-			else UnsubscribeBypassingFilter();
+			UnsubscribeThroughFilter();
 			Init();
 		}
 
@@ -59,15 +63,8 @@ namespace RansacBot.Assemblies
 			SetCascades();
 			SetNewDecider();
 			SetNewStopPlacer();
-			if (usingFilter)
-			{
-				SetNewFilter();
-				SubscribeThroughFilter();
-			}
-			else
-			{
-				SubscribeBypassingFilter();
-			}
+			SetNewFilter();
+			SubscribeThroughFilter();
 			SetNewCloser();
 		}
 		void UnsubscribeBypassingFilter()
@@ -102,7 +99,15 @@ namespace RansacBot.Assemblies
 		}
 		void SetNewFilter()
 		{
-			filter = new HigherLowerFilterOnRansac(GetCascade(filterRansac), filterRansac.level - 2);
+			LinearTradeFilter linearFilter = new();
+			
+			if(usingFilter) linearFilter.Add(new HigherLowerFilterOnRansac(GetCascade(filterRansac), filterRansac.level - 2));
+
+			foreach(Func<ITradeFilter> getFilter in additionalTradeFilterGetters)
+			{
+				linearFilter.Add(getFilter());
+			}
+			filter = linearFilter;
 		}
 		void SetNewCloser()
 		{

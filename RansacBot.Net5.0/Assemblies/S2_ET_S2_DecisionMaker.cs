@@ -1,4 +1,5 @@
 ﻿using RansacBot.Trading;
+using RansacBot.Trading.Filters;
 using RansacsRealTime;
 using System;
 using System.Collections.Generic;

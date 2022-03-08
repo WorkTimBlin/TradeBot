@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using RansacBot.UI;
 using RansacsRealTime;
 using RansacBot.Trading;
+using RansacBot.Trading.Filters;
 
 namespace RansacBot.HystoryTest
 {

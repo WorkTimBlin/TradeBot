@@ -1,5 +1,5 @@
 ﻿
-namespace RansacBot.HystoryTest
+namespace RansacBot.UI
 {
 	partial class FlexibleHystoryTestForm
 	{
@@ -49,6 +49,7 @@ namespace RansacBot.HystoryTest
 			this.runFilesSeparatlyButton = new System.Windows.Forms.Button();
 			this.addDatasetFromFolderButton = new System.Windows.Forms.Button();
 			this.inputFolderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+			this.curfewFiltersButton = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// inputFileDialog
@@ -227,11 +228,23 @@ namespace RansacBot.HystoryTest
 			this.addDatasetFromFolderButton.UseVisualStyleBackColor = true;
 			this.addDatasetFromFolderButton.Click += new System.EventHandler(this.addDatasetFromFolderButton_Click);
 			// 
+			// curfewFiltersButton
+			// 
+			this.curfewFiltersButton.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+			this.curfewFiltersButton.Location = new System.Drawing.Point(13, 292);
+			this.curfewFiltersButton.Name = "curfewFiltersButton";
+			this.curfewFiltersButton.Size = new System.Drawing.Size(289, 34);
+			this.curfewFiltersButton.TabIndex = 14;
+			this.curfewFiltersButton.Text = "Curfew Filters...";
+			this.curfewFiltersButton.UseVisualStyleBackColor = true;
+			this.curfewFiltersButton.Click += new System.EventHandler(this.curfewFiltersButton_Click);
+			// 
 			// FlexibleHystoryTestForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(800, 450);
+			this.Controls.Add(this.curfewFiltersButton);
 			this.Controls.Add(this.remainingTimeLabel);
 			this.Controls.Add(this.stopsPlacingRansacLevelUsageControl);
 			this.Controls.Add(this.filterRansacLevelUsageControl);
@@ -278,5 +291,6 @@ namespace RansacBot.HystoryTest
 		private System.Windows.Forms.Button runFilesSeparatlyButton;
 		private System.Windows.Forms.Button addDatasetFromFolderButton;
 		private System.Windows.Forms.FolderBrowserDialog inputFolderBrowserDialog;
+		private System.Windows.Forms.Button curfewFiltersButton;
 	}
 }

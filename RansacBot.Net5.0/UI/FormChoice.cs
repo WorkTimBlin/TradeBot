@@ -24,7 +24,7 @@ namespace RansacBot.UI
 
 		private void buttonHystoryTest_Click(object sender, EventArgs e)
 		{
-			SwitchToForm(new HystoryTest.FlexibleHystoryTestForm());
+			SwitchToForm(new UI.FlexibleHystoryTestForm());
 		}
 
 		private void buttonBotDemo_Click(object sender, EventArgs e)

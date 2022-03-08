@@ -3,9 +3,21 @@ using RansacsRealTime;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RansacBot
 {
+	public readonly struct TickWithDateTime
+	{
+		public readonly Tick tick;
+		public readonly DateTime dateTime;
+
+		public TickWithDateTime(Tick tick, DateTime dateTime)
+		{
+			this.tick = tick;
+			this.dateTime = dateTime;
+		}
+	}
 	public class TicksLazyParser : IEnumerable<Tick>, IList<Tick>, ITicksHystoryGetter
 	{
 		private readonly IList<string> rawStrings;
@@ -141,6 +153,32 @@ namespace RansacBot
 		#endregion
 	}
 
+	public class TicksDateTimeExtractor : IEnumerable<Tick>
+	{
+		public IEnumerable<TickWithDateTime> ticks;
+		private DateTime lastTickTime;
+		public DateTime GetLastTickTime() => lastTickTime;
+
+		public TicksDateTimeExtractor(IEnumerable<TickWithDateTime> ticks)
+		{
+			this.ticks = ticks;
+		}
+
+		public IEnumerator<Tick> GetEnumerator()
+		{
+			return ticks.Select(tick =>
+			{
+				lastTickTime = tick.dateTime;
+				return tick.tick;
+			}).GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+	}
+
 	class TicksParser : ITicksParser
 	{
 		char separator;
@@ -195,9 +233,70 @@ namespace RansacBot
 			}
 		}
 	}
+	class TicksWithDateTimeParser : ITickWithDateTimeParcer
+	{
+		public DateTime Time { get; private set; }
+		char separator;
+		short idIndex;
+		short priceIndex;
+		short dateTimeIndex;
+
+		public static ITickWithDateTimeParcer FinamStandart { get => FromIndexes(4, 2); }
+		public static ITickWithDateTimeParcer DamirStandart { get => FromSeparatorAndIndexes(',', 0, 2); }
+
+		public static ITickWithDateTimeParcer FromFunction(Func<string, TickWithDateTime> parsingFunc)
+		{
+			return new TicksParserFromFunc(parsingFunc);
+		}
+		public static ITickWithDateTimeParcer FromIndexes(short idIndex, short priceIndex)
+		{
+			return new TicksWithDateTimeParser(';', idIndex, priceIndex);
+		}
+		public static ITickWithDateTimeParcer FromSeparatorAndIndexes(char separator, short idIndex, short priceIndex)
+		{
+			return new TicksWithDateTimeParser(separator, idIndex, priceIndex);
+		}
+		private TicksWithDateTimeParser(char separator, short idIndex, short priceIndex)
+		{
+			this.separator = separator;
+			this.idIndex = idIndex;
+			this.priceIndex = priceIndex;
+		}
+
+		public TickWithDateTime ParseTick(string[] data)
+		{
+			return new TickWithDateTime(new Tick(
+				Convert.ToInt64(data[idIndex]),
+				0,
+				Convert.ToDouble(data[priceIndex], System.Globalization.CultureInfo.InvariantCulture)), 
+				new(Convert.ToInt32(data[dateTimeIndex])));
+		}
+		public TickWithDateTime ParseTick(string line)
+		{
+			return ParseTick(line.Split(separator, StringSplitOptions.RemoveEmptyEntries));
+		}
+		class TicksParserFromFunc : ITickWithDateTimeParcer
+		{
+			Func<string, TickWithDateTime> parsingFunc;
+
+			public TicksParserFromFunc(Func<string, TickWithDateTime> parsingFunc)
+			{
+				this.parsingFunc = parsingFunc;
+			}
+
+			public TickWithDateTime ParseTick(string line)
+			{
+				return parsingFunc(line);
+			}
+		}
+	}
 
 	public interface ITicksParser
 	{
 		public Tick ParseTick(string line);
+	}
+	public interface ITickWithDateTimeParcer
+	{
+		public TickWithDateTime ParseTick(string line);
 	}
 }

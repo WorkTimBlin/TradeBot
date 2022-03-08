@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using RansacsRealTime;
 
-namespace RansacBot.Trading
+namespace RansacBot.Trading.Filters
 {
 	class HigherLowerFilter:IExtremumFilter
 	{

@@ -1,5 +1,7 @@
 ﻿using RansacBot.Assemblies;
+using RansacBot.HystoryTest;
 using RansacBot.Trading;
+using RansacBot.Trading.Filters;
 using RansacBot.Trading.Hystory;
 using RansacBot.Trading.Hystory.Infrastructure;
 using RansacsRealTime;
@@ -14,7 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace RansacBot.HystoryTest
+namespace RansacBot.UI
 {
 	public partial class FlexibleHystoryTestForm : Form
 	{
@@ -24,6 +26,9 @@ namespace RansacBot.HystoryTest
 		RansacObservingParameters closingRansac;
 		RansacObservingParameters filterRansac;
 		RansacObservingParameters stopsRansac;
+
+		CurfewFiltersDialog filtersDialog = new();
+		List<(TimeSpan closingTime, TimeSpan openingTime)> filterTimes;
 		
 		public FlexibleHystoryTestForm()
 		{
@@ -124,10 +129,7 @@ namespace RansacBot.HystoryTest
 			this.Invoke((Action)BlockAllAdjustmentControls);
 			return Task.Run(() =>
 			{
-				foreach (var dataset in datasets)
-				{
-					Process(dataset);
-				}
+				ProcessAllDatasets(Process);
 			}).ContinueWith((task) => this.Invoke((Action)UnblockAllAdjustmentControls));
 		}
 		void ProcessAllDatasets(Action<Dataset> Process)
@@ -140,7 +142,12 @@ namespace RansacBot.HystoryTest
 		private void ProcessDataset(Dataset dataset)
 		{
 			this.Invoke(GetChangingStatusTo("Processing dataset " + dataset.DirName));
-			IEnumerable<string> unparsedTicks = dataset.FilesWithoutHeaders.Concat();
+			DateTime currentTickTime = new();
+			IEnumerable<string> unparsedTicks = dataset.FilesWithoutHeaders.Concat().Select(str =>
+			{
+				currentTickTime = new(Convert.ToInt64(str.Split(',')[1] + "0000000"));
+				return str;
+			});
 			FinishedTradesFromUnparsedTicks processor = GetNewProcessor(unparsedTicks);
 			GetProcessorReady(processor);
 			startDateTime = DateTime.Now;
@@ -193,13 +200,21 @@ namespace RansacBot.HystoryTest
 
 		private FinishedTradesFromUnparsedTicks GetNewProcessor(IEnumerable<string> unparsedTicks)
 		{
-			return new(unparsedTicks, 
-				TicksParser.DamirStandart, 
+			ITickWithDateTimeParcer parcer = TicksWithDateTimeParser.DamirStandart;
+			TicksDateTimeExtractor timeExtractor = new(unparsedTicks.Select(parcer.ParseTick));
+			return new(timeExtractor, 
 				new Closer_Filter_StopDecisionMaker(
 					closingRansac, 
 					filterRansac, 
 					stopsRansac, 
-					useFilterCheckbox.Checked));
+					useFilterCheckbox.Checked,
+					100,
+					filterTimes.Select(times => 
+						(Func<CurfewTimeTradeFilter>)
+						(() => new CurfewTimeTradeFilter(times.closingTime, times.openingTime, timeExtractor.GetLastTickTime))
+						)
+					)
+				);
 		}
 		private void GetProcessorReady(FinishedTradesFromUnparsedTicks processor)
 		{
@@ -273,5 +288,10 @@ namespace RansacBot.HystoryTest
 			}
 		}
 
+		private void curfewFiltersButton_Click(object sender, EventArgs e)
+		{
+			if (filtersDialog.ShowDialog() != DialogResult.OK) return;
+			filterTimes = filtersDialog.AllFilterTimes;
+		}
 	}
 }

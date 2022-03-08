@@ -1,6 +1,5 @@
 ﻿using Accord.Math;
 using Accord.Statistics.Distributions.Univariate;
-using Accord.Statistics.Models.Regression.Linear;
 using System;
 using System.Collections.Generic;
 using System.Linq;

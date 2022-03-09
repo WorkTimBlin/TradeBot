@@ -47,9 +47,9 @@ namespace RansacBot.UI.Components
 			// 
 			// closingTimePicker
 			// 
-			this.closingTimePicker.Hours = 23;
+			this.closingTimePicker.Hours = 0;
 			this.closingTimePicker.Location = new System.Drawing.Point(4, 41);
-			this.closingTimePicker.Minutes = 23;
+			this.closingTimePicker.Minutes = 0;
 			this.closingTimePicker.Name = "closingTimePicker";
 			this.closingTimePicker.Size = new System.Drawing.Size(102, 58);
 			this.closingTimePicker.TabIndex = 1;
@@ -65,9 +65,9 @@ namespace RansacBot.UI.Components
 			// 
 			// openingTimePicker
 			// 
-			this.openingTimePicker.Hours = 23;
+			this.openingTimePicker.Hours = 0;
 			this.openingTimePicker.Location = new System.Drawing.Point(112, 41);
-			this.openingTimePicker.Minutes = 23;
+			this.openingTimePicker.Minutes = 0;
 			this.openingTimePicker.Name = "openingTimePicker";
 			this.openingTimePicker.Size = new System.Drawing.Size(102, 58);
 			this.openingTimePicker.TabIndex = 1;

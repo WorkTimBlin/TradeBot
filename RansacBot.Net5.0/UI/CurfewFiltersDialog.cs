@@ -1,6 +1,7 @@
 ﻿using RansacBot.Trading.Filters;
 using RansacBot.UI.Components;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,8 +16,7 @@ namespace RansacBot.UI
 	public partial class CurfewFiltersDialog : Form
 	{
 		public List<(TimeSpan closingTime, TimeSpan openingTime)> AllFilterTimes =>
-			(flowLayoutPanel.Controls as IEnumerable<Control> ?? throw new Exception("Controls not Enumerable")).
-			Select(control => control as CurfewControl ?? throw new Exception("Control wasn't CurfewControl")).
+			(flowLayoutPanel.Controls as IEnumerable ?? throw new Exception("Controls not Enumerable")).Cast<CurfewControl>().
 			Select(control => (control.ClosingTime, control.OpeningTime)).ToList();
 		public CurfewFiltersDialog()
 		{
@@ -32,7 +32,12 @@ namespace RansacBot.UI
 		}
 		private void RemoveLastFilter()
 		{
-			flowLayoutPanel.Controls.RemoveAt(flowLayoutPanel.Controls.Count);
+			if(flowLayoutPanel.Controls.Count > 0)
+			{
+				Control control = flowLayoutPanel.Controls[^1];
+				flowLayoutPanel.Controls.RemoveAt(flowLayoutPanel.Controls.Count - 1);
+				control.Dispose();
+			}
 		}
 
 		private void addButton_Click(object sender, EventArgs e)

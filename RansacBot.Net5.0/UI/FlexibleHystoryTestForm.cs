@@ -28,7 +28,7 @@ namespace RansacBot.UI
 		RansacObservingParameters stopsRansac;
 
 		CurfewFiltersDialog filtersDialog = new();
-		List<(TimeSpan closingTime, TimeSpan openingTime)> filterTimes;
+		List<(TimeSpan closingTime, TimeSpan openingTime)> filterTimes = new();
 		
 		public FlexibleHystoryTestForm()
 		{
@@ -44,7 +44,8 @@ namespace RansacBot.UI
 				findOutputDirectoryButton, 
 				closerRansacLevelUsageControl,
 				filterRansacLevelUsageControl,
-				stopsPlacingRansacLevelUsageControl
+				stopsPlacingRansacLevelUsageControl,
+				curfewFiltersButton
 			};
 		}
 
@@ -109,6 +110,14 @@ namespace RansacBot.UI
 			}
 		}
 
+		private void curfewFiltersButton_Click(object sender, EventArgs e)
+		{
+			if (filtersDialog.ShowDialog() != DialogResult.OK) return;
+			filterTimes = filtersDialog.AllFilterTimes;
+			
+			ChangeStatusTo("Added filters: \n" + 
+				String.Concat(filterTimes.Select(times => '\t' + times.closingTime.ToString() + ' ' + times.openingTime.ToString() + '\n')));
+		}
 
 		private void runButton_Click(object sender, EventArgs e)
 		{
@@ -130,6 +139,7 @@ namespace RansacBot.UI
 			return Task.Run(() =>
 			{
 				ProcessAllDatasets(Process);
+				GC.Collect();
 			}).ContinueWith((task) => this.Invoke((Action)UnblockAllAdjustmentControls));
 		}
 		void ProcessAllDatasets(Action<Dataset> Process)
@@ -142,16 +152,11 @@ namespace RansacBot.UI
 		private void ProcessDataset(Dataset dataset)
 		{
 			this.Invoke(GetChangingStatusTo("Processing dataset " + dataset.DirName));
-			DateTime currentTickTime = new();
-			IEnumerable<string> unparsedTicks = dataset.FilesWithoutHeaders.Concat().Select(str =>
-			{
-				currentTickTime = new(Convert.ToInt64(str.Split(',')[1] + "0000000"));
-				return str;
-			});
+			IEnumerable<string> unparsedTicks = dataset.FilesWithoutHeaders.Concat();
 			FinishedTradesFromUnparsedTicks processor = GetNewProcessor(unparsedTicks);
 			GetProcessorReady(processor);
-			startDateTime = DateTime.Now;
 			string outputFileName = outputDirectoryTextBox.Text + '\\' + dataset.DirName + ".csv";
+			startDateTime = DateTime.Now;
 			processor.ProgressChanged += UpdateProgressBarFromProcessor;
 			using (StreamWriter writer = new(outputFileName))
 			{
@@ -187,13 +192,12 @@ namespace RansacBot.UI
 				processor.ProgressChanged += UpdateProgressBarFromProcessor;
 				using (StreamWriter writer = new(outputFileName))
 				{
-					this.Invoke(GetChangingStatusTo("Building Trades..."));
 					foreach (string trade in Process(processor))
 					{
 						writer.WriteLine(trade);
 					}
-					this.Invoke(GetChangingStatusTo("Trades builded!"));
 				}
+				this.Invoke(GetChangingStatusTo("All done!"));
 				processor.ProgressChanged -= UpdateProgressBarFromProcessor;
 			}
 		}
@@ -201,7 +205,7 @@ namespace RansacBot.UI
 		private FinishedTradesFromUnparsedTicks GetNewProcessor(IEnumerable<string> unparsedTicks)
 		{
 			ITickWithDateTimeParcer parcer = TicksWithDateTimeParser.DamirStandart;
-			TicksDateTimeExtractor timeExtractor = new(unparsedTicks.Select(parcer.ParseTick));
+			TicksDateTimeExtractor timeExtractor = new(unparsedTicks.Select(TicksWithDateTimeParser.ParseTickDamir));
 			return new(timeExtractor, 
 				new Closer_Filter_StopDecisionMaker(
 					closingRansac, 
@@ -253,14 +257,18 @@ namespace RansacBot.UI
 		{
 			return () =>
 			{
-				string newStatus = DateTime.Now.ToString() + ' ' + status + '\n';
-				statusRichTextBox.AppendText(newStatus);
-				statusRichTextBox.ScrollToCaret();
+				ChangeStatusTo(status);
 			};
 		}
 		private Action GetChangingProgress(int progress)
 		{
 			return () => progressBar1.Value = progress;
+		}
+		private void ChangeStatusTo(string status)
+		{
+			string newStatus = DateTime.Now.ToString() + ' ' + status + '\n';
+			statusRichTextBox.AppendText(newStatus);
+			statusRichTextBox.ScrollToCaret();
 		}
 		
 		int FileNameComparer(string s1, string s2)
@@ -288,10 +296,5 @@ namespace RansacBot.UI
 			}
 		}
 
-		private void curfewFiltersButton_Click(object sender, EventArgs e)
-		{
-			if (filtersDialog.ShowDialog() != DialogResult.OK) return;
-			filterTimes = filtersDialog.AllFilterTimes;
-		}
 	}
 }

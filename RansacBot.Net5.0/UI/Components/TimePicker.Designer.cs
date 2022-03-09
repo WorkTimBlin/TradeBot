@@ -48,11 +48,6 @@ namespace RansacBot.UI.Components
 			this.hoursNumericUpDown.Name = "hoursNumericUpDown";
 			this.hoursNumericUpDown.Size = new System.Drawing.Size(40, 23);
 			this.hoursNumericUpDown.TabIndex = 0;
-			this.hoursNumericUpDown.Value = new decimal(new int[] {
-            23,
-            0,
-            0,
-            0});
 			// 
 			// hoursLabel
 			// 
@@ -74,11 +69,6 @@ namespace RansacBot.UI.Components
 			this.minutesNumericUpDown.Name = "minutesNumericUpDown";
 			this.minutesNumericUpDown.Size = new System.Drawing.Size(40, 23);
 			this.minutesNumericUpDown.TabIndex = 0;
-			this.minutesNumericUpDown.Value = new decimal(new int[] {
-            23,
-            0,
-            0,
-            0});
 			// 
 			// minutesLabel
 			// 

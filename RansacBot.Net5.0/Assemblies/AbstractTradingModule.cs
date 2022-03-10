@@ -14,7 +14,7 @@ namespace RansacBot.Assemblies
 		public event Action<TradeWithStop, double> TradeClosedOnPrice;
 		public IStopsContainer StopsContainer { get => stopsOperator; }
 
-		public ITradeWithStopProvider TradeWithStopProvider
+		public ITradeWithStopProvider? TradeWithStopProvider
 		{
 			set
 			{
@@ -25,7 +25,7 @@ namespace RansacBot.Assemblies
 					tradeWithStopProvider.NewTradeWithStop += checkpoint.OnNewTradeWithStop;
 			}
 		}
-		public IClosingProvider ClosingProvider
+		public IClosingProvider? ClosingProvider
 		{
 			set
 			{
@@ -43,8 +43,18 @@ namespace RansacBot.Assemblies
 			}
 		}
 
-		ITradeWithStopProvider tradeWithStopProvider;
-		IClosingProvider closingProvider;
+		public bool CompensateKilledStopWithMarketOrder
+		{
+			set
+			{
+				compensator = GetCompensator();
+				stopsOperator.UnexecutedStopRemoved -= compensator.OnNewTradeWithStop;
+				if (value) stopsOperator.UnexecutedStopRemoved += compensator.OnNewTradeWithStop;
+			}
+		}
+
+		ITradeWithStopProvider? tradeWithStopProvider;
+		IClosingProvider? closingProvider;
 
 		AbstractOneAtATimeCheckpoint<TOrder> checkpoint;
 		AbstractClassicStopsOperator<TStopOrder, TOrder> stopsOperator;
@@ -65,7 +75,7 @@ namespace RansacBot.Assemblies
 			stopsOperator = GetStopsOperator();
 			checkpoint.NewTradeWithStop += stopsOperator.OnNewTradeWithStop;
 			compensator = GetCompensator();
-			stopsOperator.UnexecutedStopRemoved += compensator.OnNewTradeWithStop;
+			CompensateKilledStopWithMarketOrder = true;
 
 			checkpoint.NewTradeWithStop += InvokeTradeExecuted;
 			stopsOperator.StopExecuted += InvokeTradeStopExecuted;

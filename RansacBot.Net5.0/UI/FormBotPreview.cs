@@ -139,8 +139,9 @@ namespace RansacBot
 			timer1.Start();
 			Task.Run(() =>
 			{
+				ITicksParser parser = TicksParser.FinamStandart;
 				foreach (Tick tick in
-					new TicksFromFiles(@"C:\Users\ir2\Desktop\1.txt", TicksParser.FinamStandart))
+					File.ReadLines(@"C:\Users\ir2\Desktop\1.txt").Select(parser.ParseTick))
 				{
 					finishedTradesBuilder.OnNewTick(tick);
 				}

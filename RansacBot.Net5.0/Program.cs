@@ -20,6 +20,7 @@ namespace RansacBot
 
 			//UI.FormChoice choiceForm = new();
 			Application.Run(new UI.FlexibleHystoryTestForm());
+			//Application.Run(new UI.QuikBotForm());
 		}
 	}
 }

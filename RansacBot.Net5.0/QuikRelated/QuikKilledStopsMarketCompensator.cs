@@ -8,7 +8,7 @@ using RansacBot.Trading;
 
 namespace RansacBot.QuikRelated
 {
-	class QuikKilledStopsMarketCompensator : AbstractKilledStopsMarketCompensator<Order>
+	class QuikKilledStopsMarketCompensator : AbstractMarketCompensator<Order>
 	{
 		TradeParams tradeParams;
 

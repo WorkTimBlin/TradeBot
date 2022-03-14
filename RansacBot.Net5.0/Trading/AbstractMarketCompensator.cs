@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Trading
 {
-	abstract class AbstractKilledStopsMarketCompensator<TOrder> : ITradeWithStopProcessor
+	abstract class AbstractMarketCompensator<TOrder> : ITradeWithStopProcessor
 	{
 		readonly Dictionary<AbstractOrderEnsurerWithPrice<TOrder>, TradeWithStop> marketOrders = new();
 

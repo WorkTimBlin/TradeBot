@@ -32,6 +32,8 @@ namespace RansacBot.Ground
 			if (filters.Count > 0)
 				UnsubscribeAtIndex(filters.Count - 1);
 			filters.Add(item);
+			if(Count > 1)
+				SubscribeAtIndex(filters.Count - 2);
 			SubscribeAtIndex(filters.Count - 1);
 		}
 

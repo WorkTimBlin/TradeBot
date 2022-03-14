@@ -34,7 +34,7 @@ namespace RansacBot.Assemblies
 		{
 			return new QuikClassicStopsOperator(tradeParams);
 		}
-		protected override AbstractKilledStopsMarketCompensator<Order> GetCompensator()
+		protected override AbstractMarketCompensator<Order> GetCompensator()
 		{
 			return new QuikKilledStopsMarketCompensator(tradeParams);
 		}

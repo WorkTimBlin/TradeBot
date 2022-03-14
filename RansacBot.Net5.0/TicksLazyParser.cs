@@ -1,4 +1,5 @@
 ﻿using FinamDataLoader;
+using RansacBot.Trading;
 using RansacsRealTime;
 using System;
 using System.Collections;
@@ -153,10 +154,13 @@ namespace RansacBot
 		#endregion
 	}
 
-	public class TicksDateTimeExtractor : IEnumerable<Tick>
+	public class TicksDateTimeExtractor : IEnumerable<Tick>, ITradingEnvironment
 	{
 		public IEnumerable<TickWithDateTime> ticks;
 		private DateTime lastTickTime;
+
+		public DateTime DateTime => lastTickTime;
+
 		public DateTime GetLastTickTime() => lastTickTime;
 
 		public TicksDateTimeExtractor(IEnumerable<TickWithDateTime> ticks)
@@ -241,26 +245,37 @@ namespace RansacBot
 		short priceIndex;
 		short dateTimeIndex;
 
-		public static ITickWithDateTimeParcer FinamStandart { get => FromIndexes(4, 2); }
-		public static ITickWithDateTimeParcer DamirStandart { get => FromSeparatorAndIndexes(',', 0, 2); }
+		public static ITickWithDateTimeParcer DamirStandart { get => FromSeparatorAndIndexes(',', 0, 2, 1); }
 
 		public static ITickWithDateTimeParcer FromFunction(Func<string, TickWithDateTime> parsingFunc)
 		{
 			return new TicksParserFromFunc(parsingFunc);
 		}
-		public static ITickWithDateTimeParcer FromIndexes(short idIndex, short priceIndex)
+		public static ITickWithDateTimeParcer FromIndexes(short idIndex, short priceIndex, short dateTimeIndex)
 		{
-			return new TicksWithDateTimeParser(';', idIndex, priceIndex);
+			return new TicksWithDateTimeParser(';', idIndex, priceIndex, dateTimeIndex);
 		}
-		public static ITickWithDateTimeParcer FromSeparatorAndIndexes(char separator, short idIndex, short priceIndex)
+		public static ITickWithDateTimeParcer FromSeparatorAndIndexes(char separator, short idIndex, short priceIndex, short dateTimeIndex)
 		{
-			return new TicksWithDateTimeParser(separator, idIndex, priceIndex);
+			return new TicksWithDateTimeParser(separator, idIndex, priceIndex, dateTimeIndex);
 		}
-		private TicksWithDateTimeParser(char separator, short idIndex, short priceIndex)
+		public static TickWithDateTime ParseTickDamir(string line)
+		{
+			string[] data = line.Split(',');
+			return new(
+				new(
+					Convert.ToInt64(data[0]),
+					0,
+					Convert.ToDouble(data[2])),
+				new(Convert.ToInt64(data[1] + "0000000"))
+				);
+		}
+		private TicksWithDateTimeParser(char separator, short idIndex, short priceIndex, short dateTimeIndex)
 		{
 			this.separator = separator;
 			this.idIndex = idIndex;
 			this.priceIndex = priceIndex;
+			this.dateTimeIndex = dateTimeIndex;
 		}
 
 		public TickWithDateTime ParseTick(string[] data)

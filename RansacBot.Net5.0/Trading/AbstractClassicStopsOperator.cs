@@ -7,162 +7,83 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Trading
 {
-	/// <summary>
-	/// needs AbstractOrderEnsurer that gives callback when got executionPrice
-	/// </summary>
-	/// <typeparam name="TStopOrder"></typeparam>
 	abstract class AbstractClassicStopsOperator<TStopOrder, TOrder> : IStopsOperator, IStopsContainer
 	{
-		public event Action<TradeWithStop, double> StopExecuted;
+		public event Action<TradeWithStop, double> ExecutedStopExecuted;
 		public event Action<TradeWithStop> UnexecutedStopRemoved;
 
-		readonly SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> longs;
-		readonly SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> shorts;
+		public bool CloseSlippedWithBoth { get; set; }
 
-		readonly Dictionary<AbstractOrderEnsurerWithPrice<TOrder>, TradeWithStop>
-			executedStopsUnexecutedOrders = new();
+		readonly AbstractSortedOrdersWaitroom<TStopOrder, TOrder> longs;
+		readonly AbstractSortedOrdersWaitroom<TStopOrder, TOrder> shorts;
+
+		readonly AbstractSentOrdersWaitroom<TOrder, double> executed;
 
 		public AbstractClassicStopsOperator(
-			Comparison<AbstractStopOrderEnsurer<TStopOrder, TOrder>> longsComparer,
-			Comparison<AbstractStopOrderEnsurer<TStopOrder, TOrder>> shortsComparer)
+			Comparison<AbstractOrderEnsurerWithCompletionAttribute<TStopOrder, TOrder>> longsComparer,
+			Comparison<AbstractOrderEnsurerWithCompletionAttribute<TStopOrder, TOrder>> shortsComparer,
+			bool closeSlippedWithBoth = true)
 		{
-			longs = new(Comparer<AbstractStopOrderEnsurer<TStopOrder, TOrder>>.Create(
-				(first, second) => first.IsSame(second.Order) ? 0 : longsComparer(first, second)));
-			shorts = new(Comparer<AbstractStopOrderEnsurer<TStopOrder, TOrder>>.Create(
-				(first, second) => first.IsSame(second.Order) ? 0 : shortsComparer(first, second)));
+			longs = GetNewWaitroom(longsComparer);
+			shorts = GetNewWaitroom(shortsComparer);
+			executed = GetNewExecutedWaitroom();
+			longs.OrderKilled += OnUnexecutedStopRemoved;
+			longs.OrderExecuted += OnStopExecuted;
+			shorts.OrderKilled += OnUnexecutedStopRemoved;
+			shorts.OrderExecuted += OnStopExecuted;
+			executed.OrderExecuted += OnExecutedStopExecuted;
+			executed.OrderKilled += OnUnexecutedStopRemoved;
+			this.CloseSlippedWithBoth = closeSlippedWithBoth;
 		}
+
+		protected abstract AbstractSentOrdersWaitroom<TOrder, double> GetNewExecutedWaitroom();
 
 		public void ClosePercentOfLongs(double percent)
 		{
-			KillPercentOfStops(longs, percent);
+			if (CloseSlippedWithBoth) executed.KillLastPercent(100);
+			longs.KillLastPercent(percent);
 		}
 		public void ClosePercentOfShorts(double percent)
 		{
-			KillPercentOfStops(shorts, percent);
+			if(CloseSlippedWithBoth) executed.KillLastPercent(100);
+			shorts.KillLastPercent(percent);
+		}
+		public void ClosePercentOfSlippedStops(double percent)
+		{
+			executed.KillLastPercent(percent);
 		}
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop)
 		{
-			AbstractStopOrderEnsurer<TStopOrder, TOrder> ensurer = BuildStopOrderEnsurer(tradeWithStop);
-			ensurer.OrderEnsuranceStatusChanged += OnStopOrderEnsuranceStatusChanged;
-			ensurer.SubscribeSelfAndSendOrder();
-			AddToStops(ensurer, tradeWithStop);
+			TStopOrder stop = BuildStopOrder(tradeWithStop);
+			GetWaitroom(stop).OnNewOrder(tradeWithStop, stop);
 		}
 
-		void KillPercentOfStops(
-			SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> stopsDic,
-			double percent)
+		private void OnUnexecutedStopRemoved(TradeWithStop tradeWithStop) => UnexecutedStopRemoved?.Invoke(tradeWithStop);
+		private void OnStopExecuted(TradeWithStop tradeWithStop, TOrder order)
 		{
-			IEnumerable<AbstractStopOrderEnsurer<TStopOrder, TOrder>> stops =
-				stopsDic.Keys.Skip((int)(stopsDic.Count * (100 - percent) / 100)).ToList();
-			foreach (AbstractStopOrderEnsurer<TStopOrder, TOrder> stop in stops)
-			{
-				stop.UpdateOrderFromQuikByTransID();
-				if (stop.State == EnsuranceState.Active)
-				{
-					stop.Kill();
-				}
-			}
+			executed.OnNewSentOrder(tradeWithStop, order);
 		}
-
-		void OnStopOrderEnsuranceStatusChanged(object ensurer) =>
-			OnStopOrderEnsuranceStatusChanged(ensurer as AbstractStopOrderEnsurer<TStopOrder, TOrder> ??
-				throw new TypeAccessException("object was not of right type"));
-		void OnStopOrderEnsuranceStatusChanged(AbstractStopOrderEnsurer<TStopOrder, TOrder> ensurer)
+		private void OnExecutedStopExecuted(TradeWithStop tradeWithStop, double price)
 		{
-			if (ensurer.IsComplete)
-			{
-				ensurer.OrderEnsuranceStatusChanged -= OnStopOrderEnsuranceStatusChanged;
-				if (ensurer.State == EnsuranceState.Killed)
-				{
-					UnexecutedStopRemoved?.Invoke(GetTradeWithStop(ensurer));
-				}
-				if (ensurer.State == EnsuranceState.Executed)
-				{
-					AbstractOrderEnsurerWithPrice<TOrder> order = GetOrderEnsurer(ensurer.CompletionAttribute);
-					order.OrderEnsuranceStatusChanged += OnExecutedStopOrderEnsuranceStatusChanged;
-					order.Subscribe();
-					executedStopsUnexecutedOrders.Add(order, GetTradeWithStop(ensurer));
-
-					if (order.IsComplete) OnExecutedStopOrderEnsuranceStatusChanged(order);
-					else order.UpdateOrderFromQuikByTransID();
-				}
-				RemoveStopFromList(ensurer);
-			}
+			ExecutedStopExecuted?.Invoke(tradeWithStop, price);
 		}
-
-		void OnExecutedStopOrderEnsuranceStatusChanged(object aEnsurer)
-		{
-			AbstractOrderEnsurerWithPrice<TOrder> ensurer = aEnsurer as AbstractOrderEnsurerWithPrice<TOrder> ??
-				throw new TypeAccessException("can't cast aEnsurer to the right type");
-			if (ensurer.IsComplete)
-			{
-				ensurer.OrderEnsuranceStatusChanged -= OnExecutedStopOrderEnsuranceStatusChanged;
-				if (ensurer.State == EnsuranceState.Killed)
-				{
-					UnexecutedStopRemoved?.Invoke(GetTradeWithStop(ensurer));
-				}
-				if (ensurer.State == EnsuranceState.Executed)
-				{
-					StopExecuted?.Invoke(GetTradeWithStop(ensurer), ensurer.CompletionAttribute);
-				}
-				executedStopsUnexecutedOrders.Remove(ensurer);
-			}
-		}
-
-		void RemoveStopFromList(AbstractStopOrderEnsurer<TStopOrder, TOrder> ensurer)
-		{
-			ensurer.OrderEnsuranceStatusChanged -= OnStopOrderEnsuranceStatusChanged;
-			GetDict(ensurer).Remove(ensurer);
-		}
-		void AddToStops(AbstractStopOrderEnsurer<TStopOrder, TOrder> ensurer, TradeWithStop tradeWithStop)
-		{
-			GetDict(ensurer).Add(ensurer, tradeWithStop);
-		}
-		TradeWithStop GetTradeWithStop(AbstractStopOrderEnsurer<TStopOrder, TOrder> ensurer)
-		{
-			try
-			{
-				return GetDict(ensurer)[ensurer];
-			}
-			catch
-			{
-				return GetDict(ensurer).Values.ToList()
-					[GetDict(ensurer).Keys.ToList().FindIndex((ens) => ens == ensurer)];
-			}
-		}
-		TradeWithStop GetTradeWithStop(AbstractOrderEnsurerWithPrice<TOrder> ensurer) =>
-			executedStopsUnexecutedOrders[ensurer];
-
-
-		private SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop>
-			GetDict(AbstractStopOrderEnsurer<TStopOrder, TOrder> ensurer)
-		{
-			return IsLong(ensurer) ? longs : shorts;
-		}
-		protected abstract bool IsLong(AbstractStopOrderEnsurer<TStopOrder, TOrder> stopEnsurer);
-		protected abstract AbstractStopOrderEnsurer<TStopOrder, TOrder> 
-			BuildStopOrderEnsurer(Trading.TradeWithStop trade);
-		protected abstract AbstractOrderEnsurerWithPrice<TOrder> GetOrderEnsurer(TOrder order);
+		private AbstractSortedOrdersWaitroom<TStopOrder, TOrder> GetWaitroom(TStopOrder stopOrder) => IsLong(stopOrder) ? longs : shorts;
+		protected abstract TStopOrder BuildStopOrder(TradeWithStop tradeWithStop);
+		protected abstract bool IsLong(TStopOrder stopOrder);
+		protected abstract AbstractSortedOrdersWaitroom<TStopOrder, TOrder> 
+			GetNewWaitroom(Comparison<AbstractOrderEnsurerWithCompletionAttribute<TStopOrder, TOrder>> comparison);
 
 		public IEnumerable<string> GetLongs()
 		{
-			return GetStopsStrings(longs);
+			return longs.GetAsStrings();
 		}
 		public IEnumerable<string> GetShorts()
 		{
-			return GetStopsStrings(shorts);
+			return shorts.GetAsStrings();
 		}
 		public IEnumerable<string> GetExecuted()
 		{
-			return executedStopsUnexecutedOrders.Keys.Select(GetSerialized);
+			return executed.GetAsStrings();
 		}
-
-		private IEnumerable<string> GetStopsStrings(
-			SortedDictionary<AbstractStopOrderEnsurer<TStopOrder, TOrder>, TradeWithStop> stops)
-		{
-			return stops.Keys.Select(GetSerialized);
-		}
-		public abstract string GetSerialized(AbstractStopOrderEnsurer<TStopOrder, TOrder> stopOrder);
-		public abstract string GetSerialized(AbstractOrderEnsurerWithPrice<TOrder> ensurer);
 	}
 }

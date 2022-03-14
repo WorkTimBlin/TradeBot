@@ -8,7 +8,7 @@ namespace RansacBot.Trading
 {
 	public interface IStopsOperator : IStopsCloser
 	{
-		public event Action<TradeWithStop, double> StopExecuted;
+		public event Action<TradeWithStop, double> ExecutedStopExecuted;
 		public event Action<TradeWithStop> UnexecutedStopRemoved;
 
 		public void OnNewTradeWithStop(TradeWithStop tradeWithStop);

@@ -18,7 +18,7 @@ namespace RansacBot.Trading.Filters
 
 		public CurfewTimeTradeFilter(TimeSpan closingTime, TimeSpan openingTime, Func<DateTime> dateTimeGetter)
 		{
-			if (closingTime.TotalDays > 0 || openingTime.TotalDays > 0) 
+			if ((int)closingTime.TotalDays > 0 || (int)openingTime.TotalDays > 0) 
 				throw new ArgumentException("closing time and opening time must be times of day");
 			this.closingTime = closingTime;
 			this.openingTime = openingTime;

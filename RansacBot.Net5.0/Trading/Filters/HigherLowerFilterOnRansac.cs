@@ -35,12 +35,12 @@ namespace RansacBot.Trading.Filters
 			if(trade.direction == TradeDirection.buy && trade.price > high)
 			{
 				high = trade.price;
-				NewTrade.Invoke(trade);
+				NewTrade?.Invoke(trade);
 			}
 			if(trade.direction == TradeDirection.sell && trade.price < low)
 			{
 				low = trade.price;
-				NewTrade.Invoke(trade);
+				NewTrade?.Invoke(trade);
 			}
 		}
 	}

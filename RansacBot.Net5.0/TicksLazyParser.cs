@@ -1,4 +1,5 @@
 ﻿using FinamDataLoader;
+using RansacBot.Trading;
 using RansacsRealTime;
 using System;
 using System.Collections;
@@ -153,10 +154,13 @@ namespace RansacBot
 		#endregion
 	}
 
-	public class TicksDateTimeExtractor : IEnumerable<Tick>
+	public class TicksDateTimeExtractor : IEnumerable<Tick>, ITradingEnvironment
 	{
 		public IEnumerable<TickWithDateTime> ticks;
 		private DateTime lastTickTime;
+
+		public DateTime DateTime => lastTickTime;
+
 		public DateTime GetLastTickTime() => lastTickTime;
 
 		public TicksDateTimeExtractor(IEnumerable<TickWithDateTime> ticks)

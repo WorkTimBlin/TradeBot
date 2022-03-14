@@ -21,13 +21,13 @@ namespace RansacBot.HystoryTest
 		public double ProgressPromille { get => numberOfProcessedTicks * 1000 / numberOfTicks; }
 		private ulong numberOfTicks;
 		private ulong numberOfProcessedTicks = 0;
-		private IEnumerable<Tick> ticks;
-		private IDecisionProvider decisionMaker;
+		private IEnumerable<string> unparcedTicks;
+		private Func<ITradingEnvironment, IDecisionProvider> decisionMakerGetter;
 
-		public FinishedTradesFromUnparsedTicks(IEnumerable<Tick> ticks, IDecisionProvider decisionProvider)
+		public FinishedTradesFromUnparsedTicks(IEnumerable<string> unparsedTicks, Func<ITradingEnvironment, IDecisionProvider> decisionProvider)
 		{
-			decisionMaker = decisionProvider;
-			this.ticks = ticks;
+			decisionMakerGetter = decisionProvider;
+			this.unparcedTicks = unparsedTicks;
 		}
 
 		public void GetReady()
@@ -40,7 +40,7 @@ namespace RansacBot.HystoryTest
 
 		private void CountTicks()
 		{
-			numberOfTicks = (ulong)ticks.Count();
+			numberOfTicks = (ulong)unparcedTicks.Count();
 		}
 
 		public IEnumerable<FinishedTrade> GetAllFinishedTrades(int period = 0)
@@ -49,7 +49,9 @@ namespace RansacBot.HystoryTest
 			if (State > HystoryProcessorState.Ready) throw new Exception("started already");
 			State = HystoryProcessorState.Processing;
 			if (period == 0) period = (int)(numberOfTicks / 1000);
-			decisionMaker.Clear();
+			TicksDateTimeExtractor extractor = new(unparcedTicks.Select(TicksWithDateTimeParser.ParseTickDamir));
+			IEnumerable<Tick> ticks = extractor;
+			IDecisionProvider decisionMaker = decisionMakerGetter(extractor);
 
 			HystoryTradingModule tradingModule =
 				new(

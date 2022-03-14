@@ -58,7 +58,7 @@ namespace RansacBot.Assemblies
 
 		AbstractOneAtATimeCheckpoint<TOrder> checkpoint;
 		AbstractClassicStopsOperator<TStopOrder, TOrder> stopsOperator;
-		AbstractKilledStopsMarketCompensator<TOrder> compensator;
+		AbstractMarketCompensator<TOrder> compensator;
 
 		public AbstractTradingModule(
 			ITradeWithStopProvider tradeWithStopProvider,
@@ -78,13 +78,13 @@ namespace RansacBot.Assemblies
 			CompensateKilledStopWithMarketOrder = true;
 
 			checkpoint.NewTradeWithStop += InvokeTradeExecuted;
-			stopsOperator.StopExecuted += InvokeTradeStopExecuted;
+			stopsOperator.ExecutedStopExecuted += InvokeTradeStopExecuted;
 			compensator.FullyClosedTradeWithStop += InvokeTradeClosedOnPrice;
 		}
 
 		protected abstract AbstractOneAtATimeCheckpoint<TOrder> GetCheckpoint();
 		protected abstract AbstractClassicStopsOperator<TStopOrder, TOrder> GetStopsOperator();
-		protected abstract AbstractKilledStopsMarketCompensator<TOrder> GetCompensator();
+		protected abstract AbstractMarketCompensator<TOrder> GetCompensator();
 
 		void InvokeTradeExecuted(TradeWithStop tradeWithStop) =>
 			TradeExecuted?.Invoke(tradeWithStop);

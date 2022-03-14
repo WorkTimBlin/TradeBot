@@ -9,39 +9,94 @@ namespace RansacBot.Trading.Hystory
 {
 	class HystoryStopsOperator : AbstractClassicStopsOperator<HystoryOrder, HystoryOrder>
 	{
-		HystoryQuikSimulator quikSimulator; 
-		public HystoryStopsOperator(HystoryQuikSimulator quikSimulator) : 
-			base(
-				(ensurer1, ensurer2) => ensurer1.Order.price > ensurer2.Order.price ? 1 : -1,
-				(ensurer1, ensurer2) => ensurer1.Order.price < ensurer2.Order.price ? 1 : -1)
+		HystoryQuikSimulator quikSimulator;
+		public HystoryStopsOperator(HystoryQuikSimulator quikSimulator) :
+			base(LongComparison, ShortComparison)
 		{
 			this.quikSimulator = quikSimulator;
 		}
 
-		public override string GetSerialized(AbstractStopOrderEnsurer<HystoryOrder, HystoryOrder> stopOrder)
+		protected override HystoryOrder BuildStopOrder(TradeWithStop tradeWithStop)
 		{
-			return stopOrder.Order.transID.ToString() + " " + stopOrder.Order.price.ToString();
+			return new HystoryOrder(tradeWithStop.stop);
 		}
 
-		public override string GetSerialized(AbstractOrderEnsurerWithPrice<HystoryOrder> ensurer)
+		protected override AbstractSentOrdersWaitroom<HystoryOrder, double> GetNewExecutedWaitroom()
 		{
-			return ensurer.Order.transID.ToString() + " " + ensurer.Order.transID.ToString();
+			return new ExecutedWaitroom(GetHystoryQuikSimulator);
 		}
 
-		protected override AbstractStopOrderEnsurer<HystoryOrder, HystoryOrder> 
-			BuildStopOrderEnsurer(TradeWithStop trade)
+		protected override AbstractSortedOrdersWaitroom<HystoryOrder, HystoryOrder> 
+			GetNewWaitroom(Comparison<AbstractOrderEnsurerWithCompletionAttribute<HystoryOrder, HystoryOrder>> comparison)
 		{
-			return new HystoryStopOrderEnsurer(new(trade.stop), quikSimulator);
+			return new StopWaitroom(comparison, GetHystoryQuikSimulator);
 		}
 
-		protected override AbstractOrderEnsurerWithPrice<HystoryOrder> GetOrderEnsurer(HystoryOrder order)
+		protected override bool IsLong(HystoryOrder stopOrder)
 		{
-			return new HystoryOrderEnsurer(order, quikSimulator);
+			return stopOrder.direction == TradeDirection.sell;
 		}
 
-		protected override bool IsLong(AbstractStopOrderEnsurer<HystoryOrder, HystoryOrder> stopEnsurer)
+		private HystoryQuikSimulator GetHystoryQuikSimulator() => quikSimulator;
+		private static int LongComparison(
+			AbstractOrderEnsurerWithCompletionAttribute<HystoryOrder, HystoryOrder> ensurer1,
+			AbstractOrderEnsurerWithCompletionAttribute<HystoryOrder, HystoryOrder> ensurer2
+			)
 		{
-			return stopEnsurer.Order.direction == TradeDirection.sell;
+			if (ensurer1.Order.price > ensurer2.Order.price) return 1;
+			if (ensurer1.Order.price < ensurer2.Order.price) return -1;
+			if (ensurer1.Order.transID > ensurer2.Order.transID) return 1;
+			if (ensurer1.Order.transID < ensurer2.Order.transID) return -1;
+			return 0;
+		}
+		private static int ShortComparison(
+			AbstractOrderEnsurerWithCompletionAttribute<HystoryOrder, HystoryOrder> ensurer1,
+			AbstractOrderEnsurerWithCompletionAttribute<HystoryOrder, HystoryOrder> ensurer2
+			)
+		{
+			if (ensurer1.Order.price < ensurer2.Order.price) return 1;
+			if (ensurer1.Order.price > ensurer2.Order.price) return -1;
+			if (ensurer1.Order.transID > ensurer2.Order.transID) return 1;
+			if (ensurer1.Order.transID < ensurer2.Order.transID) return -1;
+			return 0;
+		}
+
+		class ExecutedWaitroom : AbstractSentOrdersWaitroom<HystoryOrder, double>
+		{
+			Func<HystoryQuikSimulator> quikSimulatorGetter;
+			public ExecutedWaitroom(Func<HystoryQuikSimulator> quikSimulatorGetter)
+			{
+				this.quikSimulatorGetter = quikSimulatorGetter;
+			}
+			public override string GetSerialized(AbstractOrderEnsurerWithCompletionAttribute<HystoryOrder, double> ensurer)
+			{
+				return ensurer.Order.transID.ToString() + " " + ensurer.Order.transID.ToString();
+			}
+
+			protected override AbstractOrderEnsurerWithCompletionAttribute<HystoryOrder, double> GetNewEnsurer(HystoryOrder order)
+			{
+				return new HystoryOrderEnsurer(order, quikSimulatorGetter());
+			}
+		}
+		class StopWaitroom : AbstractSortedOrdersWaitroom<HystoryOrder, HystoryOrder>
+		{
+			Func<HystoryQuikSimulator> quikSimulatorGetter;
+			public StopWaitroom(
+				Comparison<AbstractOrderEnsurerWithCompletionAttribute<HystoryOrder, HystoryOrder>> comparison, 
+				Func<HystoryQuikSimulator> quikSimulatorGetter) : base(comparison)
+			{
+				this.quikSimulatorGetter = quikSimulatorGetter;
+			}
+
+			public override string GetSerialized(AbstractOrderEnsurerWithCompletionAttribute<HystoryOrder, HystoryOrder> ensurer)
+			{
+				return ensurer.Order.transID.ToString() + " " + ensurer.Order.transID.ToString();
+			}
+
+			protected override AbstractOrderEnsurerWithCompletionAttribute<HystoryOrder, HystoryOrder> GetEnsurer(HystoryOrder order)
+			{
+				return new HystoryStopOrderEnsurer(order, quikSimulatorGetter());
+			}
 		}
 	}
 }

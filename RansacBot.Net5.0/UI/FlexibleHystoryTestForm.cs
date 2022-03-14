@@ -204,9 +204,8 @@ namespace RansacBot.UI
 
 		private FinishedTradesFromUnparsedTicks GetNewProcessor(IEnumerable<string> unparsedTicks)
 		{
-			ITickWithDateTimeParcer parcer = TicksWithDateTimeParser.DamirStandart;
-			TicksDateTimeExtractor timeExtractor = new(unparsedTicks.Select(TicksWithDateTimeParser.ParseTickDamir));
-			return new(timeExtractor, 
+			return new(unparsedTicks, 
+				(env) =>
 				new Closer_Filter_StopDecisionMaker(
 					closingRansac, 
 					filterRansac, 
@@ -215,7 +214,7 @@ namespace RansacBot.UI
 					100,
 					filterTimes.Select(times => 
 						(Func<CurfewTimeTradeFilter>)
-						(() => new CurfewTimeTradeFilter(times.closingTime, times.openingTime, timeExtractor.GetLastTickTime))
+						(() => new CurfewTimeTradeFilter(times.closingTime, times.openingTime, () => env.DateTime))
 						)
 					)
 				);

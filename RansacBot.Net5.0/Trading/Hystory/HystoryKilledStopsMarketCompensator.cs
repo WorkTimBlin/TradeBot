@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RansacBot.Trading.Hystory
 {
-	class HystoryKilledStopsMarketCompensator : AbstractKilledStopsMarketCompensator<HystoryOrder>
+	class HystoryKilledStopsMarketCompensator : AbstractMarketCompensator<HystoryOrder>
 	{
 		HystoryQuikSimulator quikSimulator;
 		public HystoryKilledStopsMarketCompensator(HystoryQuikSimulator quikSimulator)

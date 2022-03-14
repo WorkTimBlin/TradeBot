@@ -25,7 +25,7 @@ namespace RansacBot.Assemblies
 			return new HystoryOneAtATimeCheckpoint(QuikSimulator);
 		}
 
-		protected override AbstractKilledStopsMarketCompensator<HystoryOrder> GetCompensator()
+		protected override AbstractMarketCompensator<HystoryOrder> GetCompensator()
 		{
 			return new HystoryKilledStopsMarketCompensator(QuikSimulator);
 		}

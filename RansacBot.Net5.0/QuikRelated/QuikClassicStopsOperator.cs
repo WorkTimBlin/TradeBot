@@ -14,35 +14,80 @@ namespace RansacBot.QuikRelated
 		TradeParams tradeParams;
 
 		public QuikClassicStopsOperator(TradeParams tradeParams) :
-			base((ensurer1, ensurer2) => ensurer1.Order.Price > ensurer2.Order.Price ? 1 : -1,
-				(ensurer1, ensurer2) => ensurer1.Order.Price < ensurer2.Order.Price ? 1 : -1)
+			base(
+				LongComparison,
+				ShortComparison
+				)
 		{
 			this.tradeParams = tradeParams;
 		}
 
-
-		protected override AbstractStopOrderEnsurer<StopOrder, Order> BuildStopOrderEnsurer(TradeWithStop trade)
+		protected override StopOrder BuildStopOrder(TradeWithStop tradeWithStop)
 		{
-			return new QuikStopOrderEnsurer(QuikHelpFunctions.BuildStopOrder(trade, tradeParams, 1));
-		}
-		protected override AbstractOrderEnsurerWithPrice<Order> GetOrderEnsurer(Order order)
-		{
-			return new QuikOrderEnsurer(order);
+			return QuikHelpFunctions.BuildStopOrder(tradeWithStop, tradeParams, 1);
 		}
 
-		public override string GetSerialized(AbstractStopOrderEnsurer<StopOrder, Order> stopOrder)
+		protected override bool IsLong(StopOrder stopOrder)
 		{
-			return stopOrder.Order.TransId.ToString() + " " + stopOrder.Order.ConditionPrice.ToString();
+			return stopOrder.IsLong();
 		}
 
-		protected override bool IsLong(AbstractStopOrderEnsurer<StopOrder, Order> stopEnsurer)
+		protected override AbstractSortedOrdersWaitroom<StopOrder, Order> 
+			GetNewWaitroom(Comparison<AbstractOrderEnsurerWithCompletionAttribute<StopOrder, Order>> comparison)
 		{
-			return stopEnsurer.Order.IsLong();
+			return new QuikStopWaitroom(comparison);
 		}
 
-		public override string GetSerialized(AbstractOrderEnsurerWithPrice<Order> ensurer)
+		protected override AbstractSentOrdersWaitroom<Order, double> GetNewExecutedWaitroom()
 		{
-			return ensurer.Order.TransID.ToString() + " " + ensurer.Order.Price.ToString();
+			return new QuikOrderWaitroom();
+		}
+		private static int LongComparison(
+			AbstractOrderEnsurerWithCompletionAttribute<StopOrder, Order> ensurer1,
+			AbstractOrderEnsurerWithCompletionAttribute<StopOrder, Order> ensurer2
+			)
+		{
+			if (ensurer1.Order.Price > ensurer2.Order.Price) return 1;
+			if (ensurer1.Order.Price < ensurer2.Order.Price) return -1;
+			if (ensurer1.Order.TransId > ensurer2.Order.TransId) return 1;
+			else return -1;
+		}
+		private static int ShortComparison(
+			AbstractOrderEnsurerWithCompletionAttribute<StopOrder, Order> ensurer1,
+			AbstractOrderEnsurerWithCompletionAttribute<StopOrder, Order> ensurer2
+			)
+		{
+			if (ensurer1.Order.Price < ensurer2.Order.Price) return 1;
+			if (ensurer1.Order.Price > ensurer2.Order.Price) return -1;
+			if (ensurer1.Order.TransId > ensurer2.Order.TransId) return 1;
+			else return -1;
+		}
+
+		class QuikOrderWaitroom : AbstractSentOrdersWaitroom<Order, double>
+		{
+			public override string GetSerialized(AbstractOrderEnsurerWithCompletionAttribute<Order, double> ensurer)
+			{
+				return ensurer.Order.TransID.ToString() + " " + ensurer.Order.Price.ToString();
+			}
+
+			protected override AbstractOrderEnsurerWithCompletionAttribute<Order, double> GetNewEnsurer(Order order)
+			{
+				return new QuikOrderEnsurer(order);
+			}
+		}
+		class QuikStopWaitroom : AbstractSortedOrdersWaitroom<StopOrder, Order>
+		{
+			public QuikStopWaitroom(Comparison<AbstractOrderEnsurerWithCompletionAttribute<StopOrder, Order>> compartion) : base(compartion)
+			{ }
+			public override string GetSerialized(AbstractOrderEnsurerWithCompletionAttribute<StopOrder, Order> ensurer)
+			{
+				return ensurer.Order.TransId.ToString() + " " + ensurer.Order.Price.ToString();
+			}
+
+			protected override AbstractOrderEnsurerWithCompletionAttribute<StopOrder, Order> GetEnsurer(StopOrder order)
+			{
+				return new QuikStopOrderEnsurer(order);
+			}
 		}
 	}
 }
